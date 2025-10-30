@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gameplay Room</title>
+    <style>
+        .arena { display: flex; justify-content: space-around; margin-top: 50px; }
+        .player { text-align: center; }
+        #imgPlayer1 { width: 150px; height: 150px; }
+        #imgPlayer2 { width: 250px; height: 250px; } /* увеличиваем врага */
+    </style>
+
+</head>
+<body>
+<h1>Комната: <span id="roomIdSpan"></span></h1>
+
+<div class="arena">
+    <div class="player" id="player1">
+        <h2>Вы</h2>
+        <img id="imgPlayer1" src="/images/player1.png" alt="Player 1">
+    </div>
+    <div class="player" id="player2">
+        <h2>Противник</h2>
+        <img id="imgPlayer2" src="/images/player2.png" alt="Player 2">
+    </div>
+</div>
+
+
+<script>
+    const btn = document.getElementById('duelBtn');
+    btn.addEventListener('click', () => {
+        const roomId = document.getElementById('roomId').value.trim();
+        if (!roomId) {
+            alert('Введите номер комнаты!');
+            return;
+        }
+        // Переходим на gameplay.html с query-параметром id
+        window.location.href = `/gameplay.html?id=${encodeURIComponent(roomId)}`;
+    });
+</script>
+
+</body>
+</html>

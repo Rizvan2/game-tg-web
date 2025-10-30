@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: postgres-game-tg-web
+    environment:
+      POSTGRES_DB: game-tg-web-db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  game-tg-web:
+    image: game-tg-web:latest
+    container_name: game-tg-web
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/game-tg-web-db
+      DB_USERNAME: postgres
+      DB_PW: postgres
+      TG_TOKEN: 7974198794:AAGQrhwltOkpGDUaBej-vnQKFBc5PiZkyGA
+      WEBAPP_URL: https://cadmic-karry-tabulable.ngrok-free.dev
+    ports:
+      - "8087:8087"
