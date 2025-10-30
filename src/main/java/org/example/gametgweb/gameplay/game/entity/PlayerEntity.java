@@ -3,6 +3,11 @@ package org.example.gametgweb.gameplay.game.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Упрощённая JPA Entity для игрока в игре.
@@ -19,12 +24,12 @@ public class PlayerEntity {
     private Long id;
 
     @Column(nullable = false)
-    private Long telegramId;
+    private String  password;
 
-    @Column(nullable = false)
-    private String nickname;
+    @Column(nullable = false, unique = true)
+    private String username;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "game_id")
     private GameSession game;
 
@@ -38,10 +43,9 @@ public class PlayerEntity {
     // ====== Конструкторы ======
     public PlayerEntity() {}
 
-    public PlayerEntity(Long telegramId, String nickname, Long activeUnitId) {
-        this.telegramId = telegramId;
-        this.nickname = nickname;
+    public PlayerEntity(String  password, String username, Long activeUnitId) {
+        this.password = password;
+        this.username = username;
         this.activeUnitId = activeUnitId;
     }
-
 }
