@@ -2,29 +2,256 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gameplay Room</title>
     <style>
-        .arena { display: flex; justify-content: space-around; margin-top: 50px; }
-        .player { text-align: center; }
-        #imgPlayer1 { width: 150px; height: 150px; }
-        #imgPlayer2 { width: 250px; height: 250px; } /* увеличиваем врага */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1f1c2c, #928dab);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Верхний бар с дуэлянтами */
+        .top-bar {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            padding: 35px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            min-height: 180px;
+        }
+
+        .room-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .room-info h1 {
+            font-size: 2.2em;
+            font-weight: 600;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        #roomIdSpan {
+            color: #6c63ff;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(108, 99, 255, 0.5);
+        }
+
+        .duelists {
+            display: flex;
+            gap: 50px;
+            align-items: center;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .duelist {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding: 25px 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            min-width: 200px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .duelist:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(108, 99, 255, 0.3);
+        }
+
+        .duelist h2 {
+            font-size: 1.4em;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .duelist img {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        /* Центральная часть (арена) */
+        .arena {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            min-height: 300px;
+        }
+
+        /* Нижний бар с кнопками и сообщениями */
+        .bottom-bar {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .actions-section {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            font-size: 0.9em;
+            border: none;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #6c63ff, #5848c2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+            font-weight: 500;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(108, 99, 255, 0.5);
+        }
+
+        .action-btn:active {
+            transform: translateY(0);
+        }
+
+        .messages-section {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            padding: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+        }
+
+        .messages-section::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .messages-section::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .messages-section::-webkit-scrollbar-thumb {
+            background: rgba(108, 99, 255, 0.5);
+            border-radius: 4px;
+        }
+
+        .messages-section::-webkit-scrollbar-thumb:hover {
+            background: rgba(108, 99, 255, 0.7);
+        }
+
+        #messages {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        #messages p {
+            padding: 6px 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            border-left: 2px solid #6c63ff;
+            margin: 0;
+            word-wrap: break-word;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .top-bar {
+                flex-direction: column;
+                padding: 25px 20px;
+                min-height: auto;
+            }
+
+            .room-info h1 {
+                font-size: 1.6em;
+            }
+
+            .duelists {
+                width: 100%;
+                justify-content: space-around;
+                gap: 20px;
+            }
+
+            .duelist {
+                min-width: 140px;
+                padding: 20px;
+            }
+
+            .duelist h2 {
+                font-size: 1.2em;
+            }
+
+            .duelist img {
+                width: 80px;
+                height: 80px;
+            }
+        }
     </style>
 
 </head>
 <body>
-<h1>Комната: <span id="roomIdSpan"></span></h1>
+    <!-- Верхний бар с дуэлянтами -->
+    <div class="top-bar">
+        <div class="room-info">
+            <h1>Комната: <span id="roomIdSpan"></span></h1>
+        </div>
+        <div class="duelists">
+            <div class="duelist" id="player1">
+                <h2>Вы</h2>
+                <img id="imgPlayer1" src="/images/player1.png" alt="Player 1">
+            </div>
+            <div class="duelist" id="player2">
+                <h2>Противник</h2>
+                <img id="imgPlayer2" src="/images/player2.png" alt="Player 2">
+            </div>
+        </div>
+    </div>
 
-<div class="arena">
-    <div class="player" id="player1">
-        <h2>Вы</h2>
-        <img id="imgPlayer1" src="/images/player1.png" alt="Player 1">
+    <!-- Центральная часть (арена) -->
+    <div class="arena">
+        <!-- Здесь может быть игровая арена или другие элементы -->
     </div>
-    <div class="player" id="player2">
-        <h2>Противник</h2>
-        <img id="imgPlayer2" src="/images/player2.png" alt="Player 2">
+
+    <!-- Нижний бар с кнопками и сообщениями -->
+    <div class="bottom-bar">
+        <div class="actions-section">
+            <!-- Здесь будут будущие кнопки действий -->
+        </div>
+        <div class="messages-section">
+            <div id="messages"></div>
+        </div>
     </div>
-</div>
-<div id="messages" style="margin-top:30px; font-family: Arial, sans-serif;"></div>
 
 <script>
     // Получаем код комнаты из query-параметров (поддерживаем id и gameCode)
