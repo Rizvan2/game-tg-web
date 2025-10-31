@@ -1,9 +1,10 @@
 package org.example.gametgweb.gameplay.controllers;
 
-
+import org.example.gametgweb.gameplay.game.entity.PlayerDetails;
 import org.example.gametgweb.services.DuelManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,8 +21,8 @@ public class DuelController {
 
     @PostMapping("/StartDuel")
     public String duel(@RequestParam String gameCode,
-                       @RequestParam Long playerId) {
-
+                       @AuthenticationPrincipal PlayerDetails playerDetails) {
+        Long playerId = playerDetails.playerEntity().getId();
         return duelManager.joinOrCreateGame(gameCode, playerId);
     }
 }

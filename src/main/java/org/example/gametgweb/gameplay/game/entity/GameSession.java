@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.example.gametgweb.gameplay.game.GameState;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * JPA Entity для хранения игрового матча в PostgreSQL.
  * <p>
@@ -40,6 +43,9 @@ public class GameSession {
     @Column(nullable = false)
     private GameState state;
 
+    @OneToMany(mappedBy = "gameSession", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<PlayerEntity> players = new ArrayList<>();
+
     /**
      * Конструктор по умолчанию, требуемый JPA.
      */
@@ -54,6 +60,10 @@ public class GameSession {
     public GameSession(String gameCode, GameState state) {
         this.gameCode = gameCode;
         this.state = state;
+    }
+
+    public void setPlayer(PlayerEntity player) {
+        this.players.add(player);
     }
 }
 //    /**

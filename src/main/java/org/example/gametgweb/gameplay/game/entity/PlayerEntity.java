@@ -3,11 +3,7 @@ package org.example.gametgweb.gameplay.game.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
-import java.util.Collection;
-import java.util.List;
+import org.springframework.web.socket.WebSocketSession;
 
 /**
  * Упрощённая JPA Entity для игрока в игре.
@@ -31,7 +27,7 @@ public class PlayerEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "game_id")
-    private GameSession game;
+    private GameSession gameSession;
 
     /**
      * ID юнита, которым игрок управляет прямо сейчас.

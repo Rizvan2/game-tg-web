@@ -1,11 +1,10 @@
 package org.example.gametgweb.services;
 
 import org.example.gametgweb.gameplay.game.entity.GameSession;
+import org.example.gametgweb.gameplay.game.entity.PlayerEntity;
 import org.example.gametgweb.repository.GameSessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 /**
  * Сервисный менеджер для управления созданием и присоединением к дуэльным играм.
@@ -59,14 +58,19 @@ public class DuelManager {
 
     /** Привязывает игрока к игре */
     private void attachPlayerToGame(Long playerId, GameSession game) {
-        playerService.getPlayer(playerId)
-                .orElseThrow(() -> new IllegalArgumentException("Игрок не найден"))
-                .setGame(game);
+        PlayerEntity playerEntity = playerService.getPlayer(playerId)
+                .orElseThrow(() -> new IllegalArgumentException("Игрок не найден"));
+        playerEntity.setGameSession(game);
+        game.setPlayer(playerEntity);
     }
 
     /** Формирует ссылку на страницу игры */
     private String buildGameLink(GameSession game) {
         return "/gameplay.html?id=" + game.getId();
+    }
+
+    public GameSession findGameByGameCode(String gameCode) {
+        return gameService.findGameByGameCode(gameCode);
     }
 
 }

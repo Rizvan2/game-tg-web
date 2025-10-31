@@ -24,19 +24,48 @@
         <img id="imgPlayer2" src="/images/player2.png" alt="Player 2">
     </div>
 </div>
-
+<div id="messages" style="margin-top:30px; font-family: Arial, sans-serif;"></div>
 
 <script>
-    const btn = document.getElementById('duelBtn');
-    btn.addEventListener('click', () => {
-        const roomId = document.getElementById('roomId').value.trim();
-        if (!roomId) {
-            alert('Введите номер комнаты!');
-            return;
-        }
-        // Переходим на gameplay.html с query-параметром id
-        window.location.href = `/gameplay.html?id=${encodeURIComponent(roomId)}`;
-    });
+    // Получаем id комнаты из query-параметра
+    const params = new URLSearchParams(window.location.search);
+    const gameCode = params.get('id');
+
+    const roomIdSpan = document.getElementById('roomIdSpan');
+    roomIdSpan.textContent = gameCode ? gameCode : '—';
+
+    const messagesDiv = document.getElementById('messages');
+
+    function addMessage(text) {
+        const p = document.createElement('p');
+        p.textContent = text;
+        messagesDiv.appendChild(p);
+    }
+
+    if (!gameCode) {
+        addMessage('Не указан код комнаты. Вернитесь на главную страницу.');
+    } else {
+        // Открываем WebSocket-соединение к комнате
+        const wsProtocol = location.protocol === 'https:' ? 'wss' : 'ws';
+        const wsUrl = `${wsProtocol}://${location.host}/ws/duel?gameCode=${encodeURIComponent(gameCode)}`;
+        const socket = new WebSocket(wsUrl);
+
+        socket.onopen = () => {
+            addMessage('Подключение к комнате установлено. Ожидаем игроков...');
+        };
+
+        socket.onmessage = (event) => {
+            addMessage(event.data);
+        };
+
+        socket.onerror = () => {
+            addMessage('Ошибка WebSocket-соединения.');
+        };
+
+        socket.onclose = () => {
+            addMessage('Соединение закрыто.');
+        };
+    }
 </script>
 
 </body>

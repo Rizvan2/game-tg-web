@@ -6,7 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-public record PlayerDetails(PlayerEntity player) implements UserDetails {
+public record PlayerDetails(PlayerEntity playerEntity) implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -15,12 +15,12 @@ public record PlayerDetails(PlayerEntity player) implements UserDetails {
 
     @Override
     public String getPassword() {
-        return String.valueOf(player.getPassword()); // если пароль Long — лучше заменить на String
+        return String.valueOf(playerEntity.getPassword()); // если пароль Long — лучше заменить на String
     }
 
     @Override
     public String getUsername() {
-        return player.getUsername();
+        return playerEntity.getUsername();
     }
 
     @Override

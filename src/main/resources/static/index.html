@@ -129,29 +129,37 @@
 <label for="roomId">Введите номер комнаты:</label>
 <input type="text" id="roomId" placeholder="123">
 <button id="duelBtn">Начать дуэль</button>
-
 <p id="status"></p>
 
 <script>
-  let BASE_URL = '';
-
-  fetch('/config')
-          .then(response => response.json())
-          .then(cfg => {
-            const config = cfg;
-            BASE_URL = config.baseUrl;
-          });
-
   const btn = document.getElementById('duelBtn');
   const status = document.getElementById('status');
 
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', async () => {
     const roomId = document.getElementById('roomId').value.trim();
     if (!roomId) {
       status.textContent = 'Введите номер комнаты!';
       return;
     }
-    window.location.href = `${BASE_URL}/gameplay.html?id=${encodeURIComponent(roomId)}`;
+
+    try {
+      // POST для создания/начала дуэли
+      const response = await fetch(`/StartDuel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ gameCode: roomId })
+      });
+
+      if (!response.ok) throw new Error('Ошибка при запуске дуэли');
+
+      const result = await response.text(); // должен вернуть только код комнаты, напр. "1"
+
+      // Перенаправление на gameplay.html с чистым id
+      window.location.href = `/gameplay.html?id=${encodeURIComponent(result)}`;
+
+    } catch (e) {
+      status.textContent = 'Ошибка: ' + e.message;
+    }
   });
 </script>
 </body>
