@@ -1,216 +1,133 @@
 package org.example.gametgweb.configs.webSocket;
 
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
-import java.security.Principal;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import jakarta.annotation.PreDestroy;
 
 /**
- * {@code DuelWebSocketHandler} — обработчик WebSocket-соединений,
- * обеспечивающий обмен сообщениями между игроками внутри одной игровой комнаты.
+ * {@code DuelWebSocketHandler} — обработчик WebSocket-соединений между игроками.
  * <p>
- * Используется потокобезопасная структура данных для хранения подключений,
- * что позволяет безопасно работать с множеством одновременных подключений.
+ * Отвечает за жизненный цикл соединений:
+ * <ul>
+ *     <li>Добавление и регистрацию нового подключения;</li>
+ *     <li>Отложенную обработку выхода/входа игрока (через {@link JoinLeaveScheduler});</li>
+ *     <li>Рассылку системных сообщений о присоединении и выходе;</li>
+ *     <li>Закрытие некорректных сессий с отсутствующим параметром {@code gameCode}.</li>
+ * </ul>
+ * <p>
+ * Все активные соединения хранятся в {@link RoomSessionRegistry}, что обеспечивает
+ * потокобезопасную работу с множеством одновременно подключённых клиентов.
  */
+@Slf4j
 @Component
 public class DuelWebSocketHandler extends TextWebSocketHandler {
 
-    /**
-     * Потокобезопасная карта, где:
-     * <ul>
-     *     <li>ключ — код игровой комнаты ({@code gameCode});</li>
-     *     <li>значение — множество WebSocket-сессий игроков в этой комнате.</li>
-     * </ul>
-     * Используется {@link ConcurrentHashMap} и {@link ConcurrentHashMap#newKeySet()} для потокобезопасности.
-     */
-    private final ConcurrentHashMap<String, Set<WebSocketSession>> gameSessions = new ConcurrentHashMap<>();
-    private static final String ATTR_GAME_CODE = "GAME_CODE";
-    private static final String ATTR_PLAYER_NAME = "PLAYER_NAME";
+    /** Реестр активных WebSocket-сессий, сгруппированных по игровым комнатам. */
+    private final RoomSessionRegistry registry;
 
-    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-    private final ConcurrentHashMap<String, ConcurrentHashMap<String, ScheduledFuture<?>>> pendingLeaveTasks = new ConcurrentHashMap<>();
-    private static final long RELOAD_GRACE_MS = 3000L;
-    private final ConcurrentHashMap<String, ConcurrentHashMap<String, Long>> lastLeaveAt = new ConcurrentHashMap<>();
+    /** Планировщик отложенных событий подключения и выхода игроков. */
+    private final JoinLeaveScheduler scheduler;
+
+    /** Форматирует системные сообщения (например, "Игрок подключился" или "Игрок покинул комнату"). */
+    private final MessageFormatter formatter;
 
     /**
-     * Метод вызывается автоматически при установлении нового WebSocket-соединения.
-     * <p>
-     * Извлекает код комнаты из query-параметра {@code gameCode},
-     * добавляет сессию игрока в соответствующую комнату
-     * и уведомляет всех участников комнаты о подключении нового игрока.
+     * Конструктор с внедрением зависимостей.
      *
-     * @param session объект {@link WebSocketSession}, представляющий соединение клиента
-     * @throws Exception если при инициализации соединения возникла ошибка
+     * @param registry  менеджер активных сессий по игровым кодам
+     * @param scheduler планировщик отложенных действий при входе/выходе
+     * @param formatter утилита для форматирования текстовых уведомлений
+     */
+    @Autowired
+    public DuelWebSocketHandler(RoomSessionRegistry registry,
+                                JoinLeaveScheduler scheduler,
+                                MessageFormatter formatter) {
+        this.registry = registry;
+        this.scheduler = scheduler;
+        this.formatter = formatter;
+    }
+
+    /**
+     * Вызывается при успешном установлении нового WebSocket-соединения.
+     * <p>
+     * Извлекает контекст соединения ({@link WebSocketContext}) из параметров запроса.
+     * Если контекст отсутствует или параметр {@code gameCode} не найден — соединение закрывается.
+     * В противном случае игрок добавляется в комнату, и выполняется отложенная логика входа.
+     *
+     * @param session активная WebSocket-сессия
+     * @throws Exception при ошибке инициализации соединения
      */
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        String query = session.getUri() != null ? session.getUri().getQuery() : null;
-        String gameCode = extractQueryParam(query, "gameCode");
-        if (gameCode == null || gameCode.isEmpty()) {
-            session.close(CloseStatus.BAD_DATA.withReason("Missing gameCode parameter"));
+        var ctx = WebSocketContext.from(session);
+        if (ctx == null) {
+            closeBadSession(session);
             return;
         }
-
-        // Запоминаем комнату в атрибутах сессии
-        session.getAttributes().put(ATTR_GAME_CODE, gameCode);
-
-        // Создаёт новую комнату при необходимости и добавляет сессию игрока
-        gameSessions.computeIfAbsent(gameCode, k -> ConcurrentHashMap.newKeySet()).add(session);
-
-        // Имя игрока из аутентификации (если доступно)
-        String playerName = resolvePlayerName(session.getPrincipal());
-        if (playerName != null) {
-            session.getAttributes().put(ATTR_PLAYER_NAME, playerName);
-        }
-
-        // Если для этого игрока был запланирован «вышел», отменим его и не будем слать «зашёл»
-        boolean cancelledLeave = false;
-        if (playerName != null) {
-            ConcurrentHashMap<String, ScheduledFuture<?>> roomLeaves = pendingLeaveTasks.get(gameCode);
-            if (roomLeaves != null) {
-                ScheduledFuture<?> f = roomLeaves.remove(playerName);
-                if (f != null) {
-                    f.cancel(false);
-                    cancelledLeave = true;
-                }
-            }
-        }
-
-        // Если недавно фиксировали выход этого игрока, подавим «зашёл»
-        if (playerName != null) {
-            Long t = lastLeaveAt.computeIfAbsent(gameCode, k -> new ConcurrentHashMap<>()).get(playerName);
-            if (t != null && (System.currentTimeMillis() - t) < RELOAD_GRACE_MS) {
-                return;
-            }
-        }
-
-        if (!cancelledLeave) {
-            // Отложим «зашёл» на 2с и убедимся, что у игрока есть открытая сессия в комнате
-            scheduler.schedule(() -> {
-                Set<WebSocketSession> sessions = gameSessions.get(gameCode);
-                if (sessions == null) return;
-                boolean stillHere = sessions.stream()
-                        .filter(WebSocketSession::isOpen)
-                        .anyMatch(s -> playerName != null && playerName.equals(s.getAttributes().get(ATTR_PLAYER_NAME)));
-                if (stillHere) {
-                    broadcast(gameCode, (playerName != null ? playerName : "Игрок") + " подключился к комнате " + gameCode + "!");
-                }
-            }, 2000, TimeUnit.MILLISECONDS);
-        }
+        handleJoin(ctx, session);
     }
 
     /**
-     * Метод вызывается при закрытии WebSocket-соединения.
+     * Вызывается при закрытии WebSocket-соединения.
      * <p>
-     * Удаляет сессию игрока из всех комнат, где он мог находиться,
-     * и записывает лог о закрытии соединения.
+     * Удаляет игрока из комнаты и запускает отложенную проверку:
+     * если через установленный интервал игрок не переподключится, рассылается сообщение о выходе.
      *
-     * @param session объект {@link WebSocketSession}, представляющий закрывающееся соединение
-     * @param status  причина закрытия соединения
+     * @param session закрытая сессия
+     * @param status  причина и код закрытия соединения
      */
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        Object code = session.getAttributes().get(ATTR_GAME_CODE);
-        String playerName = (String) session.getAttributes().get(ATTR_PLAYER_NAME);
+        var ctx = WebSocketContext.from(session);
+        if (ctx == null) return;
 
-        if (code instanceof String gameCode) {
-            Set<WebSocketSession> sessions = gameSessions.get(gameCode);
-            if (sessions != null) {
-                sessions.remove(session);
-                if (sessions.isEmpty()) {
-                    gameSessions.remove(gameCode);
-                } else if (playerName != null) {
-                    // Отложим «вышел» на 2с и проверим, что у игрока не осталось открытых сессий
-                    // Фиксируем время выхода сразу, чтобы новый вход мог подавить «зашёл»
-                    lastLeaveAt
-                            .computeIfAbsent(gameCode, k -> new ConcurrentHashMap<>())
-                            .put(playerName, System.currentTimeMillis());
+        registry.removeSession(ctx.gameCode(), session);
+        scheduler.handleLeave(ctx, () ->
+                registry.broadcast(ctx.gameCode(), formatter.leaveMessage(ctx.playerName(), ctx.gameCode())));
 
-                    ScheduledFuture<?> leaveFuture = scheduler.schedule(() -> {
-                        boolean stillConnected = sessions.stream()
-                                .filter(WebSocketSession::isOpen)
-                                .anyMatch(s -> playerName.equals(s.getAttributes().get(ATTR_PLAYER_NAME)));
-                        if (!stillConnected) {
-                            broadcast(gameCode, playerName + " вышел из комнаты " + gameCode + "!");
-                        }
-                        ConcurrentHashMap<String, ScheduledFuture<?>> roomLeaves = pendingLeaveTasks.get(gameCode);
-                        if (roomLeaves != null) roomLeaves.remove(playerName);
-                    }, 2000, TimeUnit.MILLISECONDS);
-
-                    pendingLeaveTasks.computeIfAbsent(gameCode, k -> new ConcurrentHashMap<>()).put(playerName, leaveFuture);
-                }
-            }
-        } else {
-            gameSessions.values().forEach(sessions -> sessions.remove(session));
-        }
-
-        System.out.println("WebSocket закрыт: " + session.getId() + ", статус: " + status);
+        log.info("WebSocket закрыт: {}, статус: {}", session.getId(), status);
     }
-
 
     /**
-     * Отправляет текстовое сообщение всем активным игрокам в указанной комнате.
-     * <p>
-     * Каждое соединение проверяется на открытость перед отправкой.
-     * Ошибки при отправке сообщений логируются, но не прерывают процесс рассылки.
+     * Закрывает соединение с ошибкой, если отсутствует обязательный параметр {@code gameCode}.
      *
-     * @param gameCode уникальный код игровой комнаты
-     * @param message  текст сообщения, отправляемого всем участникам комнаты
+     * @param session сессия, подлежащая закрытию
+     * @throws IOException при сбое закрытия соединения
      */
-    public void broadcast(String gameCode, String message) {
-        Set<WebSocketSession> sessions = gameSessions.get(gameCode);
-        if (sessions == null) return;
-
-        sessions.forEach(s -> {
-            if (s.isOpen()) {
-                try {
-                    s.sendMessage(new TextMessage(message));
-                } catch (IOException e) {
-                    System.err.println("Ошибка отправки сообщения: " + e.getMessage());
-                }
-            }
-        });
+    private void closeBadSession(WebSocketSession session) throws IOException {
+        session.close(CloseStatus.BAD_DATA.withReason("Missing gameCode parameter"));
     }
 
-    private String extractQueryParam(String query, String key) {
-        if (query == null || key == null) return null;
-        String[] pairs = query.split("&");
-        for (String pair : pairs) {
-            int idx = pair.indexOf('=');
-            if (idx <= 0) continue;
-            String k = pair.substring(0, idx);
-            String v = pair.substring(idx + 1);
-            if (key.equals(k)) {
-                return v;
-            }
-        }
-        return null;
-    }
-
-    private String resolvePlayerName(Principal principal) {
-        if (principal == null) return null;
-        try {
-            // principal.getName() уже должен возвращать username
-            String name = principal.getName();
-            return (name != null && !name.isBlank()) ? name : null;
-        } catch (Exception ignored) {
-            return null;
+    /**
+     * Обрабатывает успешное подключение игрока:
+     * <ul>
+     *     <li>добавляет игрока в комнату;</li>
+     *     <li>инициирует отложенное событие «входа»;</li>
+     *     <li>рассылает уведомление о присоединении при подтверждённом подключении.</li>
+     * </ul>
+     *
+     * @param ctx     контекст WebSocket-подключения (содержит код комнаты и имя игрока)
+     * @param session активная сессия игрока
+     */
+    private void handleJoin(WebSocketContext ctx, WebSocketSession session) {
+        registry.addSession(ctx.gameCode(), session);
+        if (scheduler.handleJoin(ctx, () ->
+                registry.broadcast(ctx.gameCode(), formatter.joinMessage(ctx.playerName(), ctx.gameCode())))) {
+            logJoin(ctx);
         }
     }
 
-    @PreDestroy
-    public void shutdownScheduler() {
-        scheduler.shutdownNow();
+    /**
+     * Логирует факт подключения игрока к комнате.
+     *
+     * @param ctx контекст с именем игрока и кодом комнаты
+     */
+    private void logJoin(WebSocketContext ctx) {
+        log.info("{} подключился к комнате {}", ctx.playerName(), ctx.gameCode());
     }
 }
