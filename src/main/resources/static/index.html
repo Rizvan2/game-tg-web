@@ -153,8 +153,6 @@
 
       if (!response.ok) throw new Error('Ошибка при запуске дуэли');
 
-      const result = await response.text(); // серверный ответ (может совпадать с roomId)
-
       // Перенаправляем, передавая именно введённый пользователем gameCode
       window.location.href = `/gameplay.html?gameCode=${encodeURIComponent(roomId)}`;
 
