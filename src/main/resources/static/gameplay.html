@@ -27,9 +27,9 @@
 <div id="messages" style="margin-top:30px; font-family: Arial, sans-serif;"></div>
 
 <script>
-    // Получаем id комнаты из query-параметра
+    // Получаем код комнаты из query-параметров (поддерживаем id и gameCode)
     const params = new URLSearchParams(window.location.search);
-    const gameCode = params.get('id');
+    const gameCode = params.get('gameCode') || params.get('id');
 
     const roomIdSpan = document.getElementById('roomIdSpan');
     roomIdSpan.textContent = gameCode ? gameCode : '—';
