@@ -1,4 +1,4 @@
-package org.example.gametgweb.configs;
+package org.example.gametgweb.configs.Security;
 
 import org.example.gametgweb.services.PlayerServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;

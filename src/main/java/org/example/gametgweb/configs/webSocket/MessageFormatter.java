@@ -34,6 +34,19 @@ public class MessageFormatter {
         String name = playerName != null ? playerName : "Игрок";
         return name + " вышел из комнаты " + gameCode + "!";
     }
+
+    /**
+     * Формирует сообщение чата для отправки всем игрокам комнаты.
+     *
+     * @param playerName имя игрока, отправившего сообщение
+     * @param message    текст сообщения
+     * @return текстовое сообщение вида "[playerName]: message"
+     */
+    public String chatMessage(String playerName, String message) {
+        String name = playerName != null ? playerName : "Игрок";
+        String text = message != null ? message : "";
+        return "[" + name + "]: " + text;
+    }
 }
 
 

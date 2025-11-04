@@ -5,12 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gameplay Room</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin:0; padding:0; box-sizing:border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1f1c2c, #928dab);
@@ -21,278 +16,241 @@
             overflow-x: hidden;
         }
 
-        /* Верхний бар с дуэлянтами */
+        /* Верхний бар */
         .top-bar {
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0,0,0,0.4);
             backdrop-filter: blur(10px);
-            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 2px solid rgba(255,255,255,0.1);
             padding: 35px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 30px;
+            gap:30px;
             min-height: 180px;
-        }
-
-        .room-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .room-info h1 {
-            font-size: 2.2em;
-            font-weight: 600;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-
-        #roomIdSpan {
-            color: #6c63ff;
-            font-weight: bold;
-            text-shadow: 0 0 10px rgba(108, 99, 255, 0.5);
-        }
-
-        .duelists {
-            display: flex;
-            gap: 50px;
-            align-items: center;
-            flex: 1;
-            justify-content: center;
-        }
-
-        .duelist {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            padding: 25px 30px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            min-width: 200px;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .duelist:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(108, 99, 255, 0.3);
-        }
-
-        .duelist h2 {
-            font-size: 1.4em;
-            font-weight: 500;
-            margin: 0;
-        }
-
-        .duelist img {
-            width: 120px;
-            height: 120px;
-            object-fit: contain;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
-        }
-
-        /* Центральная часть (арена) */
-        .arena {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 40px 20px;
-            min-height: 300px;
-        }
-
-        /* Нижний бар с кнопками и сообщениями */
-        .bottom-bar {
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(10px);
-            border-top: 2px solid rgba(255, 255, 255, 0.1);
-            padding: 12px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .actions-section {
-            display: flex;
-            gap: 8px;
             flex-wrap: wrap;
-            justify-content: center;
+        }
+        .room-info { display:flex; align-items:center; gap:15px; }
+        .room-info h1 { font-size:2.2em; font-weight:600; text-shadow:2px 2px 4px rgba(0,0,0,0.5);}
+        #roomIdSpan { color:#6c63ff; font-weight:bold; text-shadow:0 0 10px rgba(108,99,255,0.5); }
+
+        .duelists { display:flex; gap:50px; align-items:center; flex:1; justify-content:center; }
+        .duelist { display:flex; flex-direction:column; align-items:center; gap:15px; padding:25px 30px; background: rgba(255,255,255,0.05); border-radius:16px; border:1px solid rgba(255,255,255,0.1); min-width:200px; transition: transform 0.3s, box-shadow 0.3s; }
+        .duelist:hover { transform:translateY(-5px); box-shadow:0 5px 20px rgba(108,99,255,0.3);}
+        .duelist h2 { font-size:1.4em; font-weight:500; margin:0;}
+        .duelist img { width:120px; height:120px; object-fit:contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
+
+        /* Центральная арена */
+        .arena { flex:1; display:flex; justify-content:center; align-items:center; padding:40px 20px; min-height:300px; }
+
+        /* Нижний бар */
+        .bottom-bar {
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+            border-top: 2px solid rgba(255,255,255,0.1);
+            display:flex;
+            flex-direction:column;
+            gap:10px;
+            padding:12px 20px;
         }
 
-        .action-btn {
-            padding: 8px 16px;
-            font-size: 0.9em;
-            border: none;
-            border-radius: 6px;
-            background: linear-gradient(135deg, #6c63ff, #5848c2);
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
-            font-weight: 500;
-        }
+        .actions-section { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; }
+        .action-btn { padding:8px 16px; font-size:0.9em; border:none; border-radius:6px; background: linear-gradient(135deg, #6c63ff, #5848c2); color:white; cursor:pointer; transition: all 0.3s; box-shadow:0 4px 15px rgba(108,99,255,0.3); font-weight:500; }
+        .action-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(108,99,255,0.5);}
+        .action-btn:active { transform:translateY(0); }
 
-        .action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(108, 99, 255, 0.5);
-        }
-
-        .action-btn:active {
-            transform: translateY(0);
-        }
-
+        /* Чат */
         .messages-section {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 6px;
-            padding: 10px;
-            max-height: 150px;
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 0.85em;
+            flex:1;
+            background: rgba(0,0,0,0.3);
+            border-radius:6px;
+            overflow-y:auto;
+            padding:10px;
+            font-family:'Courier New', monospace;
+            font-size:0.85em;
+            display:flex;
+            flex-direction:column-reverse; /* новые сообщения снизу */
+            gap:5px;
+            max-height:150px;
         }
 
-        .messages-section::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .messages-section::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-
-        .messages-section::-webkit-scrollbar-thumb {
-            background: rgba(108, 99, 255, 0.5);
-            border-radius: 4px;
-        }
-
-        .messages-section::-webkit-scrollbar-thumb:hover {
-            background: rgba(108, 99, 255, 0.7);
-        }
-
-        #messages {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
+        .messages-section::-webkit-scrollbar { width:8px; }
+        .messages-section::-webkit-scrollbar-track { background: rgba(255,255,255,0.1); border-radius:4px; }
+        .messages-section::-webkit-scrollbar-thumb { background: rgba(108,99,255,0.5); border-radius:4px; }
+        .messages-section::-webkit-scrollbar-thumb:hover { background: rgba(108,99,255,0.7); }
 
         #messages p {
-            padding: 6px 10px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 4px;
-            border-left: 2px solid #6c63ff;
-            margin: 0;
+            padding:6px 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius:4px;
+            border-left:2px solid #6c63ff;
+            margin:0;
             word-wrap: break-word;
         }
+
+        /* Поле ввода */
+        .chat-input {
+            display:flex;
+            gap:8px;
+            flex-shrink:0;
+        }
+        .chat-input input {
+            flex:1;
+            padding:8px 12px;
+            border-radius:6px;
+            border:1px solid rgba(108,99,255,0.5);
+            background: rgba(40,36,55,0.8);
+            color:#f0f0f0;
+            font-size:14px;
+            outline:none;
+        }
+        .chat-input button {
+            padding:8px 16px;
+            border:none;
+            border-radius:6px;
+            background: linear-gradient(135deg,#6c63ff,#5848c2);
+            color:white;
+            font-weight:bold;
+            cursor:pointer;
+            transition: all 0.3s;
+        }
+        .chat-input button:hover {
+            background: linear-gradient(135deg,#5848c2,#6c63ff);
+            box-shadow:0 6px 15px rgba(108,99,255,0.5);
+        }
+        .chat-input button:active { transform:translateY(1px);}
+        /* уже существующие стили... */
 
         /* Адаптивность */
         @media (max-width: 768px) {
             .top-bar {
                 flex-direction: column;
-                padding: 25px 20px;
+                padding: 20px;
                 min-height: auto;
             }
-
-            .room-info h1 {
-                font-size: 1.6em;
-            }
-
+            .room-info h1 { font-size: 1.6em; }
             .duelists {
                 width: 100%;
                 justify-content: space-around;
                 gap: 20px;
             }
-
             .duelist {
-                min-width: 140px;
-                padding: 20px;
+                min-width: 120px;
+                padding: 15px;
             }
+            .duelist h2 { font-size: 1.1em; }
+            .duelist img { width: 60px; height: 60px; }
 
-            .duelist h2 {
-                font-size: 1.2em;
+            .bottom-bar {
+                padding: 8px 12px;
             }
-
-            .duelist img {
-                width: 80px;
-                height: 80px;
+            .messages-section {
+                max-height: 120px;
             }
+            .chat-input input { font-size: 0.9em; }
+            .chat-input button { font-size: 0.9em; padding:6px 12px; }
         }
-    </style>
 
+        /* Для очень маленьких экранов (смартфоны) */
+        @media (max-width: 480px) {
+            .duelists {
+                flex-direction: row; /* сохраняем горизонтально */
+                flex-wrap: wrap;     /* если не влезают, переносятся */
+                gap: 15px;
+                justify-content: space-around;
+            }
+            .duelist {
+                min-width: 90px;
+                padding: 10px;
+            }
+            .duelist img { width: 50px; height: 50px; }
+            .top-bar { padding: 15px; }
+            .room-info h1 { font-size: 1.3em; }
+            .messages-section { max-height: 100px; }
+            .chat-input input { font-size:0.85em; }
+            .chat-input button { font-size:0.85em; padding:5px 10px; }
+            .arena { padding:20px 10px; min-height:200px; }
+        }
+
+    </style>
 </head>
 <body>
-    <!-- Верхний бар с дуэлянтами -->
-    <div class="top-bar">
-        <div class="room-info">
-            <h1>Комната: <span id="roomIdSpan"></span></h1>
-        </div>
-        <div class="duelists">
-            <div class="duelist" id="player1">
-                <h2>Вы</h2>
-                <img id="imgPlayer1" src="/images/player1.png" alt="Player 1">
-            </div>
-            <div class="duelist" id="player2">
-                <h2>Противник</h2>
-                <img id="imgPlayer2" src="/images/player2.png" alt="Player 2">
-            </div>
-        </div>
-    </div>
 
-    <!-- Центральная часть (арена) -->
-    <div class="arena">
-        <!-- Здесь может быть игровая арена или другие элементы -->
+<!-- Верхний бар -->
+<div class="top-bar">
+    <div class="room-info">
+        <h1>Комната: <span id="roomIdSpan"></span></h1>
     </div>
+    <div class="duelists">
+        <div class="duelist" id="player1">
+            <h2>Вы</h2>
+            <img id="imgPlayer1" src="/images/player1.png" alt="Player 1">
+        </div>
+        <div class="duelist" id="player2">
+            <h2>Противник</h2>
+            <img id="imgPlayer2" src="/images/player2.png" alt="Player 2">
+        </div>
+    </div>
+</div>
 
-    <!-- Нижний бар с кнопками и сообщениями -->
-    <div class="bottom-bar">
-        <div class="actions-section">
-            <!-- Здесь будут будущие кнопки действий -->
-        </div>
-        <div class="messages-section">
-            <div id="messages"></div>
-        </div>
+<!-- Арена -->
+<div class="arena"></div>
+
+<!-- Нижний бар -->
+<div class="bottom-bar">
+    <div class="actions-section"></div>
+    <div class="messages-section" id="messages-section">
+        <div id="messages"></div>
     </div>
+    <div class="chat-input">
+        <input type="text" id="chatInput" placeholder="Написать сообщение...">
+        <button id="sendBtn">Отправить</button>
+    </div>
+</div>
 
 <script>
-    // Получаем код комнаты из query-параметров (поддерживаем id и gameCode)
     const params = new URLSearchParams(window.location.search);
     const gameCode = params.get('gameCode') || params.get('id');
-
-    const roomIdSpan = document.getElementById('roomIdSpan');
-    roomIdSpan.textContent = gameCode ? gameCode : '—';
+    document.getElementById('roomIdSpan').textContent = gameCode || '—';
 
     const messagesDiv = document.getElementById('messages');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
 
-    function addMessage(text) {
+    // WebSocket
+    let socket;
+    if(gameCode){
+        const wsProtocol = location.protocol === 'https:' ? 'wss' : 'ws';
+        const wsUrl = `${wsProtocol}://${location.host}/ws/duel?gameCode=${encodeURIComponent(gameCode)}`;
+        socket = new WebSocket(wsUrl);
+
+        socket.onopen = () => addMessage('Подключение к комнате установлено. Ожидаем игроков...');
+        socket.onmessage = (event) => addMessage(event.data);
+        socket.onerror = () => addMessage('Ошибка WebSocket-соединения.');
+        socket.onclose = () => addMessage('Соединение закрыто.');
+    } else {
+        addMessage('Не указан код комнаты. Вернитесь на главную страницу.');
+    }
+
+    // Добавление сообщений
+    function addMessage(text){
         const p = document.createElement('p');
         p.textContent = text;
         messagesDiv.appendChild(p);
     }
 
-    if (!gameCode) {
-        addMessage('Не указан код комнаты. Вернитесь на главную страницу.');
-    } else {
-        // Открываем WebSocket-соединение к комнате
-        const wsProtocol = location.protocol === 'https:' ? 'wss' : 'ws';
-        const wsUrl = `${wsProtocol}://${location.host}/ws/duel?gameCode=${encodeURIComponent(gameCode)}`;
-        const socket = new WebSocket(wsUrl);
+    // Отправка сообщений
+    sendBtn.addEventListener('click', () => {
+        const text = chatInput.value.trim();
+        if(text && socket && socket.readyState === WebSocket.OPEN){
+            const payload = JSON.stringify({type:'chat', message:text});
+            socket.send(payload);
+            chatInput.value = '';
+        }
+    });
 
-        socket.onopen = () => {
-            addMessage('Подключение к комнате установлено. Ожидаем игроков...');
-        };
-
-        socket.onmessage = (event) => {
-            addMessage(event.data);
-        };
-
-        socket.onerror = () => {
-            addMessage('Ошибка WebSocket-соединения.');
-        };
-
-        socket.onclose = () => {
-            addMessage('Соединение закрыто.');
-        };
-    }
+    chatInput.addEventListener('keypress', (e)=>{
+        if(e.key === 'Enter'){ sendBtn.click(); }
+    });
 </script>
 
 </body>

@@ -1,9 +1,12 @@
 package org.example.gametgweb.configs.webSocket;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
@@ -92,6 +95,46 @@ public class DuelWebSocketHandler extends TextWebSocketHandler {
 
         log.info("WebSocket закрыт: {}, статус: {}", session.getId(), status);
     }
+
+    /**
+     * Обрабатывает входящие текстовые сообщения от WebSocket-сессии.
+     * <p>
+     * Метод выполняет следующие действия:
+     * <ol>
+     *     <li>Извлекает контекст соединения {@link WebSocketContext} из сессии, содержащий имя игрока и код комнаты.</li>
+     *     <li>Если контекст отсутствует, сообщение игнорируется.</li>
+     *     <li>Парсит текстовое сообщение в JSON с помощью {@link ObjectMapper}.</li>
+     *     <li>Определяет тип сообщения по полю "type".</li>
+     *     <li>Если тип сообщения равен "chat":</li>
+     *     <ul>
+     *         <li>Извлекает текст сообщения из поля "message".</li>
+     *         <li>Форматирует сообщение через {@link MessageFormatter} в вид "[playerName]: message".</li>
+     *         <li>Рассылает сформированное сообщение всем игрокам в комнате через {@link RoomSessionRegistry#broadcast(String, String)}.</li>
+     *     </ul>
+     * </ol>
+     *
+     * @param session активная WebSocket-сессия, от которой пришло сообщение
+     * @param message текстовое сообщение от клиента
+     * @throws Exception если произошла ошибка парсинга JSON или отправки сообщения
+     */
+    @Override
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        var ctx = WebSocketContext.from(session);
+        if (ctx == null) return;
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode payload = mapper.readTree(message.getPayload());
+        String type = payload.has("type") ? payload.get("type").asText() : null;
+
+        if ("chat".equals(type)) {
+            String text = payload.has("message") ? payload.get("message").asText() : "";
+            String player = ctx.playerName();
+
+            String formatted = formatter.chatMessage(player, text);
+            registry.broadcast(ctx.gameCode(), formatted);
+        }
+    }
+
 
     /**
      * Закрывает соединение с ошибкой, если отсутствует обязательный параметр {@code gameCode}.
