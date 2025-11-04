@@ -10,4 +10,5 @@ public interface PlayerService {
     void deletePlayer(PlayerEntity player);
     PlayerEntity updatePlayer(PlayerEntity player);
     PlayerEntity setPlayer(PlayerEntity player);
+    PlayerEntity findByUsername(String username);
 }

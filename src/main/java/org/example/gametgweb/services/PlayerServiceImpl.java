@@ -85,6 +85,12 @@ public class PlayerServiceImpl implements PlayerService, UserDetailsService {
         return null;
     }
 
+    @Override
+    public PlayerEntity findByUsername(String username) {
+        return playerRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Игрок не найден: " + username));
+    }
+
     /**
      * Метод, используемый Spring Security для загрузки данных пользователя по имени.
      *
@@ -94,8 +100,7 @@ public class PlayerServiceImpl implements PlayerService, UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        PlayerEntity player = playerRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Игрок не найден: " + username));
+        PlayerEntity player = findByUsername(username);
         return new PlayerDetails(player);
     }
 }
