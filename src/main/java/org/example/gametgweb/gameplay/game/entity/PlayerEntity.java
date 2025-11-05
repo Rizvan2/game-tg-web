@@ -13,7 +13,7 @@ import org.springframework.web.socket.WebSocketSession;
 @Table(name = "players")
 @Getter
 @Setter
-public class PlayerEntity {
+public class PlayerEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,18 +30,19 @@ public class PlayerEntity {
     private GameSession gameSession;
 
     /**
-     * ID юнита, которым игрок управляет прямо сейчас.
+     * Юнит которым игрок управляет прямо сейчас.
      * Позволяет хранить выбранного моба без отдельной коллекции всех юнитов.
      */
-    @Column(name = "active_unit_id")
-    private Long activeUnitId;
+    @ManyToOne
+    @JoinColumn(name = "active_unit")
+    private Unit activeUnit;
 
     // ====== Конструкторы ======
     public PlayerEntity() {}
 
-    public PlayerEntity(String  password, String username, Long activeUnitId) {
+    public PlayerEntity(String  password, String username, Unit activeUnit) {
         this.password = password;
         this.username = username;
-        this.activeUnitId = activeUnitId;
+        this.activeUnit = activeUnit;
     }
 }

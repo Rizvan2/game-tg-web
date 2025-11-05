@@ -130,13 +130,16 @@
 <label for="roomId">Введите номер комнаты:</label>
 <input type="text" id="roomId" placeholder="123">
 <button id="duelBtn">Начать дуэль</button>
+<button id="campaignBtn" style="margin-top: 15px;">Начать кампанию</button>
 <p id="status"></p>
 
 <script>
-  const btn = document.getElementById('duelBtn');
+  const duelBtn = document.getElementById('duelBtn');
+  const campaignBtn = document.getElementById('campaignBtn');
   const status = document.getElementById('status');
 
-  btn.addEventListener('click', async () => {
+  // --- Дуэль ---
+  duelBtn.addEventListener('click', async () => {
     const roomId = document.getElementById('roomId').value.trim();
     if (!roomId) {
       status.textContent = 'Введите номер комнаты!';
@@ -144,7 +147,6 @@
     }
 
     try {
-      // POST для создания/начала дуэли
       const response = await fetch(`/StartDuel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -153,13 +155,33 @@
 
       if (!response.ok) throw new Error('Ошибка при запуске дуэли');
 
-      // Перенаправляем, передавая именно введённый пользователем gameCode
       window.location.href = `/gameplay.html?gameCode=${encodeURIComponent(roomId)}`;
+    } catch (e) {
+      status.textContent = 'Ошибка: ' + e.message;
+    }
+  });
 
+  // --- Кампания ---
+  campaignBtn.addEventListener('click', async () => {
+    try {
+      const response = await fetch(`/campaign/startCampaign`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      });
+
+      if (!response.ok) throw new Error('Ошибка при запуске кампании');
+
+      const text = await response.text();
+      // вытаскиваем имя врага из ответа: "Бой начат против: Turk Warrior"
+      const enemyName = text.match(/против: (.+)$/)[1];
+
+      // редирект на страницу кампании
+      window.location.href = `/campaign.html?enemyName=${encodeURIComponent(enemyName)}`;
     } catch (e) {
       status.textContent = 'Ошибка: ' + e.message;
     }
   });
 </script>
+
 </body>
 </html>

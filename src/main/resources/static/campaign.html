@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кампания: Битва</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg,#1f1c2c,#928dab); display:flex; flex-direction:column; align-items:center; justify-content:flex-start; min-height:100vh; margin:0; color:#fff; padding:20px; box-sizing:border-box;}
+        h1 { font-size:2.5em; margin-bottom:20px; text-shadow:2px 2px 8px #000; text-align:center; }
+        .battle-container { display:flex; justify-content:space-around; width:100%; max-width:900px; position:relative;}
+        .unit { display:flex; flex-direction:column; align-items:center; position:relative; }
+        .unit img { width:150px; height:150px; border:2px solid #fff; border-radius:12px; margin-bottom:10px; }
+        .health-bar { width:150px; height:20px; background:#555; border-radius:10px; overflow:hidden; margin-bottom:10px; }
+        .health-bar-inner { height:100%; background:#ff4b5c; width:100%; transition: width 0.3s ease-in-out; }
+        .hit-zone { position:absolute; border-radius:50%; cursor:pointer; opacity:0.7; }
+        .hit-zone.selected { outline:2px solid #6c63ff; opacity:1; }
+        button { padding:12px 25px; font-size:1.1em; border:none; border-radius:12px; background-color:#6c63ff; color:white; cursor:pointer; margin-top:20px; }
+        button:hover { background-color:#5848c2; transform:scale(1.05); }
+        #log { margin-top:20px; width:100%; max-width:900px; min-height:60px; padding:10px; background:rgba(0,0,0,0.3); border-radius:10px; font-size:1em; }
+    </style>
+</head>
+<body>
+
+<h1>⚔ Кампания: Битва</h1>
+
+<div class="battle-container" id="battleContainer">
+    <div class="unit" id="playerUnit">
+        <img id="playerImg" src="" alt="Player">
+        <div class="health-bar"><div class="health-bar-inner" id="playerHealth"></div></div>
+        <div id="playerName"></div>
+    </div>
+
+    <div class="unit" id="enemyUnit">
+        <img id="enemyImg" src="" alt="Enemy">
+        <div class="health-bar"><div class="health-bar-inner" id="enemyHealth"></div></div>
+        <div id="enemyName"></div>
+    </div>
+</div>
+
+<button id="attackBtn">Атаковать выбранную часть</button>
+<div id="log"></div>
+
+<script>
+    const logEl = document.getElementById('log');
+    const playerHealthEl = document.getElementById('playerHealth');
+    const enemyHealthEl = document.getElementById('enemyHealth');
+    const enemyUnitEl = document.getElementById('enemyUnit');
+    let selectedBody = 'CHEST';
+    let zones = [];
+
+    // --- WebSocket компании---
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const ws = new WebSocket(`${protocol}://${window.location.host}/ws/campaign`);
+
+
+    ws.onopen = () => {
+        logEl.textContent = '✅ Подключение установлено. Запуск кампании...';
+        ws.send(JSON.stringify({ action: 'start' }));
+    };
+
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log(data);
+        if(data.error){
+            logEl.textContent = '❌ Ошибка: ' + data.error;
+            return;
+        }
+
+        const player = data.player;
+        const enemy = data.enemy;
+
+        // --- Подставляем картинки и здоровье ---
+        document.getElementById('playerImg').src = player.imagePath;
+        document.getElementById('playerName').textContent = player.name;
+        playerHealthEl.style.width = (player.health / player.maxHealth * 100) + '%';
+
+        document.getElementById('enemyImg').src = enemy.imagePath;
+        document.getElementById('enemyName').textContent = enemy.name;
+        enemyHealthEl.style.width = (enemy.health / enemy.maxHealth * 100) + '%';
+
+        // --- Лог ---
+        if(data.message) logEl.textContent = data.message;
+
+        // --- Обновляем точки атаки ---
+        zones.forEach(z => z.remove());
+        zones = [];
+        if(enemy.hitZones){
+            enemy.hitZones.forEach(hz => {
+                const div = document.createElement('div');
+                div.classList.add('hit-zone');
+                div.dataset.body = hz.body;
+                div.style.top = hz.top;
+                div.style.left = hz.left;
+                div.style.width = hz.width;
+                div.style.height = hz.height;
+                div.style.background = hz.color || 'red';
+                enemyUnitEl.appendChild(div);
+                zones.push(div);
+
+                div.addEventListener('click', () => {
+                    zones.forEach(z => z.classList.remove('selected'));
+                    div.classList.add('selected');
+                    selectedBody = div.dataset.body;
+                    logEl.textContent = `🎯 Цель выбрана: ${selectedBody}`;
+                });
+            });
+        }
+    };
+
+    ws.onclose = () => logEl.textContent = '❌ Соединение закрыто';
+    ws.onerror = (e) => logEl.textContent = '❌ Ошибка WS: ' + e;
+
+    // --- Кнопка атаки ---
+    document.getElementById('attackBtn').addEventListener('click', () => {
+        if(ws.readyState !== WebSocket.OPEN){
+            logEl.textContent = '❌ WebSocket не подключен';
+            return;
+        }
+        ws.send(JSON.stringify({ action: 'attack', body: selectedBody }));
+    });
+</script>
+
+</body>
+</html>

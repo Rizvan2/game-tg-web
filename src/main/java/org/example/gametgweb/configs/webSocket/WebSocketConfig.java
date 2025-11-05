@@ -1,5 +1,7 @@
 package org.example.gametgweb.configs.webSocket;
 
+import org.example.gametgweb.gameplay.Campaign.webSocket.CampaignWebSocketHandler;
+import org.example.gametgweb.gameplay.Campaign.webSocket.PlayerHandshakeInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
@@ -32,6 +34,8 @@ public class WebSocketConfig implements WebSocketConfigurer {
     /** Обработчик WebSocket-сессий дуэли между игроками. */
     private final DuelWebSocketHandler duelWebSocketHandler;
 
+    private final CampaignWebSocketHandler campaignWebSocketHandler;
+
     /** Разрешённый источник подключений (берётся из конфигурации). */
     private final String allowedOrigin;
 
@@ -43,9 +47,10 @@ public class WebSocketConfig implements WebSocketConfigurer {
      *                      указывающее разрешённый источник подключения.
      */
     @Autowired
-    public WebSocketConfig(DuelWebSocketHandler duelWebSocketHandler,
+    public WebSocketConfig(DuelWebSocketHandler duelWebSocketHandler, CampaignWebSocketHandler campaignWebSocketHandler,
                            @Value("${game.base-url}") String allowedOrigin) {
         this.duelWebSocketHandler = duelWebSocketHandler;
+        this.campaignWebSocketHandler = campaignWebSocketHandler;
         this.allowedOrigin = allowedOrigin;
     }
 
@@ -58,5 +63,9 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(duelWebSocketHandler, "/ws/duel")
                 .setAllowedOrigins(allowedOrigin);
+
+        registry.addHandler(campaignWebSocketHandler, "/ws/campaign")
+                .addInterceptors(new PlayerHandshakeInterceptor())
+                .setAllowedOrigins("*");
     }
 }
