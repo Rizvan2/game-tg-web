@@ -38,7 +38,7 @@ class CampaignServiceTest {
     void saveCampaign() {
         Campaign campaign = new Campaign(4L
                 ,new Unit(4L,"Turc Warrior", 100L, 100L,10L,"/images/always-mustachioed.png")
-                ,new Unit(4L,"Goblin", 100L, 100L,10L,"/images/player2.png"), false);
+                ,new Unit(4L,"Goblin", 100L, 100L,10L,"/images/Goblin.png"), false);
         campaignService.saveCampaign(campaign);
         // assert - проверяем взаимодействие с мок-репозиторием
         verify(campaignRepository, times(1)).save(campaign);
