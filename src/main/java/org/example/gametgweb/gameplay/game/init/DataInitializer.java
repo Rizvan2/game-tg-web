@@ -30,7 +30,7 @@ public class DataInitializer {
                         .maxHealth(80L)
                         .health(80L)
                         .damage(8L)
-                        .imagePath("/images/player2.png")
+                        .imagePath("/images/Goblin.png")
                         .build());
             }
         };
