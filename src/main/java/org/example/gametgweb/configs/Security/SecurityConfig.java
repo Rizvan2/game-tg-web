@@ -47,14 +47,20 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // 1️⃣ Авторизация запросов
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().authenticated() // Все запросы к приложению требуют аутентификации
+                        .requestMatchers("/register.html", "/login.html").permitAll() // разрешаем GET на страницы
+                        .requestMatchers("/register").permitAll() // разрешаем POST для регистрации
+                        .anyRequest().authenticated()
                 )
 
                 // 2️⃣ Настройка формы логина
-                .formLogin(AbstractAuthenticationFilterConfigurer::permitAll)
-                // Разрешаем доступ к форме логина всем (даже неавторизованным пользователям)
+                .formLogin(form -> form
+                        .loginPage("/login.html")
+                        .loginProcessingUrl("/login") // <--- убедись, что это совпадает с action формы
+                        .usernameParameter("username")
+                        .passwordParameter("password")
+                        .permitAll()
+                )
 
                 // 3️⃣ Настройка выхода (логаута)
                 .logout(LogoutConfigurer::permitAll)

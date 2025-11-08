@@ -1,6 +1,7 @@
 package org.example.gametgweb.gameplay.game.entity;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
@@ -10,12 +11,12 @@ public record PlayerDetails(PlayerEntity playerEntity) implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(); // можно вернуть роли позже
+        return List.of(new SimpleGrantedAuthority("ROLE_USER"));
     }
 
     @Override
     public String getPassword() {
-        return String.valueOf(playerEntity.getPassword()); // если пароль Long — лучше заменить на String
+        return playerEntity.getPassword();
     }
 
     @Override
