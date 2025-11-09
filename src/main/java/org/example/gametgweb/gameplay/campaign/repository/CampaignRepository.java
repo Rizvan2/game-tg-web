@@ -1,6 +1,6 @@
-package org.example.gametgweb.gameplay.Campaign.repository;
+package org.example.gametgweb.gameplay.campaign.repository;
 
-import org.example.gametgweb.gameplay.Campaign.entity.Campaign;
+import org.example.gametgweb.gameplay.campaign.entity.Campaign;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

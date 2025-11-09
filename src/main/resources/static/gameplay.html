@@ -170,13 +170,36 @@
             .chat-input button { font-size:0.85em; padding:5px 10px; }
             .arena { padding:20px 10px; min-height:200px; }
         }
-
+        #backBtn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            text-decoration: none;
+            color: #fff;
+            font-size: 1.1em;
+            background-color: #6c63ff;
+            padding: 6px 10px; /* меньше по высоте, больше по ширине */
+            border-radius: 12px;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        #backBtn:hover {
+            background-color: #5848c2;
+            transform: scale(1.05);
+        }
+        /* Адаптивность для мобильных */
+        @media (max-width: 500px) {
+            #backBtn {
+                font-size: 0.9em;
+                padding: 1px 2px;
+            }
+        }
     </style>
 </head>
 <body>
-
 <!-- Верхний бар -->
 <div class="top-bar">
+    <a href="/" id="backBtn">⬅ На главную</a>
+
     <div class="room-info">
         <h1>Комната: <span id="roomIdSpan"></span></h1>
     </div>

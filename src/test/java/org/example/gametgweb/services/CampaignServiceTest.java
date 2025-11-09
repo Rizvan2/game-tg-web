@@ -1,21 +1,15 @@
 package org.example.gametgweb.services;
 
-import org.example.gametgweb.gameplay.Campaign.entity.Campaign;
-import org.example.gametgweb.gameplay.Campaign.repository.CampaignRepository;
-import org.example.gametgweb.gameplay.game.entity.PlayerEntity;
+import org.example.gametgweb.gameplay.campaign.entity.Campaign;
+import org.example.gametgweb.gameplay.campaign.repository.CampaignRepository;
 import org.example.gametgweb.gameplay.game.entity.Unit;
 import org.example.gametgweb.repository.UnitRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)

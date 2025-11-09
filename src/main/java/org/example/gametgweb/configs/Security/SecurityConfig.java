@@ -56,7 +56,9 @@ public class SecurityConfig {
                 // 2️⃣ Настройка формы логина
                 .formLogin(form -> form
                         .loginPage("/login.html")
-                        .loginProcessingUrl("/login") // <--- убедись, что это совпадает с action формы
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/index.html", true) // ✅ добавь эту строку
+                        .failureUrl("/login.html?error=true")
                         .usernameParameter("username")
                         .passwordParameter("password")
                         .permitAll()
