@@ -1,8 +1,8 @@
 package org.example.gametgweb.services;
 
 import lombok.RequiredArgsConstructor;
-import org.example.gametgweb.gameplay.Campaign.entity.Campaign;
-import org.example.gametgweb.gameplay.Campaign.repository.CampaignRepository;
+import org.example.gametgweb.gameplay.campaign.entity.Campaign;
+import org.example.gametgweb.gameplay.campaign.repository.CampaignRepository;
 import org.example.gametgweb.gameplay.game.entity.PlayerEntity;
 import org.example.gametgweb.gameplay.game.entity.Unit;
 import org.example.gametgweb.repository.UnitRepository;

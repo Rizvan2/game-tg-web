@@ -53,6 +53,7 @@ public class DataInitializer {
                 playerRepository.save(player3);
 
                 System.out.println("✅ Игроки созданы");
+                System.out.println(goblin.getName());
             }
         };
     }

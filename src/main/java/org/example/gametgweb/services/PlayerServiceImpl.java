@@ -100,7 +100,14 @@ public class PlayerServiceImpl implements PlayerService, UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        System.out.println("Попытка загрузки пользователя: " + username); // логируем имя
         PlayerEntity player = findByUsername(username);
+        if (player == null) {
+            System.out.println("Пользователь не найден: " + username);
+            throw new UsernameNotFoundException("User not found: " + username);
+        }
+        System.out.println("Пользователь найден, хэш пароля: " + player.getPassword());
         return new PlayerDetails(player);
     }
+
 }

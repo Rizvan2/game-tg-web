@@ -91,18 +91,6 @@
       text-align: center;
     }
 
-    body::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle at 50% 50%, rgba(108,99,255,0.2) 0%, transparent 70%);
-      animation: moveBg 20s linear infinite;
-      z-index: -1;
-    }
-
     @keyframes moveBg {
       0% { transform: rotate(0deg) translate(0,0); }
       100% { transform: rotate(360deg) translate(0,0); }
@@ -110,9 +98,7 @@
 
     /* Адаптивность для мобильных */
     @media (max-width: 500px) {
-      input[type="text"], button {
-        width: 80%;
-      }
+
 
       h1 {
         font-size: 2em;
@@ -122,9 +108,30 @@
         font-size: 1em;
       }
     }
+
+    /* Адаптивность для мобильных */
+    @media (max-width: 500px) {
+      h1 {
+        font-size: 2em; /* меньше шрифт */
+      }
+
+
+
+      #logoutBtn,
+      #backBtn {
+        font-size: 0.9em;
+        padding: 4px 8px; /* уменьшаем размеры */
+      }
+    }
+
+
   </style>
 </head>
 <body>
+<form id="logoutForm" action="/logout" method="post" style="position: fixed; top: 20px; right: 20px;">
+  <button type="submit" id="logoutBtn" onclick="return confirm('Вы уверены, что хотите выйти?')">Выйти из аккаунта</button>
+</form>
+
 <h1>Duel Game</h1>
 
 <label for="roomId">Введите номер комнаты:</label>

@@ -1,18 +1,15 @@
-package org.example.gametgweb.gameplay.Campaign.webSocket;
+package org.example.gametgweb.gameplay.campaign.webSocket;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.gametgweb.gameplay.Campaign.entity.Campaign;
+import org.example.gametgweb.gameplay.campaign.entity.Campaign;
 import org.example.gametgweb.gameplay.game.Body;
-import org.example.gametgweb.gameplay.game.entity.PlayerDetails;
 import org.example.gametgweb.gameplay.game.entity.PlayerEntity;
 import org.example.gametgweb.gameplay.game.entity.Unit;
 import org.example.gametgweb.services.CampaignService;
 import org.example.gametgweb.services.PlayerService;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
 import org.springframework.web.socket.handler.TextWebSocketHandler;

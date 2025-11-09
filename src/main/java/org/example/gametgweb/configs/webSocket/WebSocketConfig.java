@@ -1,7 +1,7 @@
 package org.example.gametgweb.configs.webSocket;
 
-import org.example.gametgweb.gameplay.Campaign.webSocket.CampaignWebSocketHandler;
-import org.example.gametgweb.gameplay.Campaign.webSocket.PlayerHandshakeInterceptor;
+import org.example.gametgweb.gameplay.campaign.webSocket.CampaignWebSocketHandler;
+import org.example.gametgweb.gameplay.campaign.webSocket.PlayerHandshakeInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;

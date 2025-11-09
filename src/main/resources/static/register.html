@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="UTF-8">
+  <title>Регистрация</title>
+  <link rel="stylesheet" href="/css/register.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1f1c2c, #928dab);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      color: #fff;
+      overflow: hidden;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    h1 { margin-bottom: 40px; font-size: 3em; text-shadow: 2px 2px 8px #000; animation: glow 1.5s infinite alternate; text-align: center; }
+    @keyframes glow { 0% { text-shadow: 2px 2px 8px #000; } 100% { text-shadow: 2px 2px 20px #6c63ff; } }
+    input[type="text"], input[type="password"] {
+      padding: 12px 15px; width: 250px; font-size: 1em; border: 2px solid #ccc; border-radius: 12px; margin-bottom: 20px;
+      transition: all 0.3s; background: rgba(255,255,255,0.1); color: #fff;
+    }
+    input:focus { border-color: #6c63ff; box-shadow: 0 0 10px #6c63ff; outline: none; transform: scale(1.05); }
+    button {
+      padding: 12px 25px; font-size: 1.1em; border: none; border-radius: 12px; background-color: #6c63ff; color: white;
+      cursor: pointer; transition: all 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.3); animation: pulse 2s infinite;
+    }
+    button:hover { background-color: #5848c2; transform: translateY(-3px) scale(1.05); box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
+    @keyframes pulse { 0% { box-shadow: 0 0 10px rgba(108,99,255,0.5); } 50% { box-shadow: 0 0 25px rgba(108,99,255,0.8); } 100% { box-shadow: 0 0 10px rgba(108,99,255,0.5); } }
+    #status { margin-top: 20px; font-weight: bold; min-height: 24px; text-align: center; }
+  </style>
+</head>
+<body>
+<h1>Register</h1>
+
+<input type="text" id="username" placeholder="Username" required>
+<input type="password" id="password" placeholder="Password" required>
+<button id="registerBtn">Зарегистрироваться</button>
+<button id="login" style="margin-top: 15px;">Уже есть аккаунт</button>
+<p id="status"></p>
+
+<script>
+  document.getElementById('registerBtn').addEventListener('click', async () => {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
+    const status = document.getElementById('status');
+
+    if (!username || !password) {
+      status.textContent = '❗ Заполните все поля';
+      status.style.color = 'red';
+      return;
+    }
+
+    try {
+      const response = await fetch('/register', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({username: username, password: password})
+      });
+
+      if (response.ok) {
+        window.location.href = '/index.html';
+      } else {
+        const data = await response.text();
+        status.textContent = 'Ошибка регистрации: ' + data;
+        status.style.color = 'red';
+      }
+    } catch (e) {
+      status.textContent = 'Ошибка соединения с сервером';
+      status.style.color = 'red';
+    }
+  });
+
+  document.getElementById('login').addEventListener('click', () => {
+    window.location.href = '/login.html';
+  });
+</script>
+</body>
+</html>
