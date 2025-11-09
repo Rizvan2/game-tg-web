@@ -1,6 +1,6 @@
 package org.example.gametgweb.repository;
 
-import org.example.gametgweb.gameplay.game.entity.GameSession;
+import org.example.gametgweb.gameplay.game.Duel.entity.GameSession;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

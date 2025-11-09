@@ -1,9 +1,10 @@
-package org.example.gametgweb.gameplay.game.entity;
+package org.example.gametgweb.gameplay.game.Duel.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.example.gametgweb.gameplay.game.GameState;
+import org.example.gametgweb.gameplay.game.entity.PlayerEntity;
 
 import java.util.ArrayList;
 import java.util.List;

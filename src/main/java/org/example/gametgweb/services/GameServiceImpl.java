@@ -1,7 +1,7 @@
 package org.example.gametgweb.services;
 
 import org.example.gametgweb.gameplay.game.GameState;
-import org.example.gametgweb.gameplay.game.entity.GameSession;
+import org.example.gametgweb.gameplay.game.Duel.entity.GameSession;
 import org.example.gametgweb.gameplay.game.entity.PlayerEntity;
 import org.example.gametgweb.repository.GameSessionRepository;
 import org.example.gametgweb.repository.PlayerRepository;

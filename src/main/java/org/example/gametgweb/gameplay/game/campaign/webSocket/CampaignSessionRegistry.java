@@ -1,7 +1,7 @@
-package org.example.gametgweb.gameplay.campaign.webSocket;
+package org.example.gametgweb.gameplay.game.campaign.webSocket;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.gametgweb.gameplay.campaign.entity.Campaign;
+import org.example.gametgweb.gameplay.game.campaign.entity.Campaign;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;

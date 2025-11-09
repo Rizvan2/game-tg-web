@@ -1,4 +1,4 @@
-package org.example.gametgweb.gameplay.campaign.webSocket;
+package org.example.gametgweb.gameplay.game.campaign.webSocket;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;

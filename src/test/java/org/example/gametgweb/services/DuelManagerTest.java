@@ -1,7 +1,7 @@
 package org.example.gametgweb.services;
 
 import org.example.gametgweb.gameplay.game.GameState;
-import org.example.gametgweb.gameplay.game.entity.GameSession;
+import org.example.gametgweb.gameplay.game.Duel.entity.GameSession;
 import org.example.gametgweb.gameplay.game.entity.PlayerEntity;
 import org.example.gametgweb.gameplay.game.entity.Unit;
 import org.example.gametgweb.repository.GameSessionRepository;
@@ -37,7 +37,7 @@ class DuelManagerTest {
         game.setGameCode(gameCode);
         game.setState(GameState.WAITING);
         when(gameService.createGame(gameCode, playerId)).thenReturn(game);
-        when(playerService.getPlayer(playerId)).thenReturn(Optional.of(new PlayerEntity("123","Артьом"
+        when(playerService.findById(playerId)).thenReturn(Optional.of(new PlayerEntity("123","Артьом"
         ,new Unit(4L,"Goblin", 100L, 100L,10L,"/images/Goblin.png"))));
         String link = duelManager.joinOrCreateGame(gameCode,playerId);
         verify(gameService, times(1)).createGame(gameCode, playerId);

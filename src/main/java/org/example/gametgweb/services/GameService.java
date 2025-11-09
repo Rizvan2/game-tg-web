@@ -1,6 +1,6 @@
 package org.example.gametgweb.services;
 
-import org.example.gametgweb.gameplay.game.entity.GameSession;
+import org.example.gametgweb.gameplay.game.Duel.entity.GameSession;
 
 public interface GameService {
     GameSession findGameByGameCode(String gameCode);

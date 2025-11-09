@@ -1,10 +1,10 @@
-package org.example.gametgweb.gameplay.campaign.webSocket;
+package org.example.gametgweb.gameplay.game.campaign.webSocket;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.gametgweb.gameplay.campaign.entity.Campaign;
+import org.example.gametgweb.gameplay.game.campaign.entity.Campaign;
 import org.example.gametgweb.gameplay.game.Body;
 import org.example.gametgweb.gameplay.game.entity.PlayerEntity;
 import org.example.gametgweb.gameplay.game.entity.Unit;
@@ -196,8 +196,6 @@ public class CampaignWebSocketHandler extends TextWebSocketHandler {
             throw new IllegalArgumentException("Неверная часть тела: " + name);
         }
     }
-
-
 
     // Метод получения имени игрока из WebSocketSession
     private String getCurrentPlayerName(WebSocketSession session) {

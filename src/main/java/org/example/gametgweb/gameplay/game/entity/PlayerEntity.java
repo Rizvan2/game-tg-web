@@ -3,7 +3,7 @@ package org.example.gametgweb.gameplay.game.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.web.socket.WebSocketSession;
+import org.example.gametgweb.gameplay.game.Duel.entity.GameSession;
 
 /**
  * Упрощённая JPA Entity для игрока в игре.

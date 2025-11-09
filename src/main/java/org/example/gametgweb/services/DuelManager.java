@@ -1,6 +1,6 @@
 package org.example.gametgweb.services;
 
-import org.example.gametgweb.gameplay.game.entity.GameSession;
+import org.example.gametgweb.gameplay.game.Duel.entity.GameSession;
 import org.example.gametgweb.gameplay.game.entity.PlayerEntity;
 import org.example.gametgweb.repository.GameSessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +58,7 @@ public class DuelManager {
 
     /** Привязывает игрока к игре */
     private void attachPlayerToGame(Long playerId, GameSession game) {
-        PlayerEntity playerEntity = playerService.getPlayer(playerId)
+        PlayerEntity playerEntity = playerService.findById(playerId)
                 .orElseThrow(() -> new IllegalArgumentException("Игрок не найден"));
         playerEntity.setGameSession(game);
         game.setPlayer(playerEntity);

@@ -34,7 +34,7 @@ public class PlayerServiceImpl implements PlayerService, UserDetailsService {
      * @return Optional с PlayerEntity, если найден.
      */
     @Override
-    public Optional<PlayerEntity> getPlayer(Long id) {
+    public Optional<PlayerEntity> findById(Long id) {
         return playerRepository.findById(id);
     }
 

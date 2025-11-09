@@ -1,4 +1,6 @@
-package org.example.gametgweb.gameplay.game;
+package org.example.gametgweb.gameplay.game.Duel;
+
+import org.example.gametgweb.gameplay.game.GameState;
 
 /**
  * Доменный класс, представляющий игровой матч в Telegram-боте.

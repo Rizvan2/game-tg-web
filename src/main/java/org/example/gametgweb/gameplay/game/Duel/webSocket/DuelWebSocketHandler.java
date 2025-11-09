@@ -1,4 +1,4 @@
-package org.example.gametgweb.configs.webSocket;
+package org.example.gametgweb.gameplay.game.Duel.webSocket;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

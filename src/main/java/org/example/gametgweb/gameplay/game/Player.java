@@ -2,6 +2,8 @@ package org.example.gametgweb.gameplay.game;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.example.gametgweb.gameplay.game.Duel.Game;
+import org.example.gametgweb.gameplay.game.entity.Unit;
 
 import java.util.Objects;
 
@@ -19,19 +21,19 @@ public class Player {
     private final Long id;
 
     /** Никнейм игрока */
-    private String nickname;
+    private String username;
 
     /** Ссылка на игру, в которой участвует игрок */
     private final Game game;
 
     /** ID активного юнита, которым игрок управляет прямо сейчас */
-    private Long activeUnitId;
+    private Unit activeUnit;
 
-    public Player(Long id, String nickname, Game game, Long activeUnitId) {
+    public Player(Long id, String username, Game game, Unit activeUnit) {
         this.id = id;
-        this.nickname = nickname;
+        this.username = username;
         this.game = game;
-        this.activeUnitId = activeUnitId;
+        this.activeUnit = activeUnit;
     }
 
     @Override

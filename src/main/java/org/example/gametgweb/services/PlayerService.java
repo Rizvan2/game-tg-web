@@ -5,7 +5,7 @@ import org.example.gametgweb.gameplay.game.entity.PlayerEntity;
 import java.util.Optional;
 
 public interface PlayerService {
-    Optional<PlayerEntity> getPlayer(Long id);
+    Optional<PlayerEntity> findById(Long id);
     PlayerEntity savePlayer(PlayerEntity player);
     void deletePlayer(PlayerEntity player);
     PlayerEntity updatePlayer(PlayerEntity player);

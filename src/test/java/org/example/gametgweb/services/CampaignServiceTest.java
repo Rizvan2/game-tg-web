@@ -1,7 +1,7 @@
 package org.example.gametgweb.services;
 
-import org.example.gametgweb.gameplay.campaign.entity.Campaign;
-import org.example.gametgweb.gameplay.campaign.repository.CampaignRepository;
+import org.example.gametgweb.gameplay.game.campaign.entity.Campaign;
+import org.example.gametgweb.gameplay.game.campaign.repository.CampaignRepository;
 import org.example.gametgweb.gameplay.game.entity.Unit;
 import org.example.gametgweb.repository.UnitRepository;
 import org.junit.jupiter.api.Test;

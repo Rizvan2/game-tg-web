@@ -1,4 +1,4 @@
-package org.example.gametgweb.gameplay.campaign.entity;
+package org.example.gametgweb.gameplay.game.campaign.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

@@ -1,7 +1,7 @@
-package org.example.gametgweb.gameplay.campaign.controllers;
+package org.example.gametgweb.gameplay.game.campaign.controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.example.gametgweb.gameplay.campaign.entity.Campaign;
+import org.example.gametgweb.gameplay.game.campaign.entity.Campaign;
 import org.example.gametgweb.gameplay.game.entity.PlayerDetails;
 import org.example.gametgweb.gameplay.game.entity.PlayerEntity;
 import org.example.gametgweb.services.CampaignService;
