@@ -1,28 +1,51 @@
 package org.example.gametgweb.gameplay.game.Duel.webSocket;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.gametgweb.gameplay.game.entity.Unit;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * RoomSessionRegistry — реестр активных WebSocket-сессий игроков по комнатам.
- * <p>
- * Хранит потокобезопасные множества сессий и обеспечивает безопасную работу с ними,
- * включая добавление, удаление и рассылку сообщений.
+ * RoomSessionRegistry — потокобезопасный реестр активных WebSocket-сессий и игровых юнитов по комнатам.
+ *
+ * <p>Основные задачи:
+ * <ul>
+ *     <li>Хранение WebSocket-сессий игроков по коду комнаты;</li>
+ *     <li>Хранение игровых юнитов игроков по коду комнаты;</li>
+ *     <li>Обеспечение безопасной рассылки сообщений всем игрокам или конкретному игроку;</li>
+ *     <li>Удаление сессий и очистка комнат, когда они становятся пустыми.</li>
+ * </ul>
+ *
+ * <p>Использует потокобезопасные коллекции {@link ConcurrentHashMap} и {@link ConcurrentHashMap#newKeySet()}.
  */
 @Slf4j
 @Component
 public class RoomSessionRegistry {
 
+    /**
+     * Активные WebSocket-сессии игроков, сгруппированные по коду комнаты.
+     * Key — gameCode, Value — набор сессий игроков в комнате.
+     */
     private final ConcurrentHashMap<String, Set<WebSocketSession>> gameSessions = new ConcurrentHashMap<>();
 
     /**
-     * Добавляет сессию в указанную комнату.
+     * Игровые юниты игроков, сгруппированные по коду комнаты.
+     * Key — gameCode, Value — Map с ключом playerName и значением Unit.
+     */
+    private final ConcurrentHashMap<String, Map<String, Unit>> gameUnits = new ConcurrentHashMap<>();
+
+    // ============================================================
+    // =============== Работа с WebSocket-сессиями =================
+    // ============================================================
+
+    /**
+     * Добавляет WebSocket-сессию игрока в комнату.
      *
      * @param gameCode код комнаты
      * @param session  WebSocket-сессия игрока
@@ -33,7 +56,7 @@ public class RoomSessionRegistry {
     }
 
     /**
-     * Удаляет сессию из комнаты и очищает комнату, если она пуста.
+     * Удаляет WebSocket-сессию из комнаты.
      *
      * @param gameCode код комнаты
      * @param session  WebSocket-сессия игрока
@@ -43,8 +66,7 @@ public class RoomSessionRegistry {
     }
 
     /**
-     * Отправляет текстовое сообщение всем открытым сессиям комнаты.
-     * Закрытые сессии удаляются из реестра.
+     * Рассылает сообщение всем игрокам в комнате.
      *
      * @param gameCode код комнаты
      * @param message  текст сообщения
@@ -56,10 +78,8 @@ public class RoomSessionRegistry {
             return;
         }
 
-        // Удаляем закрытые сессии
         sessions.removeIf(s -> !s.isOpen());
 
-        // Отправляем сообщение всем открытым сессиям
         sessions.forEach(s -> {
             try {
                 s.sendMessage(new TextMessage(message));
@@ -71,20 +91,48 @@ public class RoomSessionRegistry {
     }
 
     /**
-     * Получает множество сессий для комнаты.
+     * Отправляет сообщение конкретному игроку в комнате.
      *
-     * @param gameCode код комнаты
-     * @return множество сессий или null, если комнаты нет
+     * @param gameCode   код комнаты
+     * @param playerName имя игрока
+     * @param message    текст сообщения
      */
-    private Set<WebSocketSession> getSessions(String gameCode) {
-        return gameSessions.get(gameCode);
+    public void sendToPlayer(String gameCode, String playerName, String message) {
+        Set<WebSocketSession> sessions = getSessions(gameCode);
+        if (sessions == null || sessions.isEmpty()) return;
+
+        // Удаляем закрытые сессии
+        sessions.removeIf(s -> !s.isOpen());
+
+        // Находим сессию игрока и отправляем сообщение
+        sessions.stream()
+                .filter(s -> playerName.equals(s.getAttributes().get("PLAYER_NAME")))
+                .forEach(s -> {
+                    try {
+                        s.sendMessage(new TextMessage(message));
+                    } catch (IOException e) {
+                        log.error("Ошибка при отправке игроку {}: {}", playerName, e.getMessage());
+                        safeRemoveSession(gameCode, s);
+                    }
+                });
     }
 
     /**
-     * Безопасно удаляет сессию из комнаты, логирует удаление и очищает комнату, если она пуста.
+     * Возвращает копию набора активных сессий для комнаты.
      *
      * @param gameCode код комнаты
-     * @param session  WebSocket-сессия
+     * @return множество WebSocket-сессий; если комнаты нет, возвращает пустой набор
+     */
+    public Set<WebSocketSession> getSessions(String gameCode) {
+        var sessions = gameSessions.get(gameCode);
+        return sessions != null ? Set.copyOf(sessions) : Set.of();
+    }
+
+    /**
+     * Безопасно удаляет сессию и очищает комнату, если она пуста.
+     *
+     * @param gameCode код комнаты
+     * @param session  WebSocket-сессия игрока
      */
     private void safeRemoveSession(String gameCode, WebSocketSession session) {
         Set<WebSocketSession> sessions = gameSessions.get(gameCode);
@@ -95,34 +143,35 @@ public class RoomSessionRegistry {
 
         if (sessions.isEmpty()) {
             gameSessions.remove(gameCode);
+            gameUnits.remove(gameCode);
             log.info("Комната {} пуста — удалена из реестра", gameCode);
         }
     }
 
-    /**
-     * Проверяет, пуста ли комната.
-     *
-     * @param gameCode код комнаты
-     * @return true, если в комнате нет сессий
-     */
-    public boolean isRoomEmpty(String gameCode) {
-        Set<WebSocketSession> sessions = gameSessions.get(gameCode);
-        return sessions == null || sessions.isEmpty();
-    }
+    // ============================================================
+    // ================= Работа с игровыми юнитами =================
+    // ============================================================
 
     /**
-     * Проверяет, есть ли открытая сессия у указанного игрока в комнате.
+     * Регистрирует юнита игрока в комнате.
      *
      * @param gameCode   код комнаты
      * @param playerName имя игрока
-     * @return true, если есть хотя бы одна открытая сессия
+     * @param unit       игровой юнит
      */
-    public boolean hasOpenConnection(String gameCode, String playerName) {
-        Set<WebSocketSession> sessions = gameSessions.get(gameCode);
-        if (sessions == null) return false;
+    public void registerUnit(String gameCode, String playerName, Unit unit) {
+        gameUnits.computeIfAbsent(gameCode, k -> new ConcurrentHashMap<>()).put(playerName, unit);
+        log.info("Юнит игрока {} добавлен в комнату {}", playerName, gameCode);
+    }
 
-        return sessions.stream()
-                .filter(WebSocketSession::isOpen)
-                .anyMatch(s -> playerName.equals(s.getAttributes().get("PLAYER_NAME")));
+    /**
+     * Возвращает юнита игрока по имени в комнате.
+     *
+     * @param gameCode   код комнаты
+     * @param playerName имя игрока
+     * @return юнит игрока или null, если не найден
+     */
+    public Unit getUnit(String gameCode, String playerName) {
+        return gameUnits.getOrDefault(gameCode, Map.of()).get(playerName);
     }
 }
