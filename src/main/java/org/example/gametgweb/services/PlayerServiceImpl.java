@@ -1,7 +1,7 @@
 package org.example.gametgweb.services;
 
-import org.example.gametgweb.gameplay.game.entity.PlayerDetails;
-import org.example.gametgweb.gameplay.game.entity.PlayerEntity;
+import org.example.gametgweb.gameplay.game.entity.player.PlayerDetails;
+import org.example.gametgweb.gameplay.game.entity.player.PlayerEntity;
 import org.example.gametgweb.repository.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

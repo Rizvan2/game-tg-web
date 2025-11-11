@@ -3,8 +3,8 @@ package org.example.gametgweb.services;
 import lombok.RequiredArgsConstructor;
 import org.example.gametgweb.gameplay.game.campaign.entity.Campaign;
 import org.example.gametgweb.gameplay.game.campaign.repository.CampaignRepository;
-import org.example.gametgweb.gameplay.game.entity.PlayerEntity;
-import org.example.gametgweb.gameplay.game.entity.Unit;
+import org.example.gametgweb.gameplay.game.entity.player.PlayerEntity;
+import org.example.gametgweb.gameplay.game.entity.unit.UnitEntity;
 import org.example.gametgweb.repository.UnitRepository;
 import org.springframework.stereotype.Service;
 
@@ -25,8 +25,8 @@ public class CampaignService {
     public Campaign startCampaign(PlayerEntity player, String enemyUnitName) {
         // Создаём кампанию с юнитами
         Campaign campaign = Campaign.builder()
-                .playerUnit(getPlayerUnit(player))
-                .enemyUnit(getEnemyUnit(enemyUnitName))
+                .playerUnitEntity(getPlayerUnit(player))
+                .enemyUnitEntity(getEnemyUnit(enemyUnitName))
                 .build();
 
         return campaignRepository.save(campaign);
@@ -42,20 +42,20 @@ public class CampaignService {
      * @return Юнит переданного игрока
      * @throws IllegalStateException если у игрока нету выбранного юнита
      */
-    private Unit getPlayerUnit(PlayerEntity player) {
-        Unit playerUnit = player.getActiveUnit();
-        if (playerUnit == null) {
+    private UnitEntity getPlayerUnit(PlayerEntity player) {
+        UnitEntity playerUnitEntity = player.getActiveUnitEntity();
+        if (playerUnitEntity == null) {
             throw new IllegalStateException("У игрока не выбран активный юнит");
         }
-        return playerUnit;
+        return playerUnitEntity;
     }
 
     /**
      * Ищет противостоящего юнита по имени
      * @param name Противник которого мы ищем
-     * @return Unit с совпадающим именем
+     * @return UnitEntity с совпадающим именем
      */
-    private Unit getEnemyUnit(String name) {
+    private UnitEntity getEnemyUnit(String name) {
         // выбираем первого врага (например, по имени)
         return unitRepository.findByName(name)
                 .orElseThrow(() -> new IllegalStateException("Не найден юнит" + name));

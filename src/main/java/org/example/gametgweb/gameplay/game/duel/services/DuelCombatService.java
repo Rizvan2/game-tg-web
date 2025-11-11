@@ -1,10 +1,10 @@
-package org.example.gametgweb.gameplay.game.Duel;
+package org.example.gametgweb.gameplay.game.duel.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.gametgweb.gameplay.game.Body;
-import org.example.gametgweb.gameplay.game.Duel.webSocket.DuelTurnManager;
-import org.example.gametgweb.gameplay.game.Duel.webSocket.RoomSessionRegistry;
-import org.example.gametgweb.gameplay.game.entity.Unit;
+import org.example.gametgweb.gameplay.game.entity.unit.Body;
+import org.example.gametgweb.gameplay.game.duel.webSocket.DuelTurnManager;
+import org.example.gametgweb.gameplay.game.duel.webSocket.RoomSessionRegistry;
+import org.example.gametgweb.gameplay.game.entity.unit.UnitEntity;
 import org.example.gametgweb.services.CombatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
  * <ul>
  *     <li>Добавление хода игрока через {@link DuelTurnManager};</li>
  *     <li>Определение готовности хода (когда оба игрока сделали выбор);</li>
- *     <li>Вызов {@link CombatService#duelRound(Unit, Body, Unit, Body)} для расчёта результатов боя;</li>
+ *     <li>Вызов {@link CombatService#duelRound(UnitEntity, Body, UnitEntity, Body)} для расчёта результатов боя;</li>
  *     <li>Очистку хода после завершения раунда;</li>
  *     <li>Возврат результата боя в виде JSON строки.</li>
  * </ul>
@@ -43,7 +43,7 @@ public class DuelCombatService {
      *     <li>Добавляет ход игрока через {@link DuelTurnManager#addMove(String, String, Body)};</li>
      *     <li>Проверяет, готовы ли оба игрока;</li>
      *     <li>Если оба игрока сделали выбор, получает их юниты из {@link RoomSessionRegistry};</li>
-     *     <li>Вызывает {@link CombatService#duelRound(Unit, Body, Unit, Body)} для расчёта результата;</li>
+     *     <li>Вызывает {@link CombatService#duelRound(UnitEntity, Body, UnitEntity, Body)} для расчёта результата;</li>
      *     <li>Удаляет текущий ход из менеджера ходов;</li>
      *     <li>Возвращает результат в виде JSON строки.</li>
      * </ol>
@@ -58,10 +58,10 @@ public class DuelCombatService {
         var turn = turnManager.addMove(gameCode, player, body);
 
         if (turn.isReady()) {
-            Unit unit1 = roomSessionRegistry.getUnit(gameCode, turn.getPlayer1());
-            Unit unit2 = roomSessionRegistry.getUnit(gameCode, turn.getPlayer2());
+            UnitEntity unitEntity1 = roomSessionRegistry.getUnit(gameCode, turn.getPlayer1());
+            UnitEntity unitEntity2 = roomSessionRegistry.getUnit(gameCode, turn.getPlayer2());
 
-            var result = combatService.duelRound(unit1, turn.getBody1(), unit2, turn.getBody2());
+            var result = combatService.duelRound(unitEntity1, turn.getBody1(), unitEntity2, turn.getBody2());
             turnManager.removeTurn(gameCode);
             return new ObjectMapper().writeValueAsString(result);
         }

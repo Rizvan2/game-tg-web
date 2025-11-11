@@ -1,6 +1,6 @@
 package org.example.gametgweb.services;
 
-import org.example.gametgweb.gameplay.game.entity.PlayerEntity;
+import org.example.gametgweb.gameplay.game.entity.player.PlayerEntity;
 
 import java.util.Optional;
 

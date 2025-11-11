@@ -1,4 +1,4 @@
-package org.example.gametgweb.gameplay.game.Duel.webSocket;
+package org.example.gametgweb.gameplay.game.duel.webSocket;
 
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;

@@ -1,6 +1,6 @@
 package org.example.gametgweb.services;
 
-import org.example.gametgweb.gameplay.game.Body;
+import org.example.gametgweb.gameplay.game.entity.unit.Body;
 
 /**
  * Интерфейс для игровых юнитов.

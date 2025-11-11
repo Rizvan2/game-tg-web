@@ -2,7 +2,7 @@ package org.example.gametgweb.services;
 
 import org.example.gametgweb.gameplay.game.campaign.entity.Campaign;
 import org.example.gametgweb.gameplay.game.campaign.repository.CampaignRepository;
-import org.example.gametgweb.gameplay.game.entity.Unit;
+import org.example.gametgweb.gameplay.game.entity.unit.UnitEntity;
 import org.example.gametgweb.repository.UnitRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,8 +31,8 @@ class CampaignServiceTest {
     @Test
     void saveCampaign() {
         Campaign campaign = new Campaign(4L
-                ,new Unit(4L,"Turc Warrior", 100L, 100L,10L,"/images/always-mustachioed.png")
-                ,new Unit(4L,"Goblin", 100L, 100L,10L,"/images/Goblin.png"), false);
+                ,new UnitEntity(4L,"Turc Warrior", 100L, 100L,10L,"/images/always-mustachioed.png")
+                ,new UnitEntity(4L,"Goblin", 100L, 100L,10L,"/images/Goblin.png"), false);
         campaignService.saveCampaign(campaign);
         // assert - проверяем взаимодействие с мок-репозиторием
         verify(campaignRepository, times(1)).save(campaign);

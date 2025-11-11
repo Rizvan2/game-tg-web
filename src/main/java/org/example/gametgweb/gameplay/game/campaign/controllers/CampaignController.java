@@ -2,8 +2,8 @@ package org.example.gametgweb.gameplay.game.campaign.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.example.gametgweb.gameplay.game.campaign.entity.Campaign;
-import org.example.gametgweb.gameplay.game.entity.PlayerDetails;
-import org.example.gametgweb.gameplay.game.entity.PlayerEntity;
+import org.example.gametgweb.gameplay.game.entity.player.PlayerDetails;
+import org.example.gametgweb.gameplay.game.entity.player.PlayerEntity;
 import org.example.gametgweb.services.CampaignService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +47,6 @@ public class CampaignController {
 
         PlayerEntity player = playerDetails.playerEntity();
         Campaign campaign = campaignService.startCampaign(player, "Turk Warrior");
-        return ResponseEntity.ok("Бой начат против: " + campaign.getEnemyUnit().getName());
+        return ResponseEntity.ok("Бой начат против: " + campaign.getEnemyUnitEntity().getName());
     }
 }

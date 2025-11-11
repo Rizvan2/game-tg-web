@@ -1,10 +1,9 @@
-package org.example.gametgweb.gameplay.game.Duel.entity;
+package org.example.gametgweb.gameplay.game.entity.gameSession;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.example.gametgweb.gameplay.game.GameState;
-import org.example.gametgweb.gameplay.game.entity.PlayerEntity;
+import org.example.gametgweb.gameplay.game.entity.player.PlayerEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +18,7 @@ import java.util.List;
 @Table(name = "games")
 @Getter
 @Setter
-public class GameSession {
+public class GameSessionEntity {
 
     /**
      * Уникальный идентификатор игры (Primary Key).
@@ -50,7 +49,7 @@ public class GameSession {
     /**
      * Конструктор по умолчанию, требуемый JPA.
      */
-    public GameSession() {}
+    public GameSessionEntity() {}
 
     /**
      * Конструктор с основными полями.
@@ -58,7 +57,7 @@ public class GameSession {
      * @param gameCode уникальный код игры
      * @param state текущее состояние игры
      */
-    public GameSession(String gameCode, GameState state) {
+    public GameSessionEntity(String gameCode, GameState state) {
         this.gameCode = gameCode;
         this.state = state;
     }

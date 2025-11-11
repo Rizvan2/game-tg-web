@@ -2,14 +2,14 @@ package org.example.gametgweb.gameplay.game.campaign.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.gametgweb.gameplay.game.entity.Unit;
+import org.example.gametgweb.gameplay.game.entity.unit.UnitEntity;
 
 /**
  * Сущность, представляющая кампанию (сюжетный бой) игрока.
  * <p>
  * Используется для хранения состояния кампаний в базе данных.
  * Каждая запись описывает конкретное сражение между боевой единицей игрока
- * ({@link #playerUnit}) и вражеским противником ({@link #enemyUnit}).
+ * ({@link #playerUnitEntity}) и вражеским противником ({@link #enemyUnitEntity}).
  */
 @Entity
 @Table(name = "campaigns")
@@ -27,11 +27,11 @@ public class Campaign {
 
     /** Боевая единица игрока, участвующая в кампании. */
     @ManyToOne(optional = false)
-    private Unit playerUnit;
+    private UnitEntity playerUnitEntity;
 
     /** Вражеский юнит, против которого идёт бой. */
     @ManyToOne(optional = false)
-    private Unit enemyUnit;
+    private UnitEntity enemyUnitEntity;
 
     /** Флаг завершённости кампании (true, если бой завершён). */
     @Column(nullable = false)

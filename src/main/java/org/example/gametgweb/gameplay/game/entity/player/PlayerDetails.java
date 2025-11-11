@@ -1,4 +1,4 @@
-package org.example.gametgweb.gameplay.game.entity;
+package org.example.gametgweb.gameplay.game.entity.player;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

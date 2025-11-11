@@ -1,9 +1,8 @@
-package org.example.gametgweb.gameplay.game.entity;
+package org.example.gametgweb.gameplay.game.entity.unit;
 
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.example.gametgweb.gameplay.game.Body;
 import org.example.gametgweb.services.GameUnit;
 
 /**
@@ -21,7 +20,7 @@ import org.example.gametgweb.services.GameUnit;
 @AllArgsConstructor
 @Builder
 @Slf4j
-public class Unit implements GameUnit {
+public class UnitEntity implements GameUnit {
 
     /** Уникальный идентификатор юнита. */
     @Id

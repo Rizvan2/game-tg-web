@@ -1,4 +1,4 @@
-package org.example.gametgweb.gameplay.game.Duel.webSocket;
+package org.example.gametgweb.gameplay.game.duel.webSocket;
 
 import org.springframework.web.socket.WebSocketSession;
 

@@ -1,6 +1,6 @@
 package org.example.gametgweb.gameplay.controllers;
 
-import org.example.gametgweb.gameplay.game.entity.PlayerDetails;
+import org.example.gametgweb.gameplay.game.entity.player.PlayerDetails;
 import org.example.gametgweb.services.DuelManager;
 
 import org.springframework.beans.factory.annotation.Autowired;

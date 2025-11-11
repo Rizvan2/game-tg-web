@@ -1,8 +1,8 @@
 package org.example.gametgweb.services;
 
-import org.example.gametgweb.gameplay.game.GameState;
-import org.example.gametgweb.gameplay.game.Duel.entity.GameSession;
-import org.example.gametgweb.gameplay.game.entity.PlayerEntity;
+import org.example.gametgweb.gameplay.game.entity.gameSession.GameSessionEntity;
+import org.example.gametgweb.gameplay.game.entity.gameSession.GameState;
+import org.example.gametgweb.gameplay.game.entity.player.PlayerEntity;
 import org.example.gametgweb.repository.GameSessionRepository;
 import org.example.gametgweb.repository.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,11 +37,11 @@ public class GameServiceImpl implements GameService {
      * Находит игру по её уникальному коду.
      *
      * @param gameCode уникальный код игры
-     * @return {@link GameSession} с указанным кодом
+     * @return {@link GameSessionEntity} с указанным кодом
      * @throws IllegalArgumentException если игра не найдена
      */
     @Override
-    public GameSession findGameByGameCode(String gameCode) {
+    public GameSessionEntity findGameByGameCode(String gameCode) {
         return gameSessionRepository.findGameByGameCode(gameCode).orElseThrow(() -> new IllegalArgumentException("Invalid game code: " + gameCode));
     }
 
@@ -51,7 +51,7 @@ public class GameServiceImpl implements GameService {
      * @param game игровая сессия для сохранения
      */
     @Override
-    public void setGame(GameSession game) {
+    public void setGame(GameSessionEntity game) {
         gameSessionRepository.save(game);
     }
 
@@ -75,40 +75,40 @@ public class GameServiceImpl implements GameService {
      * Логика:
      * 1. Проверяет, есть ли игра с указанным кодом `gameCode`.
      *    - Если игра существует, возвращает её.
-     *    - Если нет, создаёт новую игру с состоянием {@link org.example.gametgweb.gameplay.game.GameState#WAITING}.
+     *    - Если нет, создаёт новую игру с состоянием {@link GameState#WAITING}.
      * 2. Привязывает игрока с `playerId` к найденной или созданной игре.
      *
      * @param gameCode уникальный код игры для подключения игроков
      * @param playerId ID игрока, который создаёт игру или присоединяется
-     * @return {@link GameSession} — существующая или новая игровая сессия с привязанным игроком
+     * @return {@link GameSessionEntity} — существующая или новая игровая сессия с привязанным игроком
      * @throws IllegalArgumentException если игрок с указанным ID не найден
      */
     @Override
     @Transactional
-    public GameSession createGame(String gameCode, Long playerId) {
-        GameSession game = findOrCreateGameSession(gameCode, playerId);
+    public GameSessionEntity createGame(String gameCode, Long playerId) {
+        GameSessionEntity game = findOrCreateGameSession(gameCode, playerId);
         attachPlayerToGame(playerId, game);
         return game;
     }
 
     /** Проверяет, есть ли игра с таким кодом, иначе создаёт новую */
-    private GameSession findOrCreateGameSession(String gameCode, Long playerId) {
+    private GameSessionEntity findOrCreateGameSession(String gameCode, Long playerId) {
         return gameSessionRepository.findGameByGameCode(gameCode)
                 .orElseGet(() -> createNewGameSession(gameCode, playerId));
     }
 
     /** Создаёт новую игру и сохраняет её */
-    private GameSession createNewGameSession(String gameCode, Long playerId) {
-        GameSession game = new GameSession(gameCode, GameState.WAITING);
+    private GameSessionEntity createNewGameSession(String gameCode, Long playerId) {
+        GameSessionEntity game = new GameSessionEntity(gameCode, GameState.WAITING);
         gameSessionRepository.save(game); // сохраняем до привязки игрока, чтобы получить ID при необходимости
         return game;
     }
 
     /** Привязывает игрока к игре и наоборот */
-    private void attachPlayerToGame(Long playerId, GameSession game) {
+    private void attachPlayerToGame(Long playerId, GameSessionEntity game) {
         PlayerEntity player = playerRepository.findById(playerId)
                 .orElseThrow(() -> new IllegalArgumentException("Player not found with id: " + playerId));
-        player.setGameSession(game);
+        player.setGameSessionEntity(game);
         game.setPlayer(player);
     }
 
@@ -116,18 +116,18 @@ public class GameServiceImpl implements GameService {
      * Получает существующую игру по коду или создаёт новую.
      *
      * @param gameCode уникальный код игры
-     * @return {@link GameSession} — существующая или новая сессия
+     * @return {@link GameSessionEntity} — существующая или новая сессия
      */
     @Override
-    public GameSession getOrCreateGame(String gameCode) {
+    public GameSessionEntity getOrCreateGame(String gameCode) {
         // Проверяем, есть ли уже такая игра
-        Optional<GameSession> existing = gameSessionRepository.findGameByGameCode(gameCode);
+        Optional<GameSessionEntity> existing = gameSessionRepository.findGameByGameCode(gameCode);
         if (existing.isPresent()) {
             return existing.get();
         }
 
         // Если нет — создаём новую
-        GameSession newGame = new GameSession(gameCode, GameState.WAITING);
+        GameSessionEntity newGame = new GameSessionEntity(gameCode, GameState.WAITING);
         return gameSessionRepository.save(newGame);
     }
 
@@ -137,7 +137,7 @@ public class GameServiceImpl implements GameService {
      * @param game игровая сессия для обновления
      */
     @Override
-    public void updateGame(GameSession game) {
+    public void updateGame(GameSessionEntity game) {
         this.gameSessionRepository.save(game);
     }
 }

@@ -4,10 +4,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.gametgweb.gameplay.game.Body;
+import org.example.gametgweb.gameplay.game.entity.unit.Body;
 import org.example.gametgweb.gameplay.game.campaign.entity.Campaign;
-import org.example.gametgweb.gameplay.game.entity.PlayerEntity;
-import org.example.gametgweb.gameplay.game.entity.Unit;
+import org.example.gametgweb.gameplay.game.entity.player.PlayerEntity;
+import org.example.gametgweb.gameplay.game.entity.unit.UnitEntity;
 import org.example.gametgweb.services.CampaignService;
 import org.example.gametgweb.services.CombatService;
 import org.example.gametgweb.services.PlayerService;
@@ -118,8 +118,8 @@ public class CampaignWebSocketHandler extends TextWebSocketHandler {
 
         registry.broadcast(playerName, mapper.writeValueAsString(Map.of(
                 "message", "⚔ Кампания начата!",
-                "player", campaign.getPlayerUnit(),
-                "enemy", campaign.getEnemyUnit()
+                "player", campaign.getPlayerUnitEntity(),
+                "enemy", campaign.getEnemyUnitEntity()
         )));
     }
 
@@ -147,15 +147,15 @@ public class CampaignWebSocketHandler extends TextWebSocketHandler {
 
         Body body = parseBody(node.has("body") ? node.get("body").asText() : "BODY");
 
-        Unit attacker = isPlayerTurn ? campaign.getPlayerUnit() : campaign.getEnemyUnit();
-        Unit defender = isPlayerTurn ? campaign.getEnemyUnit() : campaign.getPlayerUnit();
+        UnitEntity attacker = isPlayerTurn ? campaign.getPlayerUnitEntity() : campaign.getEnemyUnitEntity();
+        UnitEntity defender = isPlayerTurn ? campaign.getEnemyUnitEntity() : campaign.getPlayerUnitEntity();
 
         String message = combatService.attack(attacker, defender, body);
 
         registry.broadcast(playerName, mapper.writeValueAsString(Map.of(
                 "message", message,
-                "player", campaign.getPlayerUnit(),
-                "enemy", campaign.getEnemyUnit()
+                "player", campaign.getPlayerUnitEntity(),
+                "enemy", campaign.getEnemyUnitEntity()
         )));
     }
 

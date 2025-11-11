@@ -1,8 +1,8 @@
 package org.example.gametgweb.gameplay.combat;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.gametgweb.gameplay.game.Body;
-import org.example.gametgweb.gameplay.game.entity.Unit;
+import org.example.gametgweb.gameplay.game.entity.unit.Body;
+import org.example.gametgweb.gameplay.game.entity.unit.UnitEntity;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -17,7 +17,7 @@ public class CombatEngine {
      * @param target часть тела, в которую идёт удар
      * @return текстовое описание хода
      */
-    public String performAttack(Unit attacker, Unit defender, Body target) {
+    public String performAttack(UnitEntity attacker, UnitEntity defender, Body target) {
         if (attacker == null || defender == null)
             throw new IllegalArgumentException("Attacker и defender не могут быть null");
 
@@ -38,7 +38,7 @@ public class CombatEngine {
     /**
      * Здесь можно добавить механику критов, брони, уклонения и т.д.
      */
-    private long calculateDamage(Unit attacker, Unit defender, Body target) {
+    private long calculateDamage(UnitEntity attacker, UnitEntity defender, Body target) {
         long baseDamage = attacker.getDamage();
 
         // Пример: шанс критического удара 10%

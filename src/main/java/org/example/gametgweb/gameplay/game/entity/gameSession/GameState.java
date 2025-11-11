@@ -1,4 +1,4 @@
-package org.example.gametgweb.gameplay.game;
+package org.example.gametgweb.gameplay.game.entity.gameSession;
 
 public enum GameState {
     WAITING,

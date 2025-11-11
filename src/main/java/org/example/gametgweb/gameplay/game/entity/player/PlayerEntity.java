@@ -1,9 +1,10 @@
-package org.example.gametgweb.gameplay.game.entity;
+package org.example.gametgweb.gameplay.game.entity.player;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.example.gametgweb.gameplay.game.Duel.entity.GameSession;
+import org.example.gametgweb.gameplay.game.entity.gameSession.GameSessionEntity;
+import org.example.gametgweb.gameplay.game.entity.unit.UnitEntity;
 
 /**
  * Упрощённая JPA Entity для игрока в игре.
@@ -27,7 +28,7 @@ public class PlayerEntity{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "game_id")
-    private GameSession gameSession;
+    private GameSessionEntity gameSessionEntity;
 
     /**
      * Юнит которым игрок управляет прямо сейчас.
@@ -35,14 +36,14 @@ public class PlayerEntity{
      */
     @ManyToOne
     @JoinColumn(name = "active_unit")
-    private Unit activeUnit;
+    private UnitEntity activeUnitEntity;
 
     // ====== Конструкторы ======
     public PlayerEntity() {}
 
-    public PlayerEntity(String  password, String username, Unit activeUnit) {
+    public PlayerEntity(String  password, String username, UnitEntity activeUnitEntity) {
         this.password = password;
         this.username = username;
-        this.activeUnit = activeUnit;
+        this.activeUnitEntity = activeUnitEntity;
     }
 }

@@ -1,7 +1,7 @@
 package org.example.gametgweb.gameplay.game.init;
 
-import org.example.gametgweb.gameplay.game.entity.PlayerEntity;
-import org.example.gametgweb.gameplay.game.entity.Unit;
+import org.example.gametgweb.gameplay.game.entity.player.PlayerEntity;
+import org.example.gametgweb.gameplay.game.entity.unit.UnitEntity;
 import org.example.gametgweb.repository.PlayerRepository;
 import org.example.gametgweb.repository.UnitRepository;
 import org.springframework.boot.CommandLineRunner;
@@ -18,14 +18,14 @@ public class DataInitializer {
     public CommandLineRunner initUnits(UnitRepository unitRepository) {
         return args -> {
             if (unitRepository.count() == 0) {
-                unitRepository.save(Unit.builder()
+                unitRepository.save(UnitEntity.builder()
                         .name("Turk Warrior")
                         .maxHealth(100L)
                         .health(100L)
                         .damage(10L)
                         .imagePath("/images/always-mustachioed.png")
                         .build());
-                unitRepository.save(Unit.builder()
+                unitRepository.save(UnitEntity.builder()
                         .name("Goblin")
                         .maxHealth(80L)
                         .health(80L)
@@ -41,7 +41,7 @@ public class DataInitializer {
     public CommandLineRunner initPlayers(PlayerRepository playerRepository, UnitRepository unitRepository, PasswordEncoder encoder) {
         return args -> {
             if (playerRepository.count() == 0) {
-                Unit goblin = unitRepository.findByName("Goblin")
+                UnitEntity goblin = unitRepository.findByName("Goblin")
                         .orElseThrow(() -> new IllegalStateException("Не найден юнит 'Goblin'"));
 
                 PlayerEntity player1 = new PlayerEntity(encoder.encode("123"), "Нагибатор2017", null);

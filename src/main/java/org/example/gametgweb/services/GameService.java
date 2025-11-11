@@ -1,9 +1,9 @@
 package org.example.gametgweb.services;
 
-import org.example.gametgweb.gameplay.game.Duel.entity.GameSession;
+import org.example.gametgweb.gameplay.game.entity.gameSession.GameSessionEntity;
 
 /**
- * Сервисный интерфейс для управления дуэльными играми ({@link GameSession}).
+ * Сервисный интерфейс для управления дуэльными играми ({@link GameSessionEntity}).
  * <p>
  * Предоставляет методы для создания, поиска, обновления и удаления игр.
  */
@@ -13,16 +13,16 @@ public interface GameService {
      * Находит игру по коду.
      *
      * @param gameCode код игры
-     * @return объект {@link GameSession}, если найден
+     * @return объект {@link GameSessionEntity}, если найден
      */
-    GameSession findGameByGameCode(String gameCode);
+    GameSessionEntity findGameByGameCode(String gameCode);
 
     /**
      * Сохраняет или устанавливает текущее состояние игры.
      *
      * @param game игра для сохранения
      */
-    void setGame(GameSession game);
+    void setGame(GameSessionEntity game);
 
     /**
      * Удаляет игру по её идентификатору.
@@ -36,22 +36,22 @@ public interface GameService {
      *
      * @param gameCode код игры
      * @param playerId идентификатор первого игрока
-     * @return созданная {@link GameSession}
+     * @return созданная {@link GameSessionEntity}
      */
-    GameSession createGame(String gameCode, Long playerId);
+    GameSessionEntity createGame(String gameCode, Long playerId);
 
     /**
      * Обновляет состояние существующей игры.
      *
      * @param game игра для обновления
      */
-    void updateGame(GameSession game);
+    void updateGame(GameSessionEntity game);
 
     /**
      * Получает существующую игру по коду или создаёт новую, если не найдена.
      *
      * @param gameCode код игры
-     * @return {@link GameSession}
+     * @return {@link GameSessionEntity}
      */
-    GameSession getOrCreateGame(String gameCode);
+    GameSessionEntity getOrCreateGame(String gameCode);
 }

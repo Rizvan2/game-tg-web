@@ -1,4 +1,4 @@
-package org.example.gametgweb.gameplay.game;
+package org.example.gametgweb.gameplay.game.entity.unit;
 
 /**
  * Перечисление частей тела юнита для расчета урона.

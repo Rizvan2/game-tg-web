@@ -1,10 +1,10 @@
-package org.example.gametgweb.gameplay.game.Duel;
+package org.example.gametgweb.gameplay.game.duel.services;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.gametgweb.gameplay.game.Duel.webSocket.JoinLeaveScheduler;
-import org.example.gametgweb.gameplay.game.Duel.webSocket.MessageFormatter;
-import org.example.gametgweb.gameplay.game.Duel.webSocket.RoomSessionRegistry;
-import org.example.gametgweb.gameplay.game.Duel.webSocket.WebSocketContext;
+import org.example.gametgweb.gameplay.game.duel.webSocket.JoinLeaveScheduler;
+import org.example.gametgweb.gameplay.game.duel.webSocket.MessageFormatter;
+import org.example.gametgweb.gameplay.game.duel.webSocket.RoomSessionRegistry;
+import org.example.gametgweb.gameplay.game.duel.webSocket.WebSocketContext;
 import org.example.gametgweb.repository.UnitRepository;
 import org.example.gametgweb.services.PlayerServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,6 +1,6 @@
-package org.example.gametgweb.gameplay.game.Duel.webSocket;
+package org.example.gametgweb.gameplay.game.duel.webSocket;
 
-import org.example.gametgweb.gameplay.game.Body;
+import org.example.gametgweb.gameplay.game.entity.unit.Body;
 
 import java.util.ArrayList;
 import java.util.HashMap;

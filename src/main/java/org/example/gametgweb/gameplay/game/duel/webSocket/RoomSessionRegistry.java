@@ -1,7 +1,7 @@
-package org.example.gametgweb.gameplay.game.Duel.webSocket;
+package org.example.gametgweb.gameplay.game.duel.webSocket;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.gametgweb.gameplay.game.entity.Unit;
+import org.example.gametgweb.gameplay.game.entity.unit.UnitEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -36,9 +36,9 @@ public class RoomSessionRegistry {
 
     /**
      * Игровые юниты игроков, сгруппированные по коду комнаты.
-     * Key — gameCode, Value — Map с ключом playerName и значением Unit.
+     * Key — gameCode, Value — Map с ключом playerName и значением UnitEntity.
      */
-    private final ConcurrentHashMap<String, Map<String, Unit>> gameUnits = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Map<String, UnitEntity>> gameUnits = new ConcurrentHashMap<>();
 
     // ============================================================
     // =============== Работа с WebSocket-сессиями =================
@@ -157,10 +157,10 @@ public class RoomSessionRegistry {
      *
      * @param gameCode   код комнаты
      * @param playerName имя игрока
-     * @param unit       игровой юнит
+     * @param unitEntity       игровой юнит
      */
-    public void registerUnit(String gameCode, String playerName, Unit unit) {
-        gameUnits.computeIfAbsent(gameCode, k -> new ConcurrentHashMap<>()).put(playerName, unit);
+    public void registerUnit(String gameCode, String playerName, UnitEntity unitEntity) {
+        gameUnits.computeIfAbsent(gameCode, k -> new ConcurrentHashMap<>()).put(playerName, unitEntity);
         log.info("Юнит игрока {} добавлен в комнату {}", playerName, gameCode);
     }
 
@@ -171,7 +171,7 @@ public class RoomSessionRegistry {
      * @param playerName имя игрока
      * @return юнит игрока или null, если не найден
      */
-    public Unit getUnit(String gameCode, String playerName) {
+    public UnitEntity getUnit(String gameCode, String playerName) {
         return gameUnits.getOrDefault(gameCode, Map.of()).get(playerName);
     }
 }

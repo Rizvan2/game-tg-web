@@ -1,11 +1,11 @@
-package org.example.gametgweb.gameplay.game.Duel.webSocket;
+package org.example.gametgweb.gameplay.game.duel.webSocket;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.example.gametgweb.gameplay.game.Body;
-import org.example.gametgweb.gameplay.game.Duel.DuelCombatService;
-import org.example.gametgweb.gameplay.game.Duel.DuelRoomService;
+import org.example.gametgweb.gameplay.game.entity.unit.Body;
+import org.example.gametgweb.gameplay.game.duel.services.DuelCombatService;
+import org.example.gametgweb.gameplay.game.duel.services.DuelRoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;

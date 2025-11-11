@@ -1,9 +1,9 @@
-package org.example.gametgweb.gameplay.game;
+package org.example.gametgweb.gameplay.game.entity.player;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.example.gametgweb.gameplay.game.Duel.Game;
-import org.example.gametgweb.gameplay.game.entity.Unit;
+import org.example.gametgweb.gameplay.game.entity.gameSession.GameSessionEntity;
+import org.example.gametgweb.gameplay.game.entity.unit.UnitEntity;
 
 import java.util.Objects;
 
@@ -24,16 +24,16 @@ public class Player {
     private String username;
 
     /** Ссылка на игру, в которой участвует игрок */
-    private final Game game;
+    private final GameSessionEntity gameSessionEntity;
 
     /** ID активного юнита, которым игрок управляет прямо сейчас */
-    private Unit activeUnit;
+    private UnitEntity activeUnitEntity;
 
-    public Player(Long id, String username, Game game, Unit activeUnit) {
+    public Player(Long id, String username, GameSessionEntity gameSessionEntity, UnitEntity activeUnitEntity) {
         this.id = id;
         this.username = username;
-        this.game = game;
-        this.activeUnit = activeUnit;
+        this.gameSessionEntity = gameSessionEntity;
+        this.activeUnitEntity = activeUnitEntity;
     }
 
     @Override

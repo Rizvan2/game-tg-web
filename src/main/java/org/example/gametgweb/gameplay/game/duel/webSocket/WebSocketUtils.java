@@ -1,4 +1,4 @@
-package org.example.gametgweb.gameplay.game.Duel.webSocket;
+package org.example.gametgweb.gameplay.game.duel.webSocket;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
