@@ -1,4 +1,4 @@
-package org.example.gametgweb.configs.Security;
+package org.example.gametgweb.configs.security;
 
 import org.example.gametgweb.gameplay.game.duel.application.services.PlayerServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;

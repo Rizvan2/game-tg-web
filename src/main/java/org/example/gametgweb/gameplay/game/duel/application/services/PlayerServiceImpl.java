@@ -1,5 +1,6 @@
 package org.example.gametgweb.gameplay.game.duel.application.services;
 
+import org.example.gametgweb.gameplay.game.duel.infrastructure.security.PasswordEncoderServiceImpl;
 import org.example.gametgweb.gameplay.game.duel.shared.PlayerDetails;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.repository.JpaPlayerRepository;
@@ -7,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 
@@ -19,10 +19,10 @@ import java.util.Optional;
 public class PlayerServiceImpl implements PlayerService, UserDetailsService {
 
     private final JpaPlayerRepository jpaPlayerRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoderServiceImpl passwordEncoder;
 
     @Autowired
-    public PlayerServiceImpl(JpaPlayerRepository jpaPlayerRepository, PasswordEncoder passwordEncoder) {
+    public PlayerServiceImpl(JpaPlayerRepository jpaPlayerRepository, PasswordEncoderServiceImpl passwordEncoder) {
         this.jpaPlayerRepository = jpaPlayerRepository;
         this.passwordEncoder = passwordEncoder;
     }

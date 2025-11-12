@@ -22,7 +22,7 @@ public class Player {
     private String username;
 
     /** Ссылка на игру, в которой участвует игрок */
-    private final GameSession gameSession;
+    private GameSession gameSession;
 
     /** ID активного юнита, которым игрок управляет прямо сейчас */
     private Unit activeUnit;

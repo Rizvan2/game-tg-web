@@ -2,6 +2,8 @@ package org.example.gametgweb.gameplay.game.duel.application.services;
 
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.GameSessionEntity;
 
+import java.util.Optional;
+
 /**
  * Сервисный интерфейс для управления дуэльными играми ({@link GameSessionEntity}).
  * <p>
@@ -15,14 +17,14 @@ public interface GameService {
      * @param gameCode код игры
      * @return объект {@link GameSessionEntity}, если найден
      */
-    GameSessionEntity findGameByGameCode(String gameCode);
+    Optional<GameSessionEntity> findByGameCode(String gameCode);
 
     /**
      * Сохраняет или устанавливает текущее состояние игры.
      *
      * @param game игра для сохранения
      */
-    void setGame(GameSessionEntity game);
+    void save(GameSessionEntity game);
 
     /**
      * Удаляет игру по её идентификатору.
@@ -47,11 +49,4 @@ public interface GameService {
      */
     void updateGame(GameSessionEntity game);
 
-    /**
-     * Получает существующую игру по коду или создаёт новую, если не найдена.
-     *
-     * @param gameCode код игры
-     * @return {@link GameSessionEntity}
-     */
-    GameSessionEntity getOrCreateGame(String gameCode);
 }

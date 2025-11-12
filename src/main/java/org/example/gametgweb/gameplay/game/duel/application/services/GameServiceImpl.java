@@ -50,7 +50,7 @@ public class GameServiceImpl implements GameService {
      * @param game игровая сессия для сохранения
      */
     @Override
-    public void setGame(GameSessionEntity game) {
+    public void save(GameSessionEntity game) {
         jpaGameSessionRepository.save(game);
     }
 
@@ -86,8 +86,17 @@ public class GameServiceImpl implements GameService {
     @Transactional
     public GameSessionEntity createGame(String gameCode, Long playerId) {
         GameSessionEntity game = findOrCreateGameSession(gameCode);
-        attachPlayerToGame(playerId, game);
-        setGame(game);
+        if (playerId == null) {
+            throw new IllegalArgumentException("Player ID must not be null");
+        }
+        jpaPlayerRepository.findById(playerId)
+                .orElseThrow(() -> new IllegalArgumentException("Player with id " + playerId + " does not exist"));
+
+            // Привязываем игрока к игре
+            attachPlayerToGame(playerId, game);
+            // Сохраняем изменения в базе через JPA
+            save(game);
+
         return game;
     }
 
@@ -109,18 +118,6 @@ public class GameServiceImpl implements GameService {
         PlayerEntity player = jpaPlayerRepository.findById(playerId)
                 .orElseThrow(() -> new IllegalArgumentException("Player not found with id: " + playerId));
         game.setPlayer(player);
-    }
-
-    /**
-     * Получает существующую игру по коду или создаёт новую.
-     *
-     * @param gameCode уникальный код игры
-     * @return {@link GameSessionEntity} — существующая или новая сессия
-     */
-    @Override
-    public GameSessionEntity getOrCreateGame(String gameCode) {
-        return findByGameCode(gameCode)
-                .orElseGet(() -> createGame(gameCode, null)); // null — если игрок не нужен при создании
     }
 
     /**
