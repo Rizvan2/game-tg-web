@@ -40,9 +40,8 @@ public class GameServiceImpl implements GameService {
      * @return {@link GameSessionEntity} с указанным кодом
      * @throws IllegalArgumentException если игра не найдена
      */
-    @Override
-    public GameSessionEntity findGameByGameCode(String gameCode) {
-        return jpaGameSessionRepository.findByGameCode(gameCode).orElseThrow(() -> new IllegalArgumentException("Invalid game code: " + gameCode));
+    public Optional<GameSessionEntity> findByGameCode(String gameCode) {
+        return jpaGameSessionRepository.findByGameCode(gameCode);
     }
 
     /**
@@ -86,19 +85,20 @@ public class GameServiceImpl implements GameService {
     @Override
     @Transactional
     public GameSessionEntity createGame(String gameCode, Long playerId) {
-        GameSessionEntity game = findOrCreateGameSession(gameCode, playerId);
+        GameSessionEntity game = findOrCreateGameSession(gameCode);
         attachPlayerToGame(playerId, game);
+        setGame(game);
         return game;
     }
 
     /** Проверяет, есть ли игра с таким кодом, иначе создаёт новую */
-    private GameSessionEntity findOrCreateGameSession(String gameCode, Long playerId) {
+    private GameSessionEntity findOrCreateGameSession(String gameCode) {
         return jpaGameSessionRepository.findByGameCode(gameCode)
-                .orElseGet(() -> createNewGameSession(gameCode, playerId));
+                .orElseGet(() -> createNewGameSession(gameCode));
     }
 
     /** Создаёт новую игру и сохраняет её */
-    private GameSessionEntity createNewGameSession(String gameCode, Long playerId) {
+    private GameSessionEntity createNewGameSession(String gameCode) {
         GameSessionEntity game = new GameSessionEntity(gameCode, GameState.WAITING);
         jpaGameSessionRepository.save(game); // сохраняем до привязки игрока, чтобы получить ID при необходимости
         return game;
@@ -108,7 +108,6 @@ public class GameServiceImpl implements GameService {
     private void attachPlayerToGame(Long playerId, GameSessionEntity game) {
         PlayerEntity player = jpaPlayerRepository.findById(playerId)
                 .orElseThrow(() -> new IllegalArgumentException("Player not found with id: " + playerId));
-        player.setGameSessionEntity(game);
         game.setPlayer(player);
     }
 
@@ -120,15 +119,8 @@ public class GameServiceImpl implements GameService {
      */
     @Override
     public GameSessionEntity getOrCreateGame(String gameCode) {
-        // Проверяем, есть ли уже такая игра
-        Optional<GameSessionEntity> existing = jpaGameSessionRepository.findByGameCode(gameCode);
-        if (existing.isPresent()) {
-            return existing.get();
-        }
-
-        // Если нет — создаём новую
-        GameSessionEntity newGame = new GameSessionEntity(gameCode, GameState.WAITING);
-        return jpaGameSessionRepository.save(newGame);
+        return findByGameCode(gameCode)
+                .orElseGet(() -> createGame(gameCode, null)); // null — если игрок не нужен при создании
     }
 
     /**
