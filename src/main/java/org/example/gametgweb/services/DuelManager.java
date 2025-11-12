@@ -1,8 +1,10 @@
 package org.example.gametgweb.services;
 
-import org.example.gametgweb.gameplay.game.entity.gameSession.GameSessionEntity;
-import org.example.gametgweb.gameplay.game.entity.player.PlayerEntity;
-import org.example.gametgweb.repository.GameSessionRepository;
+import org.example.gametgweb.gameplay.game.duel.application.services.PlayerServiceImpl;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.GameSessionEntity;
+import org.example.gametgweb.gameplay.game.duel.application.services.GameServiceImpl;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.repository.JpaGameSessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,15 +21,15 @@ import org.springframework.stereotype.Service;
 public class DuelManager {
 
     private final GameServiceImpl gameService;
-    private final GameSessionRepository gameSessionRepository;
+    private final JpaGameSessionRepository jpaGameSessionRepository;
     private final PlayerServiceImpl playerService;
 
     @Autowired
     public DuelManager(GameServiceImpl gameService,
-                       GameSessionRepository gameSessionRepository,
+                       JpaGameSessionRepository jpaGameSessionRepository,
                        PlayerServiceImpl playerService) {
         this.gameService = gameService;
-        this.gameSessionRepository = gameSessionRepository;
+        this.jpaGameSessionRepository = jpaGameSessionRepository;
         this.playerService = playerService;
     }
 
@@ -52,7 +54,7 @@ public class DuelManager {
 
     /** Проверяет, есть ли игра с таким кодом, иначе создаёт новую */
     private GameSessionEntity findOrCreateGame(String gameCode, Long playerId) {
-        return gameSessionRepository.findGameByGameCode(gameCode)
+        return jpaGameSessionRepository.findByGameCode(gameCode)
                 .orElseGet(() -> gameService.createGame(gameCode, playerId));
     }
 

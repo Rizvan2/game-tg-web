@@ -1,10 +1,12 @@
 package org.example.gametgweb.services;
 
-import org.example.gametgweb.gameplay.game.entity.gameSession.GameSessionEntity;
-import org.example.gametgweb.gameplay.game.entity.gameSession.GameState;
-import org.example.gametgweb.gameplay.game.entity.player.PlayerEntity;
-import org.example.gametgweb.gameplay.game.entity.unit.UnitEntity;
-import org.example.gametgweb.repository.GameSessionRepository;
+import org.example.gametgweb.gameplay.game.duel.application.services.PlayerServiceImpl;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.GameSessionEntity;
+import org.example.gametgweb.gameplay.game.duel.shared.domain.GameState;
+import org.example.gametgweb.gameplay.game.duel.application.services.GameServiceImpl;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.UnitEntity;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.repository.JpaGameSessionRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,7 +23,7 @@ class DuelManagerTest {
     private GameServiceImpl gameService;
 
     @Mock
-    private GameSessionRepository gameSessionRepository;
+    private JpaGameSessionRepository jpaGameSessionRepository;
 
     @Mock
     private PlayerServiceImpl playerService;

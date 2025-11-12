@@ -1,8 +1,8 @@
 package org.example.gametgweb.gameplay.combat;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.gametgweb.gameplay.game.entity.unit.Body;
-import org.example.gametgweb.gameplay.game.entity.unit.UnitEntity;
+import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.UnitEntity;
 import org.springframework.stereotype.Component;
 
 @Slf4j
