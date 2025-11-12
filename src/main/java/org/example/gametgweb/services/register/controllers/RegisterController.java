@@ -1,7 +1,7 @@
 package org.example.gametgweb.services.register.controllers;
 
-import org.example.gametgweb.gameplay.game.entity.PlayerEntity;
-import org.example.gametgweb.services.PlayerService;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
+import org.example.gametgweb.gameplay.game.duel.application.services.PlayerService;
 import org.example.gametgweb.services.register.dto.PlayerRegisterDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
