@@ -4,6 +4,7 @@ import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Unit;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.GameSessionEntity;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.repository.JpaPlayerRepository;
 
 public class PlayerMapper {
     /**
@@ -36,15 +37,25 @@ public class PlayerMapper {
      * @param gameSessionEntity ссылка на игровую сессию (для связи OneToMany)
      * @return JPA-сущность игрока
      */
-    public static PlayerEntity mapPlayerToEntity(Player p, GameSessionEntity gameSessionEntity) {
-        PlayerEntity pe = new PlayerEntity();
-        pe.setId(p.getId());
-        pe.setUsername(p.getUsername());
+    public static PlayerEntity mapPlayerToEntity(Player p
+            , GameSessionEntity gameSessionEntity, JpaPlayerRepository playerRepo) {
+        PlayerEntity pe;
+
+        if (p.getId() != null) {
+            // Достаем существующую сущность из БД, чтобы пароль остался
+            pe = playerRepo.findById(p.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Player not found"));
+            pe.setUsername(p.getUsername());
+        } else {
+            pe = new PlayerEntity();
+            pe.setUsername(p.getUsername());
+            pe.setPassword("default"); // или бросить исключение, если это невозможно
+        }
+
         pe.setGameSessionEntity(gameSessionEntity);
-
-        if (p.getActiveUnit() != null)
+        if (p.getActiveUnit() != null) {
             pe.setActiveUnitEntity(UnitMapper.toEntity(p.getActiveUnit()));
-
+        }
         return pe;
     }
 }

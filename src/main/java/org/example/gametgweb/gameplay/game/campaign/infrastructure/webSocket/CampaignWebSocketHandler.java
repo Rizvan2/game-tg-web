@@ -9,7 +9,7 @@ import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.UnitEntity;
 import org.example.gametgweb.gameplay.game.campaign.infrastructure.persistence.repository.CampaignService;
-import org.example.gametgweb.services.CombatService;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.CombatService;
 import org.example.gametgweb.gameplay.game.duel.application.services.PlayerService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;

@@ -1,4 +1,4 @@
-package org.example.gametgweb.configs.Security;
+package org.example.gametgweb.configs.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

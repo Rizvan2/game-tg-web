@@ -1,4 +1,4 @@
-package org.example.gametgweb.services;
+package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.gametgweb.gameplay.combat.CombatEngine;

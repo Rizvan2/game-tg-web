@@ -4,6 +4,7 @@ import org.example.gametgweb.gameplay.game.duel.domain.model.GameSession;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.GameSessionEntity;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.repository.JpaPlayerRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,7 +47,7 @@ public class GameSessionMapper {
      * @param domain доменная модель, содержащая бизнес-данные
      * @return JPA-сущность {@link GameSessionEntity}, пригодная для сохранения в базу данных
      */
-    public static GameSessionEntity toEntity(GameSession domain) {
+    public static GameSessionEntity toEntity(GameSession domain, JpaPlayerRepository playerRepo) {
         if (domain == null) return null;
 
         GameSessionEntity entity = new GameSessionEntity();
@@ -56,7 +57,7 @@ public class GameSessionMapper {
 
         if (domain.getPlayers() != null) {
             List<PlayerEntity> playerEntities = domain.getPlayers().stream()
-                    .map(p -> PlayerMapper.mapPlayerToEntity(p, entity))
+                    .map(p -> PlayerMapper.mapPlayerToEntity(p, entity,playerRepo))
                     .collect(Collectors.toList());
             entity.setPlayers(playerEntities);
         }

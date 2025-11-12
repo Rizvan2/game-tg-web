@@ -8,11 +8,15 @@ import org.example.gametgweb.gameplay.game.duel.shared.domain.GameState;
 
 public class GameSession {
 
-    private final Long id;
-    private final String gameCode;
+    private Long id;
+    private String gameCode;
     private GameState state;
     private List<Player> players = new ArrayList<>();
 
+    public GameSession(String gameCode, GameState state) {
+        this.gameCode = gameCode;
+        this.state = state;
+    }
     public GameSession(Long id, String gameCode, GameState state) {
         this.id = id;
         this.gameCode = gameCode;
@@ -28,12 +32,28 @@ public class GameSession {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getGameCode() {
         return gameCode;
     }
 
+    public void setGameCode(String gameCode) {
+        this.gameCode = gameCode;
+    }
+
     public GameState getState() {
         return state;
+    }
+
+    public void setState(GameState state) {
+        this.state = state;
+    }
+
+    public void setPlayers(List<Player> players) {
+        this.players = players;
     }
 
     public List<Player> getPlayers() {
