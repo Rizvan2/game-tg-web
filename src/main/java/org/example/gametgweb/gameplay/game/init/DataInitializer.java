@@ -1,5 +1,6 @@
 package org.example.gametgweb.gameplay.game.init;
 
+import jakarta.transaction.Transactional;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.UnitEntity;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.repository.JpaPlayerRepository;
@@ -36,6 +37,7 @@ public class DataInitializer {
         };
     }
 
+    @Transactional
     @Bean
     @Order(2)
     public CommandLineRunner initPlayers(JpaPlayerRepository jpaPlayerRepository, JpaUnitRepository jpaUnitRepository, PasswordEncoder encoder) {
@@ -43,10 +45,12 @@ public class DataInitializer {
             if (jpaPlayerRepository.count() == 0) {
                 UnitEntity goblin = jpaUnitRepository.findByName("Goblin")
                         .orElseThrow(() -> new IllegalStateException("Не найден юнит 'Goblin'"));
+                UnitEntity turkWarrior = jpaUnitRepository.findByName("Turk Warrior")
+                        .orElseThrow(() -> new IllegalStateException("Не найден юнит 'Turk Warrior'"));
 
                 PlayerEntity player1 = new PlayerEntity(encoder.encode("123"), "Нагибатор2017", null);
                 PlayerEntity player2 = new PlayerEntity(encoder.encode("123"), "Артьом", goblin);
-                PlayerEntity player3 = new PlayerEntity(encoder.encode("123"), "Хакер2013", null);
+                PlayerEntity player3 = new PlayerEntity(encoder.encode("123"), "Хакер2013", turkWarrior);
 
                 jpaPlayerRepository.save(player1);
                 jpaPlayerRepository.save(player2);

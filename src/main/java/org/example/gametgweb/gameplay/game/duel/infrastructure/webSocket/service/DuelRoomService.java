@@ -1,6 +1,8 @@
 package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.UnitEntity;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.JoinLeaveScheduler;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.MessageFormatter;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.RoomSessionRegistry;
@@ -10,6 +12,8 @@ import org.example.gametgweb.gameplay.game.duel.application.services.PlayerServi
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
+
+import java.util.Optional;
 
 /**
  * DuelRoomService — сервис управления комнатами дуэлей и игроками в них.
@@ -61,10 +65,15 @@ public class DuelRoomService {
     public void playerJoin(WebSocketContext ctx, WebSocketSession session) {
         registry.addSession(ctx.gameCode(), session);
 
-        var playerEntity = playerService.findByUsername(ctx.playerName());
+        PlayerEntity playerEntity = playerService.findByUsername(ctx.playerName());
         if (playerEntity != null) {
-            var unitOpt = jpaUnitRepository.findByName(playerEntity.getUsername());
-            unitOpt.ifPresent(unit -> registry.registerUnit(ctx.gameCode(), ctx.playerName(), unit));
+            UnitEntity unit = playerEntity.getActiveUnitEntity();
+            if (unit != null) {
+                registry.registerUnit(ctx.gameCode(), ctx.playerName(), unit);
+                log.info("Юнит {} зарегистрирован для игрока {} в комнате {}", unit.getName(), ctx.playerName(), ctx.gameCode());
+            } else {
+                log.warn("Не найден юнит для игрока {}", playerEntity.getUsername());
+            }
         }
 
         if (scheduler.handleJoin(ctx, () ->
@@ -72,6 +81,8 @@ public class DuelRoomService {
             log.info("{} подключился к комнате {}", ctx.playerName(), ctx.gameCode());
         }
     }
+
+
 
     /**
      * Удаляет игрока из комнаты.

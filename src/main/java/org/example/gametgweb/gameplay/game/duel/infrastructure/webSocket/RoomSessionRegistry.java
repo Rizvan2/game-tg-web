@@ -163,7 +163,7 @@ public class RoomSessionRegistry {
      */
     public void registerUnit(String gameCode, String playerName, UnitEntity unitEntity) {
         gameUnits.computeIfAbsent(gameCode, k -> new ConcurrentHashMap<>()).put(playerName, unitEntity);
-        log.info("Юнит игрока {} добавлен в комнату {}", playerName, gameCode);
+        log.info("Юнит {} (имя юнита {}) добавлен в комнату {}", playerName, unitEntity.getName(), gameCode);
     }
 
     /**
@@ -174,6 +174,9 @@ public class RoomSessionRegistry {
      * @return юнит игрока или null, если не найден
      */
     public UnitEntity getUnit(String gameCode, String playerName) {
-        return gameUnits.getOrDefault(gameCode, Map.of()).get(playerName);
+        UnitEntity unit = gameUnits.getOrDefault(gameCode, new ConcurrentHashMap<>()).get(playerName);
+        log.info("getUnit: {} в комнате {} -> {}", playerName, gameCode, unit != null ? "найден" : "не найден");
+        return unit;
     }
+
 }

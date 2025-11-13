@@ -1,7 +1,7 @@
 package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.gametgweb.gameplay.combat.CombatEngine;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat.CombatEngine;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.UnitEntity;
 import org.springframework.stereotype.Service;

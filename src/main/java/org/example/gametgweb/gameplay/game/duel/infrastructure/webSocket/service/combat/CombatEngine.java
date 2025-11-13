@@ -1,4 +1,4 @@
-package org.example.gametgweb.gameplay.combat;
+package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
@@ -19,7 +19,7 @@ public class CombatEngine {
      */
     public String performAttack(UnitEntity attacker, UnitEntity defender, Body target) {
         if (attacker == null || defender == null)
-            throw new IllegalArgumentException("Attacker и defender не могут быть null");
+            throw new IllegalArgumentException("Attacker или defender не могут быть null");
 
         long damage = calculateDamage(attacker, defender, target);
         defender.takeDamage(target, damage);
