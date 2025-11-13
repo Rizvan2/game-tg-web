@@ -1,12 +1,16 @@
 package org.example.gametgweb.gameplay.game.duel.domain.model;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.GameUnit;
+import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 
 /**
  * Доменная модель юнита — отражает игровую логику, а не структуру таблицы.
  */
 @Getter
-public class Unit {
+@Slf4j
+public class Unit implements GameUnit {
 
     private final long id;
     private final String name;
@@ -25,9 +29,21 @@ public class Unit {
     }
 
     /** Нанесение урона */
-    public void takeDamage(long damage) {
-        if (damage < 0) throw new IllegalArgumentException("Damage cannot be negative");
-        this.health = Math.max(0, this.health - damage);
+    @Override
+    public void takeDamage(Body bodyPart, long damage) {
+        if (bodyPart == null) {
+            throw new IllegalArgumentException("Часть тела не может быть null");
+        }
+
+        // Рассчитываем фактический урон с модификатором
+        long actualDamage = Math.round(damage * bodyPart.getDamageMultiplier());
+
+        // Применяем урон
+        this.health = Math.max(this.health - actualDamage, 0);
+
+        // Можно добавить лог/сообщение
+        log.info("%s получает %d урона в %s (x%.2f)%n",
+                name, actualDamage, bodyPart.name(), bodyPart.getDamageMultiplier());
     }
 
     /** Лечение */

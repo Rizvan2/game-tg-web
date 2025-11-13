@@ -1,6 +1,7 @@
 package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.gametgweb.gameplay.game.duel.domain.model.Unit;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.UnitEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
@@ -39,7 +40,7 @@ public class RoomSessionRegistry {
      * Игровые юниты игроков, сгруппированные по коду комнаты.
      * Key — gameCode, Value — Map с ключом playerName и значением UnitEntity.
      */
-    private final ConcurrentHashMap<String, Map<String, UnitEntity>> gameUnits = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, Map<String, Unit>> gameUnits = new ConcurrentHashMap<>();
 
     // ============================================================
     // =============== Работа с WebSocket-сессиями =================
@@ -159,11 +160,11 @@ public class RoomSessionRegistry {
      *
      * @param gameCode   код комнаты
      * @param playerName имя игрока
-     * @param unitEntity       игровой юнит
+     * @param unit     игровой юнит
      */
-    public void registerUnit(String gameCode, String playerName, UnitEntity unitEntity) {
-        gameUnits.computeIfAbsent(gameCode, k -> new ConcurrentHashMap<>()).put(playerName, unitEntity);
-        log.info("Юнит {} (имя юнита {}) добавлен в комнату {}", playerName, unitEntity.getName(), gameCode);
+    public void registerUnit(String gameCode, String playerName, Unit unit) {
+        gameUnits.computeIfAbsent(gameCode, k -> new ConcurrentHashMap<>()).put(playerName, unit);
+        log.info("Юнит {} (имя юнита {}) добавлен в комнату {}", playerName, unit.getName(), gameCode);
     }
 
     /**
@@ -173,8 +174,8 @@ public class RoomSessionRegistry {
      * @param playerName имя игрока
      * @return юнит игрока или null, если не найден
      */
-    public UnitEntity getUnit(String gameCode, String playerName) {
-        UnitEntity unit = gameUnits.getOrDefault(gameCode, new ConcurrentHashMap<>()).get(playerName);
+    public Unit getUnit(String gameCode, String playerName) {
+        Unit unit = gameUnits.getOrDefault(gameCode, new ConcurrentHashMap<>()).get(playerName);
         log.info("getUnit: {} в комнате {} -> {}", playerName, gameCode, unit != null ? "найден" : "не найден");
         return unit;
     }

@@ -5,11 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gametgweb.gameplay.game.campaign.infrastructure.persistence.entity.CampaignEntity;
+import org.example.gametgweb.gameplay.game.duel.domain.model.Unit;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.mapper.UnitMapper;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.UnitEntity;
 import org.example.gametgweb.gameplay.game.campaign.infrastructure.persistence.repository.CampaignService;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.CombatService;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat.CombatService;
 import org.example.gametgweb.gameplay.game.duel.application.services.PlayerService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.*;
@@ -147,8 +149,12 @@ public class CampaignWebSocketHandler extends TextWebSocketHandler {
 
         Body body = parseBody(node.has("body") ? node.get("body").asText() : "BODY");
 
-        UnitEntity attacker = isPlayerTurn ? campaignEntity.getPlayerUnitEntity() : campaignEntity.getEnemyUnitEntity();
-        UnitEntity defender = isPlayerTurn ? campaignEntity.getEnemyUnitEntity() : campaignEntity.getPlayerUnitEntity();
+        Unit attacker = isPlayerTurn ?
+                UnitMapper.toDomain(campaignEntity.getPlayerUnitEntity()) :
+                UnitMapper.toDomain(campaignEntity.getEnemyUnitEntity());
+        Unit defender = isPlayerTurn ?
+                UnitMapper.toDomain(campaignEntity.getEnemyUnitEntity()) :
+                UnitMapper.toDomain(campaignEntity.getPlayerUnitEntity());
 
         String message = combatService.attack(attacker, defender, body);
 

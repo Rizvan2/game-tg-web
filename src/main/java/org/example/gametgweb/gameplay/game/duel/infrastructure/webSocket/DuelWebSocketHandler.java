@@ -3,9 +3,10 @@ package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.MessageDispatcherService;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.DuelCombatService;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.DuelRoomService;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat.DuelCombatService;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat.DuelRoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -33,12 +34,14 @@ public class DuelWebSocketHandler extends TextWebSocketHandler {
 
     private final DuelRoomService duelRoomService;
     private final DuelCombatService duelCombatService;
+    private final MessageDispatcherService messageDispatcherService;
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
-    public DuelWebSocketHandler(DuelRoomService duelRoomService, DuelCombatService duelCombatService) {
+    public DuelWebSocketHandler(DuelRoomService duelRoomService, DuelCombatService duelCombatService, MessageDispatcherService messageDispatcherService) {
         this.duelRoomService = duelRoomService;
         this.duelCombatService = duelCombatService;
+        this.messageDispatcherService = messageDispatcherService;
     }
 
     /**
@@ -101,7 +104,7 @@ public class DuelWebSocketHandler extends TextWebSocketHandler {
         switch (type) {
             case "chat" -> {
                 String text = payload.has("message") ? payload.get("message").asText() : "";
-                duelRoomService.broadcastChat(ctx, text);
+                messageDispatcherService.broadcastChat(ctx.gameCode(),ctx.playerName(), text);
             }
             case "attack" -> handleAttack(ctx, payload);
         }
@@ -153,10 +156,10 @@ public class DuelWebSocketHandler extends TextWebSocketHandler {
         String resultJson = duelCombatService.processAttack(gameCode, player, body);
 
         if (resultJson != null) {
-            duelRoomService.broadcast(gameCode, resultJson); // оба игрока выбрали — отправляем результат боя
+            messageDispatcherService.broadcastChat(gameCode,player, resultJson); // оба игрока выбрали — отправляем результат боя
         } else {
             var info = Map.of("type", "info", "message", "Move registered. Waiting for opponent...");
-            duelRoomService.sendToPlayer(gameCode, player, mapper.writeValueAsString(info));
+            messageDispatcherService.sendToPlayer(gameCode, player, mapper.writeValueAsString(info));
         }
     }
 
@@ -177,7 +180,7 @@ public class DuelWebSocketHandler extends TextWebSocketHandler {
      */
     private void sendError(String gameCode, String player, String message) throws IOException {
         var err = Map.of("type", "error", "message", message);
-        duelRoomService.sendToPlayer(gameCode, player, mapper.writeValueAsString(err));
+        messageDispatcherService.sendToPlayer(gameCode, player, mapper.writeValueAsString(err));
     }
 
     /**

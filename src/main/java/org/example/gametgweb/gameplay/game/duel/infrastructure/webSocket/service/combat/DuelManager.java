@@ -1,9 +1,7 @@
-package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service;
+package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat;
 
 import org.example.gametgweb.gameplay.game.duel.domain.model.GameSession;
-import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
 import org.example.gametgweb.gameplay.game.duel.domain.repository.GameSessionRepositoryImpl;
-import org.example.gametgweb.gameplay.game.duel.domain.repository.PlayerRepositoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

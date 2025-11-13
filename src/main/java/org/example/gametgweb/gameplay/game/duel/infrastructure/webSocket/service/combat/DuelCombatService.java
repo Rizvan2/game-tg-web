@@ -1,6 +1,7 @@
-package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service;
+package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.gametgweb.gameplay.game.duel.domain.model.Unit;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.DuelTurnManager;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.RoomSessionRegistry;
@@ -72,8 +73,8 @@ public class DuelCombatService {
 
         // если оба игрока нажали "Атаковать" → считаем раунд
         if (turn.isReady()) {
-            UnitEntity unitEntity1 = roomSessionRegistry.getUnit(gameCode, turn.getPlayer1());
-            UnitEntity unitEntity2 = roomSessionRegistry.getUnit(gameCode, turn.getPlayer2());
+            Unit unitEntity1 = roomSessionRegistry.getUnit(gameCode, turn.getPlayer1());
+            Unit unitEntity2 = roomSessionRegistry.getUnit(gameCode, turn.getPlayer2());
 
             var result = combatService.duelRound(unitEntity1, turn.getBody1(), unitEntity2, turn.getBody2());
 
