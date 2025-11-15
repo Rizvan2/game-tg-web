@@ -131,6 +131,7 @@ public class RoomSessionRegistry {
         return sessions != null ? new HashSet<>(sessions) : new HashSet<>();
     }
 
+
     /**
      * Безопасно удаляет сессию и очищает комнату, если она пуста.
      *
@@ -164,7 +165,7 @@ public class RoomSessionRegistry {
      */
     public void registerUnit(String gameCode, String playerName, Unit unit) {
         gameUnits.computeIfAbsent(gameCode, k -> new ConcurrentHashMap<>()).put(playerName, unit);
-        log.info("Юнит {} (имя юнита {}) добавлен в комнату {}", playerName, unit.getName(), gameCode);
+        log.info("Юнит игрока {} (имя юнита {}) добавлен в комнату {}", playerName, unit.getName(), gameCode);
     }
 
     /**

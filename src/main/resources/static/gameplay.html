@@ -52,8 +52,12 @@
     const params = new URLSearchParams(window.location.search);
     const gameCode = params.get('gameCode') || params.get('id');
 
-    // Используем только имя из параметров, fallback на случай отсутствия
-    const playerName = params.get('player') || "Player" + Math.floor(Math.random() * 1000);
+    // ✔️ Имя игрока и при первом входе, и при ручном вводе
+    const playerName = params.get('player')
+        || localStorage.getItem('playerName')
+        || `Player${Math.floor(Math.random() * 1000)}`;
+
+    localStorage.setItem('playerName', playerName);
 
     const wsProtocol = location.protocol === 'https:' ? 'wss' : 'ws';
     const wsUrl = `${wsProtocol}://${location.host}/ws/duel?gameCode=${encodeURIComponent(gameCode)}`;
@@ -70,14 +74,14 @@
     }
 
     function send(data) {
-        if(socket && socket.readyState === WebSocket.OPEN){
+        if (socket && socket.readyState === WebSocket.OPEN) {
             socket.send(JSON.stringify(data));
         } else {
             log("❌ Соединение не установлено");
         }
     }
 
-    // 🎯 Создаём кнопки выбора частей тела
+    // 🎯 Кнопки атаки
     const hitParts = ['HEAD','CHEST','LEFT_ARM','RIGHT_ARM','LEFT_LEG','RIGHT_LEG'];
     hitParts.forEach(part => {
         const btn = document.createElement('button');
@@ -95,12 +99,12 @@
     attackBtn.textContent = "⚔️ Атаковать";
     attackBtn.classList.add('action-btn');
     attackBtn.onclick = () => {
-        if(!selectedBody){
+        if (!selectedBody) {
             log("❗ Сначала выберите часть тела!");
             return;
         }
         attackBtn.disabled = true;
-        send({type:'attack', body:selectedBody});
+        send({ type: 'attack', body: selectedBody });
         log(`🕒 Отправлена атака по: ${selectedBody}. Ждём соперника...`);
     };
     attackSection.appendChild(document.createElement('br'));
@@ -111,40 +115,74 @@
 
     socket.onopen = () => {
         log(`✅ Подключено к комнате "${gameCode}" как ${playerName}`);
-        // Передаём серверу имя игрока сразу после подключения
-        send({type:'join', playerName: playerName});
+        send({ type: 'join', playerName });
     };
 
     socket.onmessage = (event) => {
+        let msg;
         try {
-            const msg = JSON.parse(event.data);
-
-            if(msg.type === 'info') log(`ℹ️ ${msg.message}`);
-            else if(msg.type === 'error'){
-                log(`❌ Ошибка: ${msg.message}`);
-                attackBtn.disabled = false;
-            }
-            else if(msg.type === 'bothSelected') log(`⏳ Оба игрока выбрали цели, идёт расчёт атаки...`);
-            else if(msg.turnMessages){
-                log(`💥 Результат раунда:`);
-                msg.turnMessages.forEach(m => log(`→ ${m}`));
-                log(`❤️ HP Игрока A: ${msg.attackerHp}, HP Игрока B: ${msg.defenderHp}`);
-                attackBtn.disabled = false;
-                selectedBody = null;
-            }
-            else log(`📨 Неизвестное сообщение: ${event.data}`);
-
-        } catch(e){
-            log(`⚠️ Ошибка парсинга: ${event.data}`);
-            attackBtn.disabled = false;
+            msg = JSON.parse(event.data);
+        } catch {
+            log(`⚠️ Ошибка парсинга (сырое): ${event.data}`);
+            return;
         }
+
+        // 🟦 JOIN — приветствие
+        if (msg.type === 'join') {
+            log(`👤 ${msg.message}`);
+            return;
+        }
+
+        // 🟦 INFO
+        if (msg.type === 'info') {
+            log(`ℹ️ ${msg.message}`);
+            return;
+        }
+
+        // 🟦 ERROR
+        if (msg.type === 'error') {
+            log(`❌ Ошибка: ${msg.message}`);
+            attackBtn.disabled = false;
+            return;
+        }
+
+        // 🟦 BOTH SELECTED
+        if (msg.type === 'bothSelected') {
+            log(`⏳ Оба игрока выбрали цели, идёт расчёт атаки...`);
+            return;
+        }
+
+        if (msg.type === 'chat') {
+            let inner;
+            try {
+                // Пытаемся парсить только если message выглядит как JSON
+                if (typeof msg.message === "string" && msg.message.trim().startsWith("{")) {
+                    inner = JSON.parse(msg.message);
+                }
+            } catch {
+                inner = null;
+            }
+
+            if (inner && inner.turnMessages) {
+                log("💥 Результат раунда:");
+                inner.turnMessages.forEach(m => log(`→ ${m}`));
+                log(`❤️ HP A: ${inner.attackerHp}, HP B: ${inner.defenderHp}`);
+            } else {
+                log(`💬 ${msg.playerName}: ${msg.message}`);
+            }
+
+            attackBtn.disabled = false;
+            selectedBody = null;
+            return;
+        }
+
+        // 🟦 Если ничего не подошло
+        log(`📨 Неизвестное сообщение: ${event.data}`);
     };
 
     socket.onclose = () => log("🔒 Соединение закрыто");
-    socket.onerror = (e) => log("⚠️ Ошибка соединения: " + e.message);
+    socket.onerror  = (e) => log("⚠️ Ошибка соединения: " + e.message);
 </script>
-
-
 
 </body>
 </html>

@@ -1,52 +1,108 @@
 package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 /**
- * MessageFormatter — компонент для формирования текстовых сообщений о событиях
- * входа и выхода игроков в комнаты WebSocket.
- * <p>
- * Используется для централизованного форматирования сообщений, чтобы избежать дублирования строк в коде.
+ * {@code MessageFormatter} — сервис сериализации сообщений WebSocket в корректный JSON.
+ *
+ * <p>Назначение:
+ * <ul>
+ *     <li>формировать стандартизированные JSON-сообщения для разных WebSocket-событий;</li>
+ *     <li>гарантировать корректную сериализацию любых строк, включая вложенные JSON через Jackson;</li>
+ *     <li>исключить ручную сборку JSON и ошибки парсинга на фронтенде.</li>
+ * </ul>
+ *
+ * <p>Общий формат возвращаемых сообщений:
+ *
+ * <pre>
+ * {
+ *   "type": "join" | "leave" | "chat",
+ *   "playerName": "<имя игрока>",
+ *   "gameCode": "<код комнаты>",      // есть не везде
+ *   "message": "<человеко-читаемый текст>"
+ * }
+ * </pre>
+ *
+ * <p>Все методы возвращают JSON-строку, полностью готовую к отправке через WebSocket.
  */
 @Component
 public class MessageFormatter {
 
+    private final ObjectMapper mapper;
+
     /**
-     * Формирует сообщение о подключении игрока к комнате.
+     * Создаёт форматтер сообщений, используя общий ObjectMapper приложения.
      *
-     * @param playerName имя игрока, может быть {@code null}
-     * @param gameCode   код комнаты
-     * @return текстовое сообщение вида "{playerName} подключился к комнате {gameCode}!"
+     * @param mapper настроенный Spring'ом {@link ObjectMapper}
+     */
+    @Autowired
+    public MessageFormatter(ObjectMapper mapper) {
+        this.mapper = mapper;
+    }
+
+    /**
+     * Формирует JSON-сообщение о присоединении игрока к комнате.
+     *
+     * @param playerName имя подключившегося игрока
+     * @param gameCode   код игровой комнаты
+     * @return JSON-строка с полями: type="join", playerName, gameCode, message
      */
     public String joinMessage(String playerName, String gameCode) {
-        String name = playerName != null ? playerName : "Игрок";
-        return name + " подключился к комнате " + gameCode + "!";
+        try {
+            return mapper.writeValueAsString(Map.of(
+                    "type", "join",
+                    "playerName", playerName,
+                    "gameCode", gameCode,
+                    "message", playerName + " подключился к комнате " + gameCode + "!"
+            ));
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка сериализации joinMessage", e);
+        }
     }
 
     /**
-     * Формирует сообщение о выходе игрока из комнаты.
+     * Формирует JSON-сообщение о выходе игрока из игровой комнаты.
      *
-     * @param playerName имя игрока, может быть {@code null}
-     * @param gameCode   код комнаты
-     * @return текстовое сообщение вида "{playerName} вышел из комнаты {gameCode}!"
+     * @param playerName имя вышедшего игрока
+     * @param gameCode   код игровой комнаты
+     * @return JSON-строка с полями: type="leave", playerName, gameCode, message
      */
     public String leaveMessage(String playerName, String gameCode) {
-        String name = playerName != null ? playerName : "Игрок";
-        return name + " вышел из комнаты " + gameCode + "!";
+        try {
+            return mapper.writeValueAsString(Map.of(
+                    "type", "leave",
+                    "playerName", playerName,
+                    "gameCode", gameCode,
+                    "message", playerName + " вышел из комнаты " + gameCode + "!"
+            ));
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка сериализации leaveMessage", e);
+        }
     }
 
     /**
-     * Формирует сообщение чата для отправки всем игрокам комнаты.
+     * Формирует JSON-сообщение чата.
+     *
+     * <p>Используется как для внутренних игровых сообщений,
+     * так и для пользовательского текста.
      *
      * @param playerName имя игрока, отправившего сообщение
-     * @param message    текст сообщения
-     * @return текстовое сообщение вида "[playerName]: message"
+     * @param message    текстовое содержимое сообщения
+     * @return JSON-строка с полями: type="chat", playerName, message
      */
     public String chatMessage(String playerName, String message) {
-        String name = playerName != null ? playerName : "Игрок";
-        String text = message != null ? message : "";
-        return "[" + name + "]: " + text;
+        try {
+            return mapper.writeValueAsString(Map.of(
+                    "type", "chat",
+                    "playerName", playerName,
+                    "message", message
+            ));
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка сериализации chatMessage", e);
+        }
     }
 }
-
-
