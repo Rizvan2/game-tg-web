@@ -2,7 +2,7 @@ package org.example.gametgweb.gameplay.game.campaign.infrastructure.persistence.
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.UnitEntity;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.UnitEntity;
 
 /**
  * Сущность, представляющая кампанию (сюжетный бой) игрока.

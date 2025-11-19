@@ -2,130 +2,10 @@
 <html lang="en">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" charset="UTF-8">
+  <link rel="stylesheet" href="css/index.css">
 
   <title>Duel Page</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #1f1c2c, #928dab);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      color: #fff;
-      overflow: hidden;
-      padding: 20px;
-      box-sizing: border-box;
-    }
 
-    h1 {
-      margin-bottom: 40px;
-      font-size: 3em;
-      text-shadow: 2px 2px 8px #000;
-      animation: glow 1.5s infinite alternate;
-      text-align: center;
-    }
-
-    @keyframes glow {
-      0% { text-shadow: 2px 2px 8px #000; }
-      100% { text-shadow: 2px 2px 20px #6c63ff; }
-    }
-
-    label {
-      font-size: 1.2em;
-      margin-bottom: 10px;
-      display: block;
-      text-align: center;
-    }
-
-    input[type="text"] {
-      padding: 12px 15px;
-      width: 250px;
-      font-size: 1em;
-      border: 2px solid #ccc;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      transition: all 0.3s;
-      background: rgba(255,255,255,0.1);
-      color: #fff;
-    }
-
-    input[type="text"]:focus {
-      border-color: #6c63ff;
-      box-shadow: 0 0 10px #6c63ff;
-      outline: none;
-      transform: scale(1.05);
-    }
-
-    button {
-      padding: 12px 25px;
-      font-size: 1.1em;
-      border: none;
-      border-radius: 12px;
-      background-color: #6c63ff;
-      color: white;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      animation: pulse 2s infinite;
-    }
-
-    button:hover {
-      background-color: #5848c2;
-      transform: translateY(-3px) scale(1.05);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
-    }
-
-    @keyframes pulse {
-      0% { box-shadow: 0 0 10px rgba(108,99,255,0.5); }
-      50% { box-shadow: 0 0 25px rgba(108,99,255,0.8); }
-      100% { box-shadow: 0 0 10px rgba(108,99,255,0.5); }
-    }
-
-    #status {
-      margin-top: 20px;
-      font-weight: bold;
-      min-height: 24px;
-      text-align: center;
-    }
-
-    @keyframes moveBg {
-      0% { transform: rotate(0deg) translate(0,0); }
-      100% { transform: rotate(360deg) translate(0,0); }
-    }
-
-    /* Адаптивность для мобильных */
-    @media (max-width: 500px) {
-
-
-      h1 {
-        font-size: 2em;
-      }
-
-      button {
-        font-size: 1em;
-      }
-    }
-
-    /* Адаптивность для мобильных */
-    @media (max-width: 500px) {
-      h1 {
-        font-size: 2em; /* меньше шрифт */
-      }
-
-
-
-      #logoutBtn,
-      #backBtn {
-        font-size: 0.9em;
-        padding: 4px 8px; /* уменьшаем размеры */
-      }
-    }
-
-
-  </style>
 </head>
 <body>
 <form id="logoutForm" action="/logout" method="post" style="position: fixed; top: 20px; right: 20px;">
@@ -138,11 +18,15 @@
 <input type="text" id="roomId" placeholder="123">
 <button id="duelBtn">Начать дуэль</button>
 <button id="campaignBtn" style="margin-top: 15px;">Начать кампанию</button>
+<!-- Новая кнопка выбора персонажа -->
+<button id="selectCharacterBtn" style="margin-top: 15px;">Выбрать персонажа</button>
 <p id="status"></p>
 
 <script>
   const duelBtn = document.getElementById('duelBtn');
   const campaignBtn = document.getElementById('campaignBtn');
+  const selectCharacterBtn = document.getElementById('selectCharacterBtn'); // новая кнопка
+
   const status = document.getElementById('status');
 
   // --- Дуэль ---
@@ -187,6 +71,10 @@
     } catch (e) {
       status.textContent = 'Ошибка: ' + e.message;
     }
+  });
+  // --- Новая кнопка "Выбрать персонажа" ---
+  selectCharacterBtn.addEventListener('click', () => {
+    window.location.href = "character-selection.html"; // путь к твоей странице выбора
   });
 </script>
 

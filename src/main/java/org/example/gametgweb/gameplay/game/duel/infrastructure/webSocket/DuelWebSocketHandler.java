@@ -3,9 +3,10 @@ package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.MessageDispatcherService;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.DuelCombatService;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.DuelRoomService;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat.DuelCombatService;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat.DuelRoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -14,6 +15,7 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * {@code DuelWebSocketHandler} — обработчик WebSocket-соединений для комнат дуэлей.
@@ -32,12 +34,14 @@ public class DuelWebSocketHandler extends TextWebSocketHandler {
 
     private final DuelRoomService duelRoomService;
     private final DuelCombatService duelCombatService;
+    private final MessageDispatcherService messageDispatcherService;
     private final ObjectMapper mapper = new ObjectMapper();
 
     @Autowired
-    public DuelWebSocketHandler(DuelRoomService duelRoomService, DuelCombatService duelCombatService) {
+    public DuelWebSocketHandler(DuelRoomService duelRoomService, DuelCombatService duelCombatService, MessageDispatcherService messageDispatcherService) {
         this.duelRoomService = duelRoomService;
         this.duelCombatService = duelCombatService;
+        this.messageDispatcherService = messageDispatcherService;
     }
 
     /**
@@ -100,39 +104,83 @@ public class DuelWebSocketHandler extends TextWebSocketHandler {
         switch (type) {
             case "chat" -> {
                 String text = payload.has("message") ? payload.get("message").asText() : "";
-                duelRoomService.broadcastChat(ctx, text);
+                messageDispatcherService.broadcastChat(ctx.gameCode(),ctx.playerName(), text);
             }
             case "attack" -> handleAttack(ctx, payload);
         }
     }
 
     /**
-     * Обрабатывает атаку игрока.
-     * <p>
-     * Извлекает часть тела из JSON и вызывает {@link DuelCombatService#processAttack}.
-     * Если ход готов (оба игрока сделали выбор), результат дуэли рассылается всем игрокам через
-     * {@link DuelRoomService#broadcast}.
-     *
-     * @param ctx     контекст игрока с именем и кодом комнаты
-     * @param payload JSON-сообщение с полем "body"
-     * @throws Exception при ошибке обработки боя
+     * Обрабатывает действие "атака" от игрока.
+     * 1. Валидирует полученный JSON.
+     * 2. Преобразует строку в enum Body.
+     * 3. Передает данные в сервис дуэли.
+     * 4. Возвращает результат или сообщение "ожидания соперника".
      */
-    private void handleAttack(WebSocketContext ctx, JsonNode payload) throws Exception {
+    private void handleAttack(WebSocketContext ctx, JsonNode payload) {
         String gameCode = ctx.gameCode();
         String player = ctx.playerName();
-        Body body;
 
         try {
-            body = Body.valueOf(payload.get("body").asText().toUpperCase());
+            Body body = extractBody(payload, gameCode, player);
+            if (body == null) return;
+
+            processAttackAndRespond(gameCode, player, body);
         } catch (Exception e) {
-            duelRoomService.sendToPlayer(gameCode, player, "Неверная часть тела");
-            return;
+            handleServerError(gameCode, player, e);
+        }
+    }
+
+    /**
+     * Извлекает и валидирует выбранную часть тела из JSON.
+     * Отправляет сообщение об ошибке, если структура неверна.
+     */
+    private Body extractBody(JsonNode payload, String gameCode, String player) throws IOException {
+        if (payload == null || !payload.hasNonNull("body")) {
+            sendError(gameCode, player, "Missing 'body' in attack payload");
+            return null;
         }
 
-        String result = duelCombatService.processAttack(gameCode, player, body);
-        if (result != null) {
-            duelRoomService.broadcast(gameCode, result);
+        try {
+            return Body.valueOf(payload.get("body").asText().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            sendError(gameCode, player, "Invalid body: " + payload.get("body").asText());
+            return null;
         }
+    }
+
+    /**
+     * Вызывает доменный сервис дуэли и реагирует на его результат.
+     */
+    private void processAttackAndRespond(String gameCode, String player, Body body) throws Exception {
+        String resultJson = duelCombatService.processAttack(gameCode, player, body);
+
+        if (resultJson != null) {
+            messageDispatcherService.broadcastChat(gameCode,player, resultJson); // оба игрока выбрали — отправляем результат боя
+        } else {
+            var info = Map.of("type", "info", "message", "Move registered. Waiting for opponent...");
+            messageDispatcherService.sendToPlayer(gameCode, player, mapper.writeValueAsString(info));
+        }
+    }
+
+    /**
+     * Обрабатывает серверные исключения.
+     */
+    private void handleServerError(String gameCode, String player, Exception e) {
+        log.error("Error processing attack", e);
+        try {
+            sendError(gameCode, player, "Server error during attack processing");
+        } catch (IOException ex) {
+            log.error("Failed to send error message to player", ex);
+        }
+    }
+
+    /**
+     * Универсальная отправка сообщения об ошибке игроку.
+     */
+    private void sendError(String gameCode, String player, String message) throws IOException {
+        var err = Map.of("type", "error", "message", message);
+        messageDispatcherService.sendToPlayer(gameCode, player, mapper.writeValueAsString(err));
     }
 
     /**

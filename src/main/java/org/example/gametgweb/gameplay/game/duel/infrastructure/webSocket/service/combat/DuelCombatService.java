@@ -1,12 +1,15 @@
-package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service;
+package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.gametgweb.characterSelection.domain.model.Unit;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.DuelTurnManager;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.RoomSessionRegistry;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.UnitEntity;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.UnitEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 /**
  * DuelCombatService — сервис обработки логики боя между двумя игроками в дуэли.
@@ -56,14 +59,31 @@ public class DuelCombatService {
     public String processAttack(String gameCode, String player, Body body) throws Exception {
         var turn = turnManager.addMove(gameCode, player, body);
 
+        // игрок нажал "Атаковать"
+        turn.setReady(player);
+
+        // уведомление о том, что оба игрока сделали выбор
+        if (turn.isReady() && !turn.isBothSelectedNotified()) {
+            turn.setBothSelectedNotified(true);
+            roomSessionRegistry.broadcast(
+                    gameCode,
+                    new ObjectMapper().writeValueAsString(Map.of("type", "bothSelected"))
+            );
+        }
+
+        // если оба игрока нажали "Атаковать" → считаем раунд
         if (turn.isReady()) {
-            UnitEntity unitEntity1 = roomSessionRegistry.getUnit(gameCode, turn.getPlayer1());
-            UnitEntity unitEntity2 = roomSessionRegistry.getUnit(gameCode, turn.getPlayer2());
+            Unit unitEntity1 = roomSessionRegistry.getUnit(gameCode, turn.getPlayer1());
+            Unit unitEntity2 = roomSessionRegistry.getUnit(gameCode, turn.getPlayer2());
 
             var result = combatService.duelRound(unitEntity1, turn.getBody1(), unitEntity2, turn.getBody2());
+
+            // очищаем ход после раунда
             turnManager.removeTurn(gameCode);
+
             return new ObjectMapper().writeValueAsString(result);
         }
-        return null;
+
+        return null; // ждём второго игрока
     }
 }

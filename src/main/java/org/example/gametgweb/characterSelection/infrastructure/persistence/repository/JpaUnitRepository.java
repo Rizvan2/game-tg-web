@@ -1,6 +1,6 @@
-package org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.repository;
+package org.example.gametgweb.characterSelection.infrastructure.persistence.repository;
 
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.UnitEntity;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.UnitEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,7 +1,7 @@
 package org.example.gametgweb.gameplay.game.duel.application.controllers;
 
 import org.example.gametgweb.gameplay.game.duel.shared.PlayerDetails;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.DuelManager;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat.DuelManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

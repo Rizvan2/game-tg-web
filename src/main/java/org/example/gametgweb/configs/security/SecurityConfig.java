@@ -47,8 +47,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/register.html", "/login.html").permitAll() // разрешаем GET на страницы
-                        .requestMatchers("/register").permitAll() // разрешаем POST для регистрации
+                        .requestMatchers("/register.html", "/login.html").permitAll() // страницы
+                        .requestMatchers("/register").permitAll() // POST регистрация
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll() // статика
                         .anyRequest().authenticated()
                 )
 

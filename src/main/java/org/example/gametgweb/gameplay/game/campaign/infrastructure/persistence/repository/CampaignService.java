@@ -1,11 +1,13 @@
 package org.example.gametgweb.gameplay.game.campaign.infrastructure.persistence.repository;
 
 import lombok.RequiredArgsConstructor;
-import org.example.gametgweb.gameplay.game.campaign.infrastructure.persistence.entity.CampaignEntity;
+import org.example.gametgweb.characterSelection.domain.model.Unit;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.UnitEntity;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.mapper.UnitMapper;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.repository.JpaUnitRepository;
 import org.example.gametgweb.gameplay.game.campaign.domain.repository.CampaignRepository;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.UnitEntity;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.repository.JpaUnitRepository;
+import org.example.gametgweb.gameplay.game.campaign.infrastructure.persistence.entity.CampaignEntity;
+import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
 import org.springframework.stereotype.Service;
 
 /**
@@ -22,10 +24,10 @@ public class CampaignService {
      * @param player игрок начавший компанию
      * @return Компания с игроком и его противником
      */
-    public CampaignEntity startCampaign(PlayerEntity player, String enemyUnitName) {
+    public CampaignEntity startCampaign(Player player, String enemyUnitName) {
         // Создаём кампанию с юнитами
         CampaignEntity campaignEntity = CampaignEntity.builder()
-                .playerUnitEntity(getPlayerUnit(player))
+                .playerUnitEntity(UnitMapper.toEntity(getPlayerUnit(player)))
                 .enemyUnitEntity(getEnemyUnit(enemyUnitName))
                 .build();
 
@@ -42,8 +44,8 @@ public class CampaignService {
      * @return Юнит переданного игрока
      * @throws IllegalStateException если у игрока нету выбранного юнита
      */
-    private UnitEntity getPlayerUnit(PlayerEntity player) {
-        UnitEntity playerUnitEntity = player.getActiveUnitEntity();
+    private Unit getPlayerUnit(Player player) {
+        Unit playerUnitEntity = player.getActiveUnit();
         if (playerUnitEntity == null) {
             throw new IllegalStateException("У игрока не выбран активный юнит");
         }

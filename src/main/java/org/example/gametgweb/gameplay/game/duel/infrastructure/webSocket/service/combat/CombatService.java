@@ -1,9 +1,8 @@
-package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service;
+package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat;
 
 import lombok.RequiredArgsConstructor;
-import org.example.gametgweb.gameplay.combat.CombatEngine;
+import org.example.gametgweb.characterSelection.domain.model.Unit;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.UnitEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -14,7 +13,7 @@ public class CombatService {
 
     private final CombatEngine engine;
 
-    public String attack(UnitEntity attacker, UnitEntity defender, Body body) {
+    public String attack(Unit attacker, Unit defender, Body body) {
         return engine.performAttack(attacker, defender, body);
     }
 
@@ -28,7 +27,7 @@ public class CombatService {
      * @param bodyD часть тела, выбранная вторым игроком для атаки
      * @return карта с описанием боя и текущим здоровьем
      */
-    public Map<String, Object> duelRound(UnitEntity attacker, Body bodyA, UnitEntity defender, Body bodyD) {
+    public Map<String, Object> duelRound(Unit attacker, Body bodyA, Unit defender, Body bodyD) {
         // 1️⃣ Атака первого на второго
         String msg1 = engine.performAttack(attacker, defender, bodyA);
 

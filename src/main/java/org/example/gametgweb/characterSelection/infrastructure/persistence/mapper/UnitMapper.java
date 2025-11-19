@@ -1,7 +1,7 @@
-package org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.mapper;
+package org.example.gametgweb.characterSelection.infrastructure.persistence.mapper;
 
-import org.example.gametgweb.gameplay.game.duel.domain.model.Unit;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.UnitEntity;
+import org.example.gametgweb.characterSelection.domain.model.Unit;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.UnitEntity;
 
 public class UnitMapper {
     /**

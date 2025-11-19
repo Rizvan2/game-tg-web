@@ -3,7 +3,7 @@ package org.example.gametgweb.gameplay.game.duel.domain.repository;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.mapper.PlayerMapper;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.mapper.UnitMapper;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.mapper.UnitMapper;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.repository.JpaPlayerRepository;
 import org.springframework.stereotype.Repository;
 
@@ -35,7 +35,7 @@ public class PlayerRepositoryImpl implements PlayerRepository {
     @Override
     public Optional<Player> findById(Long id) {
         return jpaRepository.findById(id)
-                .map(PlayerMapper::mapPlayerToDomain);
+                .map(PlayerMapper::toDomain);
     }
 
     /**
@@ -58,7 +58,7 @@ public class PlayerRepositoryImpl implements PlayerRepository {
         }
 
         PlayerEntity saved = jpaRepository.save(existing);
-        return PlayerMapper.mapPlayerToDomain(saved);
+        return PlayerMapper.toDomain(saved);
     }
 
     /**
@@ -82,7 +82,7 @@ public class PlayerRepositoryImpl implements PlayerRepository {
     public Player updatePlayer(Player player) {
         PlayerEntity entity = PlayerMapper.mapPlayerToEntity(player, null, jpaRepository);
         PlayerEntity updated = jpaRepository.save(entity);
-        return PlayerMapper.mapPlayerToDomain(updated);
+        return PlayerMapper.toDomain(updated);
     }
 
     /**
@@ -109,7 +109,7 @@ public class PlayerRepositoryImpl implements PlayerRepository {
     public Player findByUsername(String username) {
         PlayerEntity entity = jpaRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("Игрок не найден: " + username));
-        return PlayerMapper.mapPlayerToDomain(entity);
+        return PlayerMapper.toDomain(entity);
     }
 
     /**
@@ -119,7 +119,7 @@ public class PlayerRepositoryImpl implements PlayerRepository {
      */
     public List<Player> findAll() {
         return jpaRepository.findAll().stream()
-                .map(PlayerMapper::mapPlayerToDomain)
+                .map(PlayerMapper::toDomain)
                 .collect(Collectors.toList());
     }
 }

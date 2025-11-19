@@ -29,7 +29,7 @@ public class GameSessionMapper {
 
         List<Player> players = entity.getPlayers() != null
                 ? entity.getPlayers().stream()
-                .map(PlayerMapper::mapPlayerToDomain)
+                .map(PlayerMapper::toDomain)
                 .collect(Collectors.toList())
                 : List.of();
 

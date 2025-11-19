@@ -1,11 +1,9 @@
 package org.example.gametgweb.services;
 
 import org.example.gametgweb.gameplay.game.duel.domain.model.GameSession;
-import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
 import org.example.gametgweb.gameplay.game.duel.domain.repository.GameSessionRepositoryImpl;
 import org.example.gametgweb.gameplay.game.duel.domain.repository.PlayerRepositoryImpl;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.DuelManager;
-import org.example.gametgweb.gameplay.game.duel.shared.domain.GameState;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat.DuelManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

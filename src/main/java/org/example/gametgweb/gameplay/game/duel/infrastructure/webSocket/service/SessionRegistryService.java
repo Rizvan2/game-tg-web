@@ -1,0 +1,27 @@
+package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service;
+
+import lombok.extern.slf4j.Slf4j;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.RoomSessionRegistry;
+import org.springframework.stereotype.Service;
+import org.springframework.web.socket.WebSocketSession;
+
+@Service
+@Slf4j
+public class SessionRegistryService {
+
+    private final RoomSessionRegistry registry;
+
+    public SessionRegistryService(RoomSessionRegistry registry) {
+        this.registry = registry;
+    }
+
+    public void addSession(String gameCode, WebSocketSession session) {
+        registry.addSession(gameCode, session);
+        log.info("Сессия добавлена для комнаты {}", gameCode);
+    }
+
+    public void removeSession(String gameCode, WebSocketSession session) {
+        registry.removeSession(gameCode, session);
+        log.info("Сессия удалена из комнаты {}", gameCode);
+    }
+}

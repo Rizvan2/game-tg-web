@@ -15,65 +15,33 @@ import java.util.Map;
  * <p>Используется {@link DuelTurnManager} для управления ходами по каждой игровой комнате.
  */
 public class DuelTurn {
-
-    /** Ходы игроков: ключ — имя игрока, значение — выбранная часть тела. */
     private final Map<String, Body> moves = new HashMap<>();
+    private final Map<String, Boolean> readyFlags = new HashMap<>(); // игрок нажал "Атаковать"
+    private boolean bothSelectedNotified = false;
 
-    /**
-     * Добавляет ход игрока.
-     * <p>Если игрок уже сделал выбор, он перезаписывается.
-     *
-     * @param player имя игрока
-     * @param body   выбранная часть тела
-     */
     public void addMove(String player, Body body) {
         moves.put(player, body);
     }
 
-    /**
-     * Проверяет, завершили ли оба игрока свои ходы.
-     *
-     * @return {@code true}, если сделано два хода, иначе {@code false}
-     */
+    public void setReady(String player) {
+        readyFlags.put(player, true);
+    }
+
     public boolean isReady() {
-        return moves.size() == 2;
+        return moves.size() == 2 && readyFlags.size() == 2;
     }
 
-    /**
-     * Возвращает имя первого игрока, сделавшего ход.
-     * <p>Порядок извлечения берется из ключей {@link HashMap}.
-     *
-     * @return имя первого игрока
-     */
-    public String getPlayer1() {
-        return new ArrayList<>(moves.keySet()).get(0);
+    public boolean isBothSelectedNotified() {
+        return bothSelectedNotified;
     }
 
-    /**
-     * Возвращает имя второго игрока, сделавшего ход.
-     * <p>Порядок извлечения берется из ключей {@link HashMap}.
-     *
-     * @return имя второго игрока
-     */
-    public String getPlayer2() {
-        return new ArrayList<>(moves.keySet()).get(1);
+    public void setBothSelectedNotified(boolean val) {
+        this.bothSelectedNotified = val;
     }
 
-    /**
-     * Возвращает выбор (часть тела) первого игрока.
-     *
-     * @return выбранная часть тела первого игрока
-     */
-    public Body getBody1() {
-        return moves.get(getPlayer1());
-    }
-
-    /**
-     * Возвращает выбор (часть тела) второго игрока.
-     *
-     * @return выбранная часть тела второго игрока
-     */
-    public Body getBody2() {
-        return moves.get(getPlayer2());
-    }
+    public String getPlayer1() { return new ArrayList<>(moves.keySet()).get(0); }
+    public String getPlayer2() { return new ArrayList<>(moves.keySet()).get(1); }
+    public Body getBody1() { return moves.get(getPlayer1()); }
+    public Body getBody2() { return moves.get(getPlayer2()); }
 }
+
