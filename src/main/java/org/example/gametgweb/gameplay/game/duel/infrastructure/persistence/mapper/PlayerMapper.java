@@ -1,7 +1,8 @@
 package org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.mapper;
 
+import org.example.gametgweb.characterSelection.infrastructure.persistence.mapper.UnitMapper;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
-import org.example.gametgweb.gameplay.game.duel.domain.model.Unit;
+import org.example.gametgweb.characterSelection.domain.model.Unit;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.GameSessionEntity;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.repository.JpaPlayerRepository;

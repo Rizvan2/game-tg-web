@@ -1,11 +1,11 @@
 package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.gametgweb.gameplay.game.duel.domain.model.Unit;
+import org.example.gametgweb.characterSelection.domain.model.Unit;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.DuelTurnManager;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.RoomSessionRegistry;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.UnitEntity;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.UnitEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

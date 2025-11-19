@@ -2,6 +2,7 @@ package org.example.gametgweb.gameplay.game.duel.domain.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.example.gametgweb.characterSelection.domain.model.Unit;
 
 import java.util.Objects;
 

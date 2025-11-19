@@ -1,8 +1,8 @@
-package org.example.gametgweb.gameplay.game.duel.domain.model;
+package org.example.gametgweb.characterSelection.domain.model;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.GameUnit;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.GameUnit;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 
 /**

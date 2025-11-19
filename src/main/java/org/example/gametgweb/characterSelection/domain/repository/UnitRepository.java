@@ -1,6 +1,6 @@
-package org.example.gametgweb.gameplay.game.duel.domain.repository;
+package org.example.gametgweb.characterSelection.domain.repository;
 
-import org.example.gametgweb.gameplay.game.duel.domain.model.Unit;
+import org.example.gametgweb.characterSelection.domain.model.Unit;
 
 import java.util.List;
 import java.util.Optional;

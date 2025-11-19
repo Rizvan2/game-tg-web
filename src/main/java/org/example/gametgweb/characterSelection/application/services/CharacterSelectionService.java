@@ -1,10 +1,10 @@
-package org.example.gametgweb.characterSelection.services;
+package org.example.gametgweb.characterSelection.application.services;
 
-import org.example.gametgweb.characterSelection.dto.SelectUnitRequest;
+import org.example.gametgweb.characterSelection.api.dto.SelectUnitRequest;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
-import org.example.gametgweb.gameplay.game.duel.domain.model.Unit;
+import org.example.gametgweb.characterSelection.domain.model.Unit;
 import org.example.gametgweb.gameplay.game.duel.domain.repository.PlayerRepositoryImpl;
-import org.example.gametgweb.gameplay.game.duel.domain.repository.UnitRepositoryImpl;
+import org.example.gametgweb.characterSelection.domain.repository.UnitRepositoryImpl;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.mapper.PlayerMapper;
 import org.example.gametgweb.gameplay.game.duel.shared.PlayerDetails;
 import org.springframework.beans.factory.annotation.Autowired;

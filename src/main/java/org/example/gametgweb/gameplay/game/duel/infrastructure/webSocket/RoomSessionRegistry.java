@@ -1,8 +1,7 @@
 package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.gametgweb.gameplay.game.duel.domain.model.Unit;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.UnitEntity;
+import org.example.gametgweb.characterSelection.domain.model.Unit;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;

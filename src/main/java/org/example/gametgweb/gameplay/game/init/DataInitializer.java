@@ -2,9 +2,9 @@ package org.example.gametgweb.gameplay.game.init;
 
 import jakarta.transaction.Transactional;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.UnitEntity;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.UnitEntity;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.repository.JpaPlayerRepository;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.repository.JpaUnitRepository;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.repository.JpaUnitRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

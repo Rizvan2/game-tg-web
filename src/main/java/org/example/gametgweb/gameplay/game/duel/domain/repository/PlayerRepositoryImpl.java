@@ -3,7 +3,7 @@ package org.example.gametgweb.gameplay.game.duel.domain.repository;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.mapper.PlayerMapper;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.mapper.UnitMapper;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.mapper.UnitMapper;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.repository.JpaPlayerRepository;
 import org.springframework.stereotype.Repository;
 

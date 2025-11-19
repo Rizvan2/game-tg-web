@@ -2,9 +2,10 @@ package org.example.gametgweb.gameplay.game.campaign.application.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.example.gametgweb.gameplay.game.campaign.infrastructure.persistence.entity.CampaignEntity;
-import org.example.gametgweb.gameplay.game.duel.shared.PlayerDetails;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
 import org.example.gametgweb.gameplay.game.campaign.infrastructure.persistence.repository.CampaignService;
+import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
+import org.example.gametgweb.gameplay.game.duel.domain.repository.PlayerRepositoryImpl;
+import org.example.gametgweb.gameplay.game.duel.shared.PlayerDetails;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,6 +26,7 @@ public class CampaignController {
 
     /** Сервис для управления кампаниями и созданием боёв. */
     private final CampaignService campaignService;
+    private final PlayerRepositoryImpl playerRepository;
 
     /**
      * Запускает новую кампанию для текущего игрока.
@@ -45,8 +47,12 @@ public class CampaignController {
                     .body("Ошибка аутентификации: игрок не найден");
         }
 
-        PlayerEntity player = playerDetails.playerEntity();
+        // Загружаем свежую сущность из БД
+        Player player = playerRepository.findById(playerDetails.playerEntity().getId())
+                .orElseThrow(() -> new IllegalStateException("Игрок не найден"));
+
         CampaignEntity campaignEntity = campaignService.startCampaign(player, "Turk Warrior");
         return ResponseEntity.ok("Бой начат против: " + campaignEntity.getEnemyUnitEntity().getName());
     }
+
 }

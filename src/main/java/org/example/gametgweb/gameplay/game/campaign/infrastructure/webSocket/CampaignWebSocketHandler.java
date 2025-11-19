@@ -4,17 +4,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.gametgweb.characterSelection.domain.model.Unit;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.mapper.UnitMapper;
 import org.example.gametgweb.gameplay.game.campaign.infrastructure.persistence.entity.CampaignEntity;
-import org.example.gametgweb.gameplay.game.duel.domain.model.Unit;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.mapper.UnitMapper;
-import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.UnitEntity;
 import org.example.gametgweb.gameplay.game.campaign.infrastructure.persistence.repository.CampaignService;
+import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
+import org.example.gametgweb.gameplay.game.duel.domain.repository.PlayerRepositoryImpl;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat.CombatService;
-import org.example.gametgweb.gameplay.game.duel.application.services.PlayerService;
+import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.*;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
@@ -35,7 +36,7 @@ public class CampaignWebSocketHandler extends TextWebSocketHandler {
     private final ObjectMapper mapper = new ObjectMapper();
     private final CampaignService campaignService;
     private final CampaignSessionRegistry registry;
-    private final PlayerService playerService;
+    private final PlayerRepositoryImpl playerService;
     private final CombatService combatService;
 
     /**
@@ -113,7 +114,7 @@ public class CampaignWebSocketHandler extends TextWebSocketHandler {
             return;
         }
 
-        PlayerEntity playerEntity = playerService.findByUsername(playerName);
+        Player playerEntity = playerService.findByUsername(playerName);
         CampaignEntity campaignEntity = campaignService.startCampaign(playerEntity, "Turk Warrior");
         registry.putCampaign(playerName, campaignEntity);
         registry.addSession(playerName, session);

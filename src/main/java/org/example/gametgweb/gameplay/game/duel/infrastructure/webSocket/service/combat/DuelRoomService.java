@@ -2,13 +2,13 @@ package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.servic
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
-import org.example.gametgweb.gameplay.game.duel.domain.model.Unit;
+import org.example.gametgweb.characterSelection.domain.model.Unit;
 import org.example.gametgweb.gameplay.game.duel.domain.repository.PlayerRepositoryImpl;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.JoinLeaveScheduler;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.WebSocketContext;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.PlayerLifecycleService;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.SessionRegistryService;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.UnitRegistryService;
+import org.example.gametgweb.characterSelection.infrastructure.webSocket.UnitRegistryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;

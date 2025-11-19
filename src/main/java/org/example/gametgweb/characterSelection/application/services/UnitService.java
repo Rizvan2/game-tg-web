@@ -1,7 +1,7 @@
-package org.example.gametgweb.gameplay.game.duel.application.services;
+package org.example.gametgweb.characterSelection.application.services;
 
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.UnitEntity;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.repository.JpaUnitRepository;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.UnitEntity;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.repository.JpaUnitRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -1,4 +1,4 @@
-package org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity;
+package org.example.gametgweb.characterSelection.infrastructure.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

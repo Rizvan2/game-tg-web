@@ -3,6 +3,7 @@ package org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.enti
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.UnitEntity;
 
 /**
  * Упрощённая JPA Entity для игрока в игре.
