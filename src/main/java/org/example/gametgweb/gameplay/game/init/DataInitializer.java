@@ -33,6 +33,20 @@ public class DataInitializer {
                         .damage(8L)
                         .imagePath("/images/Goblin.png")
                         .build());
+                jpaUnitRepository.save(UnitEntity.builder()
+                        .name("Elf")
+                        .maxHealth(120L)
+                        .health(120L)
+                        .damage(12L)
+                        .imagePath("/images/Elf.png")
+                        .build());
+                jpaUnitRepository.save(UnitEntity.builder()
+                        .name("Monk")
+                        .maxHealth(100L)
+                        .health(100L)
+                        .damage(8L)
+                        .imagePath("/images/Monk.png")
+                        .build());
             }
         };
     }
