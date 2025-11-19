@@ -15,7 +15,7 @@ public class PlayerMapper {
      * @param pe JPA-сущность игрока
      * @return доменная модель {@link Player}
      */
-    public static Player mapPlayerToDomain(PlayerEntity pe) {
+    public static Player toDomain(PlayerEntity pe) {
         Unit activeUnit = pe.getActiveUnitEntity() != null
                 ? UnitMapper.toDomain(pe.getActiveUnitEntity())
                 : null;

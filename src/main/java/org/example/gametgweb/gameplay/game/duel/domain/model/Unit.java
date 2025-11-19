@@ -34,6 +34,9 @@ public class Unit implements GameUnit {
         if (bodyPart == null) {
             throw new IllegalArgumentException("Часть тела не может быть null");
         }
+        if (damage < 0) {
+            throw new IllegalArgumentException("Урон не может быть отрицательным");
+        }
 
         // Рассчитываем фактический урон с модификатором
         long actualDamage = Math.round(damage * bodyPart.getDamageMultiplier());
@@ -41,8 +44,7 @@ public class Unit implements GameUnit {
         // Применяем урон
         this.health = Math.max(this.health - actualDamage, 0);
 
-        // Можно добавить лог/сообщение
-        log.info("%s получает %d урона в %s (x%.2f)%n",
+        log.info("{} получает {} урона в {} (x{})",
                 name, actualDamage, bodyPart.name(), bodyPart.getDamageMultiplier());
     }
 
