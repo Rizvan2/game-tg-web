@@ -6,6 +6,8 @@ import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.RoomSes
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 @Slf4j
 @Service
 public class UnitRegistryService {
@@ -65,4 +67,9 @@ public class UnitRegistryService {
         registry.getUnit(gameCode, playerName); // для будущей логики, например очистка
         log.info("Юнит {} удален из комнаты {}", playerName, gameCode);
     }
+
+    public Map<String, Unit> getUnits(String gameCode) {
+        return registry.getGameUnits().getOrDefault(gameCode, Map.of());
+    }
+
 }

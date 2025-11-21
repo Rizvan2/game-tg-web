@@ -4,6 +4,10 @@ import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.Message
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.RoomSessionRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+
+import java.io.IOException;
 
 @Component
 public class MessageDispatcherService {
@@ -33,4 +37,13 @@ public class MessageDispatcherService {
     public void sendToPlayer(String gameCode, String playerName, String message) {
         registry.sendToPlayer(gameCode, playerName, message);
     }
+    public void send(WebSocketSession session, Object payload) {
+        String message = formatter.format(payload);
+        try {
+            session.sendMessage(new TextMessage(message));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

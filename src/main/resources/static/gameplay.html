@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Duel Test</title>
+    <title>Duel Test Fixed</title>
     <style>
         body {
             font-family: sans-serif;
@@ -29,41 +29,101 @@
             color: #666;
             cursor: not-allowed;
         }
-        #log {
-            width: 80%;
-            margin: 20px auto;
-            background: #1b1b1b;
-            border-radius: 8px;
-            padding: 10px;
-            min-height: 150px;
-            text-align: left;
-            font-size: 14px;
-            overflow-y: auto;
+        .battle-container {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 900px;
+            position: relative;
+            margin-bottom: 20px;
         }
+
+        .unitEntity {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .unitEntity img {
+            width: 150px;
+            height: 150px;
+            border: 2px solid #fff;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .health-bar {
+            width: 150px;
+            height: 20px;
+            background: #555;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .health-bar-inner {
+            height: 100%;
+            background: #ff4b5c;
+            width: 100%;
+            transition: width 0.3s ease-in-out;
+        }
+
+        .hit-zone {
+            position: absolute;
+            border-radius: 50%;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        .hit-zone.selected {
+            outline: 2px solid #6c63ff;
+            opacity: 1;
+        }
+
+        #log {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 900px;
+            min-height: 60px;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            font-size: 1em;
+        }
+
     </style>
 </head>
 <body>
 
 <h2>⚔️ Duel Test Client</h2>
+
+<div class="battle-container">
+    <div class="unitEntity" id="player1">
+        <img id="player1Img" src="" alt="Player 1">
+        <div class="health-bar"><div class="health-bar-inner" id="player1Health"></div></div>
+        <div id="player1Name">Плеер 1</div>
+    </div>
+    <div class="unitEntity" id="player2">
+        <img id="player2Img" src="" alt="Player 2">
+        <div class="health-bar"><div class="health-bar-inner" id="player2Health"></div></div>
+        <div id="player2Name">Плеер 2</div>
+    </div>
+</div>
+
 <div id="attackSection"></div>
 <div id="log"></div>
 
 <script>
     const params = new URLSearchParams(window.location.search);
     const gameCode = params.get('gameCode') || params.get('id');
-
-    // ✔️ Имя игрока и при первом входе, и при ручном вводе
-    const playerName = params.get('player')
-        || localStorage.getItem('playerName')
-        || `Player${Math.floor(Math.random() * 1000)}`;
-
+    const playerName = params.get('player') || localStorage.getItem('playerName') || `Player${Math.floor(Math.random()*1000)}`;
     localStorage.setItem('playerName', playerName);
 
     const wsProtocol = location.protocol === 'https:' ? 'wss' : 'ws';
-    const wsUrl = `${wsProtocol}://${location.host}/ws/duel?gameCode=${encodeURIComponent(gameCode)}`;
+    const ws = new WebSocket(`${wsProtocol}://${location.host}/ws/duel?gameCode=${encodeURIComponent(gameCode)}`);
 
-    let selectedBody = null;
-    let socket;
+    let selectedBody = 'CHEST';
     const logEl = document.getElementById("log");
     const attackSection = document.getElementById("attackSection");
 
@@ -73,23 +133,14 @@
         logEl.scrollTop = logEl.scrollHeight;
     }
 
-    function send(data) {
-        if (socket && socket.readyState === WebSocket.OPEN) {
-            socket.send(JSON.stringify(data));
-        } else {
-            log("❌ Соединение не установлено");
-        }
-    }
-
     // 🎯 Кнопки атаки
-    const hitParts = ['HEAD','CHEST','LEFT_ARM','RIGHT_ARM','LEFT_LEG','RIGHT_LEG'];
-    hitParts.forEach(part => {
+    ['HEAD','CHEST','LEFT_ARM','RIGHT_ARM','LEFT_LEG','RIGHT_LEG'].forEach(part => {
         const btn = document.createElement('button');
         btn.textContent = part.replace('_',' ');
         btn.classList.add('action-btn');
         btn.onclick = () => {
             selectedBody = part;
-            log(`🎯 Вы выбрали: ${part}`);
+            log(`🎯 Вы выбрали: ${selectedBody}`);
         };
         attackSection.appendChild(btn);
     });
@@ -99,89 +150,69 @@
     attackBtn.textContent = "⚔️ Атаковать";
     attackBtn.classList.add('action-btn');
     attackBtn.onclick = () => {
-        if (!selectedBody) {
-            log("❗ Сначала выберите часть тела!");
-            return;
-        }
+        if (!selectedBody) { log("❗ Сначала выберите часть тела!"); return; }
         attackBtn.disabled = true;
-        send({ type: 'attack', body: selectedBody });
+        ws.send(JSON.stringify({ type: 'attack', body: selectedBody }));
         log(`🕒 Отправлена атака по: ${selectedBody}. Ждём соперника...`);
     };
     attackSection.appendChild(document.createElement('br'));
     attackSection.appendChild(attackBtn);
 
-    // 🔌 WebSocket
-    socket = new WebSocket(wsUrl);
-
-    socket.onopen = () => {
+    // WebSocket
+    ws.onopen = () => {
         log(`✅ Подключено к комнате "${gameCode}" как ${playerName}`);
-        send({ type: 'join', playerName });
+        ws.send(JSON.stringify({ type: 'join', playerName }));
     };
 
-    socket.onmessage = (event) => {
-        let msg;
-        try {
-            msg = JSON.parse(event.data);
-        } catch {
-            log(`⚠️ Ошибка парсинга (сырое): ${event.data}`);
-            return;
+    let maxHp = { player1: 100, player2: 100 }; // дефолт
+
+    ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+
+        // JOIN / INFO / ERROR
+        if(msg.type==='join') { log(`👤 ${msg.message}`); return; }
+        if(msg.type==='info') { log(`ℹ️ ${msg.message}`); return; }
+        if(msg.type==='error') { log(`❌ ${msg.message}`); attackBtn.disabled=false; return; }
+        if(msg.type==='bothSelected') { log("⏳ Оба игрока выбрали цели, идёт расчёт атаки..."); return; }
+
+        // UNITS_STATE
+        if (msg.type === 'UNITS_STATE') {
+            const u1 = msg.units[0];
+            const u2 = msg.units[1];
+
+            const myUnit = u1.player === playerName ? u1 : u2;
+            const enemyUnit = u1.player === playerName ? u2 : u1;
+
+            // Обновляем мои данные
+            document.getElementById('player1Img').src = myUnit.imagePath;
+            document.getElementById('player1Name').textContent = myUnit.player;
+            document.getElementById('player1Health').style.width =
+                (myUnit.hp / myUnit.hpMax * 100) + '%';
+
+            // Обновляем врага
+            document.getElementById('player2Img').src = enemyUnit.imagePath;
+            document.getElementById('player2Name').textContent = enemyUnit.player;
+            document.getElementById('player2Health').style.width =
+                (enemyUnit.hp / enemyUnit.hpMax * 100) + '%';
         }
 
-        // 🟦 JOIN — приветствие
-        if (msg.type === 'join') {
-            log(`👤 ${msg.message}`);
-            return;
-        }
 
-        // 🟦 INFO
-        if (msg.type === 'info') {
-            log(`ℹ️ ${msg.message}`);
-            return;
-        }
-
-        // 🟦 ERROR
-        if (msg.type === 'error') {
-            log(`❌ Ошибка: ${msg.message}`);
-            attackBtn.disabled = false;
-            return;
-        }
-
-        // 🟦 BOTH SELECTED
-        if (msg.type === 'bothSelected') {
-            log(`⏳ Оба игрока выбрали цели, идёт расчёт атаки...`);
-            return;
-        }
-
-        if (msg.type === 'chat') {
-            let inner;
-            try {
-                // Пытаемся парсить только если message выглядит как JSON
-                if (typeof msg.message === "string" && msg.message.trim().startsWith("{")) {
-                    inner = JSON.parse(msg.message);
-                }
-            } catch {
-                inner = null;
-            }
-
-            if (inner && inner.turnMessages) {
+        // CHAT / TURN RESULTS
+        if(msg.type==='chat'){
+            let inner=null;
+            try { inner=JSON.parse(msg.message); } catch{}
+            if(inner && inner.turnMessages){
                 log("💥 Результат раунда:");
-                inner.turnMessages.forEach(m => log(`→ ${m}`));
-                log(`❤️ HP A: ${inner.attackerHp}, HP B: ${inner.defenderHp}`);
-            } else {
-                log(`💬 ${msg.playerName}: ${msg.message}`);
-            }
-
-            attackBtn.disabled = false;
-            selectedBody = null;
-            return;
+                inner.turnMessages.forEach(m=>log(`→ ${m}`));
+                log(`❤️ HP Плеер 1: ${inner.attackerHp}, Плеер 2: ${inner.defenderHp}`);
+            } else log(`💬 ${msg.playerName}: ${msg.message}`);
+            attackBtn.disabled=false;
+            selectedBody=null;
         }
-
-        // 🟦 Если ничего не подошло
-        log(`📨 Неизвестное сообщение: ${event.data}`);
     };
 
-    socket.onclose = () => log("🔒 Соединение закрыто");
-    socket.onerror  = (e) => log("⚠️ Ошибка соединения: " + e.message);
+    ws.onclose = () => log("🔒 Соединение закрыто");
+    ws.onerror = (e) => log("⚠️ Ошибка соединения: " + e.message);
 </script>
 
 </body>

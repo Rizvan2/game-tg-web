@@ -3,10 +3,11 @@ package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.example.gametgweb.characterSelection.domain.model.Unit;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.MessageDispatcherService;
-import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat.DuelCombatService;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat.DuelRoomService;
+import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -15,6 +16,9 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -156,12 +160,54 @@ public class DuelWebSocketHandler extends TextWebSocketHandler {
         String resultJson = duelCombatService.processAttack(gameCode, player, body);
 
         if (resultJson != null) {
-            messageDispatcherService.broadcastChat(gameCode,player, resultJson); // оба игрока выбрали — отправляем результат боя
+            broadcastRoundResult(gameCode, player, resultJson);
+            broadcastUnitsState(gameCode);
         } else {
-            var info = Map.of("type", "info", "message", "Move registered. Waiting for opponent...");
-            messageDispatcherService.sendToPlayer(gameCode, player, mapper.writeValueAsString(info));
+            sendWaitingMessage(gameCode, player);
         }
     }
+
+    /** Отправляет результат раунда в чат */
+    private void broadcastRoundResult(String gameCode, String player, String resultJson) throws Exception {
+        messageDispatcherService.broadcastChat(gameCode, player, resultJson);
+    }
+
+    /** Формирует UNITS_STATE и отправляет всем игрокам */
+    private void broadcastUnitsState(String gameCode) throws Exception {
+        Map<String, Object> unitsState = new HashMap<>();
+        unitsState.put("type", "UNITS_STATE");
+
+        List<Map<String, Object>> units = new ArrayList<>();
+        for (String playerName : duelRoomService.getPlayerOrder(gameCode)) {
+            Unit unit = duelRoomService.getUnit(gameCode, playerName);
+            if (unit != null) {
+                units.add(Map.of(
+                        "playerId", unit.getId(),
+                        "player", playerName,
+                        "hp", unit.getHealth(),
+                        "hpMax", unit.getMaxHealth(),
+                        "imagePath", unit.getImagePath()
+                ));
+            }
+        }
+
+        unitsState.put("units", units);
+
+        // 🔥 отправляем как системное сообщение, НЕ как чат
+        for (WebSocketSession session : duelRoomService.getSessions(gameCode)) {
+            messageDispatcherService.send(session, unitsState);
+        }
+    }
+
+
+
+    /** Сообщение игроку, что ход зарегистрирован и ждём соперника */
+    private void sendWaitingMessage(String gameCode, String player) throws Exception {
+        var info = Map.of("type", "info", "message", "Move registered. Waiting for opponent...");
+        messageDispatcherService.sendToPlayer(gameCode, player, new ObjectMapper().writeValueAsString(info));
+    }
+
+
 
     /**
      * Обрабатывает серверные исключения.

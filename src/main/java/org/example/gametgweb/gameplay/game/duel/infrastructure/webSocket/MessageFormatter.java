@@ -105,4 +105,13 @@ public class MessageFormatter {
             throw new RuntimeException("Ошибка сериализации chatMessage", e);
         }
     }
+
+    public String format(Object payload) {
+        try {
+            return mapper.writeValueAsString(payload);
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка сериализации payload", e);
+        }
+    }
+
 }
