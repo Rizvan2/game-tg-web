@@ -1,5 +1,6 @@
 package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gametgweb.characterSelection.domain.model.Unit;
 import org.springframework.stereotype.Component;
@@ -39,6 +40,7 @@ public class RoomSessionRegistry {
      * Игровые юниты игроков, сгруппированные по коду комнаты.
      * Key — gameCode, Value — Map с ключом playerName и значением UnitEntity.
      */
+    @Getter
     private final ConcurrentHashMap<String, Map<String, Unit>> gameUnits = new ConcurrentHashMap<>();
 
     // ============================================================
@@ -179,5 +181,4 @@ public class RoomSessionRegistry {
         log.info("getUnit: {} в комнате {} -> {}", playerName, gameCode, unit != null ? "найден" : "не найден");
         return unit;
     }
-
 }
