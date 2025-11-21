@@ -41,17 +41,13 @@ public class CombatEngine {
     private long calculateDamage(Unit attacker, Unit defender, Body target) {
         long baseDamage = attacker.getDamage();
 
-        // Пример: шанс критического удара 10%
+        // Критический удар 10%
         if (Math.random() < 0.1) {
             log.debug("💥 Критический удар по {}", target);
-            return (long) (baseDamage * 1.5);
+            return (long) (baseDamage * target.getDamageMultiplier() * 1.5);
         }
 
-        // Пример: броня головы снижает урон
-        if (target == Body.HEAD) {
-            return (long) (baseDamage * 0.8);
-        }
-
-        return baseDamage;
+        // Используем множитель части тела
+        return (long) (baseDamage * target.getDamageMultiplier());
     }
 }
