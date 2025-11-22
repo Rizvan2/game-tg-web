@@ -1,0 +1,121 @@
+/* Основные настройки страницы:
+   тёмная тема, центрирование контента, базовая типографика */
+body {
+    font-family: sans-serif;
+    background: #111;
+    color: #eee;
+    text-align: center;
+    padding: 20px;
+}
+
+/* Кнопки действий игрока */
+.action-btn {
+    margin: 5px;
+    padding: 10px 15px;
+    background: #333;
+    border: none;
+    border-radius: 6px;
+    color: #eee;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+/* Ховер-эффект по кнопке */
+.action-btn:hover:not(:disabled) {
+    background: #555;
+}
+
+/* Заблокированная кнопка */
+.action-btn:disabled {
+    background: #222;
+    color: #666;
+    cursor: not-allowed;
+}
+
+/* Контейнер для двух юнитов — расставляет их по сторонам */
+.battle-container {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 900px;
+    position: relative;
+    margin-bottom: 20px;
+}
+
+/* Общий блок юнита с картинкой, полоской HP и зонами для удара */
+.unitEntity {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+/* Аватар юнита */
+.unitEntity img {
+    width: 150px;
+    height: 150px;
+    border: 2px solid #fff;
+    border-radius: 12px;
+    margin-bottom: 10px;
+}
+
+/* Контейнер полоски здоровья */
+.health-bar {
+    width: 150px;
+    height: 20px;
+    background: #555;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+/* Внутренняя часть полоски здоровья (динамичная ширина) */
+.health-bar-inner {
+    height: 100%;
+    background: #ff4b5c;
+    width: 100%;
+    transition: width 0.3s ease-in-out;
+}
+
+/* Зоны попадания */
+.hit-zone {
+    position: absolute;
+    border-radius: 50%; /* идеальный круг */
+    cursor: pointer;
+    background: rgba(255,0,0,0.2);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+/* Активная зона */
+.hit-zone.selected {
+    background: rgba(255,0,0,0.6);
+    box-shadow: 0 0 15px 5px rgba(255,0,0,0.7), 0 0 30px 10px rgba(255,255,255,0.5);
+    animation: spark 0.5s ease-in-out infinite alternate;
+}
+
+/* Искры */
+@keyframes spark {
+    0% { box-shadow: 0 0 15px 5px rgba(255,0,0,0.7), 0 0 30px 10px rgba(255,255,255,0.5); }
+    100% { box-shadow: 0 0 25px 10px rgba(255,0,0,0.9), 0 0 40px 15px rgba(255,255,255,0.7); }
+}
+
+
+
+/* Выделенная активная зона атаки */
+.hit-zone.selected {
+    outline: 2px solid #6c63ff;
+    opacity: 1;
+}
+
+/* Поле логов событий боя */
+#log {
+    margin-top: 20px;
+    width: 100%;
+    max-width: 900px;
+    min-height: 60px;
+    padding: 10px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+    font-size: 1em;
+}

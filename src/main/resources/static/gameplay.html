@@ -3,100 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>Duel Test Fixed</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            background: #111;
-            color: #eee;
-            text-align: center;
-            padding: 20px;
-        }
-        .action-btn {
-            margin: 5px;
-            padding: 10px 15px;
-            background: #333;
-            border: none;
-            border-radius: 6px;
-            color: #eee;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .action-btn:hover:not(:disabled) {
-            background: #555;
-        }
-        .action-btn:disabled {
-            background: #222;
-            color: #666;
-            cursor: not-allowed;
-        }
-        .battle-container {
-            display: flex;
-            justify-content: space-around;
-            width: 100%;
-            max-width: 900px;
-            position: relative;
-            margin-bottom: 20px;
-        }
+    <link rel="stylesheet" href="css/duel-battle.css">
 
-        .unitEntity {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-        }
-
-        .unitEntity img {
-            width: 150px;
-            height: 150px;
-            border: 2px solid #fff;
-            border-radius: 12px;
-            margin-bottom: 10px;
-        }
-
-        .health-bar {
-            width: 150px;
-            height: 20px;
-            background: #555;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-
-        .health-bar-inner {
-            height: 100%;
-            background: #ff4b5c;
-            width: 100%;
-            transition: width 0.3s ease-in-out;
-        }
-
-        .hit-zone {
-            position: absolute;
-            border-radius: 50%;
-            cursor: pointer;
-            opacity: 0.7;
-        }
-
-        .hit-zone.selected {
-            outline: 2px solid #6c63ff;
-            opacity: 1;
-        }
-
-        #log {
-            margin-top: 20px;
-            width: 100%;
-            max-width: 900px;
-            min-height: 60px;
-            padding: 10px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 10px;
-            font-size: 1em;
-        }
-
-    </style>
 </head>
 <body>
 
-<h2>⚔️ Duel Test Client</h2>
 
 <div class="battle-container">
     <div class="unitEntity" id="player1">
@@ -111,7 +22,30 @@
     </div>
 </div>
 
-<div id="attackSection"></div>
+<!-- Нижний большой бар с картинкой для выбора атак -->
+<div id="attackSection" style="width: 100%; background: #111; padding: 10px 0; display: flex; justify-content: center; margin-bottom: 10px;">
+    <div class="unitEntity" style="position: relative; width: 112px; height: 300px;"> <!-- уже и длиннее -->
+        <img id="attackBody" src="images/body.png" class="body-img" alt="Выбор атаки"
+             style="width: 100%; height: 100%; object-fit: cover; display: block;"> <!-- растянуть на весь блок -->
+
+        <!-- Зоны попадания на теле -->
+        <div class="hit-zone" data-part="HEAD" style="top:3px; left:42px; width:22px; height:30px;"></div>
+        <div class="hit-zone" data-part="CHEST" style="top:15%; left:37%; width:25%; height:22%;"></div>
+        <div class="hit-zone" data-part="LEFT_ARM" style="top:25%; left:6%; width:15%; height:20%;"></div>
+        <div class="hit-zone" data-part="RIGHT_ARM" style="top:25%; left:79%; width:15%; height:20%;"></div>
+        <div class="hit-zone" data-part="LEFT_LEG" style="top:55%; left:28%; width:18%; height:22%;"></div>
+        <div class="hit-zone" data-part="RIGHT_LEG" style="top:55%; left:54%; width:18%; height:22%;"></div>
+
+
+
+
+        <!-- Кнопка атаки под картинкой -->
+        <button id="attackBtn" class="action-btn" style="margin-top: 15px; width: 100%; padding: 15px;">⚔️ Атаковать</button>
+    </div>
+
+</div>
+
+
 <div id="log"></div>
 
 <script>
@@ -123,9 +57,8 @@
     const wsProtocol = location.protocol === 'https:' ? 'wss' : 'ws';
     const ws = new WebSocket(`${wsProtocol}://${location.host}/ws/duel?gameCode=${encodeURIComponent(gameCode)}`);
 
-    let selectedBody = 'CHEST';
+    let selectedBody = null;
     const logEl = document.getElementById("log");
-    const attackSection = document.getElementById("attackSection");
 
     function log(msg) {
         const time = new Date().toLocaleTimeString();
@@ -133,49 +66,40 @@
         logEl.scrollTop = logEl.scrollHeight;
     }
 
-    // 🎯 Кнопки атаки
-    ['HEAD','CHEST','LEFT_ARM','RIGHT_ARM','LEFT_LEG','RIGHT_LEG'].forEach(part => {
-        const btn = document.createElement('button');
-        btn.textContent = part.replace('_',' ');
-        btn.classList.add('action-btn');
-        btn.onclick = () => {
-            selectedBody = part;
+    // 🎯 Выбор части тела через картинку
+    document.querySelectorAll('.hit-zone').forEach(zone => {
+        zone.addEventListener('click', () => {
+            document.querySelectorAll('.hit-zone').forEach(z => z.classList.remove('selected'));
+            zone.classList.add('selected');
+            selectedBody = zone.dataset.part;
             log(`🎯 Вы выбрали: ${selectedBody}`);
-        };
-        attackSection.appendChild(btn);
+        });
     });
 
+
     // ⚔️ Кнопка атаки
-    const attackBtn = document.createElement('button');
-    attackBtn.textContent = "⚔️ Атаковать";
-    attackBtn.classList.add('action-btn');
+    const attackBtn = document.getElementById('attackBtn');
     attackBtn.onclick = () => {
         if (!selectedBody) { log("❗ Сначала выберите часть тела!"); return; }
         attackBtn.disabled = true;
         ws.send(JSON.stringify({ type: 'attack', body: selectedBody }));
         log(`🕒 Отправлена атака по: ${selectedBody}. Ждём соперника...`);
     };
-    attackSection.appendChild(document.createElement('br'));
-    attackSection.appendChild(attackBtn);
 
-    // WebSocket
+    // WebSocket события
     ws.onopen = () => {
         log(`✅ Подключено к комнате "${gameCode}" как ${playerName}`);
         ws.send(JSON.stringify({ type: 'join', playerName }));
     };
 
-    let maxHp = { player1: 100, player2: 100 }; // дефолт
-
     ws.onmessage = (event) => {
         const msg = JSON.parse(event.data);
 
-        // JOIN / INFO / ERROR
         if(msg.type==='join') { log(`👤 ${msg.message}`); return; }
         if(msg.type==='info') { log(`ℹ️ ${msg.message}`); return; }
         if(msg.type==='error') { log(`❌ ${msg.message}`); attackBtn.disabled=false; return; }
         if(msg.type==='bothSelected') { log("⏳ Оба игрока выбрали цели, идёт расчёт атаки..."); return; }
 
-        // UNITS_STATE
         if (msg.type === 'UNITS_STATE') {
             const u1 = msg.units[0];
             const u2 = msg.units[1];
@@ -183,21 +107,15 @@
             const myUnit = u1.player === playerName ? u1 : u2;
             const enemyUnit = u1.player === playerName ? u2 : u1;
 
-            // Обновляем мои данные
             document.getElementById('player1Img').src = myUnit.imagePath;
             document.getElementById('player1Name').textContent = myUnit.player;
-            document.getElementById('player1Health').style.width =
-                (myUnit.hp / myUnit.hpMax * 100) + '%';
+            document.getElementById('player1Health').style.width = (myUnit.hp / myUnit.hpMax * 100) + '%';
 
-            // Обновляем врага
             document.getElementById('player2Img').src = enemyUnit.imagePath;
             document.getElementById('player2Name').textContent = enemyUnit.player;
-            document.getElementById('player2Health').style.width =
-                (enemyUnit.hp / enemyUnit.hpMax * 100) + '%';
+            document.getElementById('player2Health').style.width = (enemyUnit.hp / enemyUnit.hpMax * 100) + '%';
         }
 
-
-        // CHAT / TURN RESULTS
         if(msg.type==='chat'){
             let inner=null;
             try { inner=JSON.parse(msg.message); } catch{}
@@ -216,4 +134,5 @@
 </script>
 
 </body>
+
 </html>
