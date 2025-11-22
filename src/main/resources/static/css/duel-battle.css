@@ -108,14 +108,58 @@ body {
     opacity: 1;
 }
 
-/* Поле логов событий боя */
+/* Боковой лог — уменьшенный */
 #log {
-    margin-top: 20px;
-    width: 100%;
-    max-width: 900px;
-    min-height: 60px;
-    padding: 10px;
-    background: rgba(0,0,0,0.3);
-    border-radius: 10px;
-    font-size: 1em;
+    width: 260px;
+    height: 220px;        /* было 100vh, теперь маленькое окошко */
+    position: fixed;
+    right: -260px;        /* скрыт */
+    top: 40%;             /* ставим по центру */
+    transform: translateY(-50%); /* выравниваем по вертикали */
+    background: #111;
+    padding: 15px;
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: column;
+
+
+    overflow-y: auto;
+    border-left: 2px solid #333;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.6);
+    transition: right 0.35s ease;
+    font-family: Consolas, "Courier New", monospace;
 }
+
+/* Открытое состояние */
+#log.open {
+    right: 0;
+}
+
+/* Сообщения */
+#log div {
+    margin: 4px 0;
+    padding-left: 6px;
+    border-left: 2px solid #333;
+    animation: fadeIn 0.25s ease;
+}
+.log-toggle {
+    position: fixed;
+    right: 0;              /* прилипает к правому краю */
+    top: 40%;              /* по середине экрана */
+    transform: translateY(-50%);
+    padding: 10px 15px;
+    background: #222;
+    color: #eee;
+    border: 1px solid #444;
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    cursor: pointer;
+    z-index: 2000;
+    transition: background 0.2s;
+}
+
+.log-toggle:hover {
+    background: #333;
+}
+
