@@ -1,7 +1,7 @@
 package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service;
 
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.MessageFormatter;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.RoomSessionRegistry;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.utils.MessageFormatter;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.RoomSessionRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;

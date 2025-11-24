@@ -2,7 +2,7 @@ package org.example.gametgweb.characterSelection.infrastructure.webSocket;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.gametgweb.characterSelection.domain.model.Unit;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.RoomSessionRegistry;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.RoomSessionRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

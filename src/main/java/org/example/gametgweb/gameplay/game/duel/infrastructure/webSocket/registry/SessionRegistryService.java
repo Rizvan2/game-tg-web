@@ -1,7 +1,6 @@
-package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service;
+package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.RoomSessionRegistry;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.WebSocketSession;
 

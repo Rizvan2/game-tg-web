@@ -3,7 +3,7 @@ package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.servic
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.gametgweb.characterSelection.domain.model.Unit;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.DuelTurnManager;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.RoomSessionRegistry;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.RoomSessionRegistry;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

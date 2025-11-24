@@ -1,4 +1,4 @@
-package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat;
+package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket;
 
 import org.example.gametgweb.gameplay.game.duel.domain.model.GameSession;
 import org.example.gametgweb.gameplay.game.duel.domain.repository.GameSessionRepositoryImpl;
