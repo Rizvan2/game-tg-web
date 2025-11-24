@@ -45,29 +45,122 @@
 <button id="toggleLogBtn" class="log-toggle">☰ Лог</button>
 
 <div id="log"></div>
+<button id="toggleChatBtn" class="chat-toggle">💬 Чат</button>
 
+<div id="chat">
+    <div id="chatMessages"></div>
+    <div id="chatInputBox">
+        <input id="chatInput" type="text" placeholder="Введите сообщение...">
+        <button id="sendChatBtn">➤</button>
+    </div>
+</div>
 <script>
+
+    // ====== КНОПКИ ОТКРЫТИЯ ПАНЕЛЕЙ ======
     document.getElementById("toggleLogBtn").onclick = () => {
-        document.getElementById("log").classList.toggle("open");
+        const log = document.getElementById("log");
+        log.classList.toggle("open");
+        // Скрываем кнопку, если окно открыто
+        document.getElementById("toggleLogBtn").classList.toggle("hidden", log.classList.contains("open"));
     };
+
+    document.getElementById("toggleChatBtn").onclick = () => {
+        const chat = document.getElementById("chat");
+        const box = document.getElementById("chatInputBox");
+
+        chat.classList.toggle("open");
+        box.style.right = chat.classList.contains("open") ? "0" : "-260px";
+        // Скрываем кнопку, если окно открыто
+        document.getElementById("toggleChatBtn").classList.toggle("hidden", chat.classList.contains("open"));
+    };
+    // ====== КЛИКИ ВНЕ ПАНЕЛЕЙ ======
+    document.addEventListener('click', (e) => {
+        const log = document.getElementById("log");
+        const logBtn = document.getElementById("toggleLogBtn");
+        if (log.classList.contains("open") && !log.contains(e.target) && e.target !== logBtn) {
+            log.classList.remove("open");
+            logBtn.classList.remove("hidden");
+        }
+
+        const chat = document.getElementById("chat");
+        const chatBtn = document.getElementById("toggleChatBtn");
+        const chatMessages = document.getElementById("chatMessages");
+        const chatInputBox = document.getElementById("chatInputBox");
+        if (
+            chat.classList.contains("open") &&
+            !chatMessages.contains(e.target) &&
+            !chatInputBox.contains(e.target) &&
+            e.target !== chatBtn
+        ) {
+            chat.classList.remove("open");
+            chatInputBox.style.right = "-260px";
+            chatBtn.classList.remove("hidden");
+        }
+    });
+
+
+
+
+
+    // ====== ФУНКЦИИ СООБЩЕНИЙ ======
+    function chatMsg(msg) {
+        const chatMessages = document.getElementById("chatMessages");
+        const time = new Date().toLocaleTimeString();
+        chatMessages.innerHTML += `<div>[${time}] ${msg}</div>`;
+        chatMessages.scrollTop = chatMessages.scrollHeight; // прокручиваем только блок сообщений
+    }
+
+
+    function log(msg) {
+        const logEl = document.getElementById("log");
+        const time = new Date().toLocaleTimeString();
+        logEl.innerHTML += `<div>[${time}] ${msg}</div>`;
+        logEl.scrollTop = logEl.scrollHeight;
+    }
+
+
+    // ====== WEBSOCKET ПОДКЛЮЧЕНИЕ ======
     const params = new URLSearchParams(window.location.search);
     const gameCode = params.get('gameCode') || params.get('id');
     const playerName = params.get('player') || localStorage.getItem('playerName') || `Player${Math.floor(Math.random()*1000)}`;
     localStorage.setItem('playerName', playerName);
 
     const wsProtocol = location.protocol === 'https:' ? 'wss' : 'ws';
-    const ws = new WebSocket(`${wsProtocol}://${location.host}/ws/duel?gameCode=${encodeURIComponent(gameCode)}`);
+    let ws = null;
+    let wsConnected = false;
 
-    let selectedBody = null;
-    const logEl = document.getElementById("log");
-
-    function log(msg) {
-        const time = new Date().toLocaleTimeString();
-        logEl.innerHTML += `<div>[${time}] ${msg}</div>`;
-        logEl.scrollTop = logEl.scrollHeight;
+    try {
+        ws = new WebSocket(`${wsProtocol}://${location.host}/ws/duel?gameCode=${encodeURIComponent(gameCode)}`);
+    } catch (e) {
+        log("❌ Ошибка: WebSocket не может быть создан.");
     }
 
-    // 🎯 Выбор части тела через картинку
+
+    // ====== ОТПРАВКА ЧАТА ======
+    document.getElementById("sendChatBtn").onclick = () => {
+        if (!wsConnected) {
+            chatMsg("❌ Невозможно отправить: нет соединения с сервером.");
+            return;
+        }
+
+        const input = document.getElementById("chatInput");
+        const text = input.value.trim();
+        if (!text) return;
+
+        ws.send(JSON.stringify({ type: "chat", message: text }));
+        input.value = "";
+    };
+
+    document.getElementById("chatInput").addEventListener("keydown", e => {
+        if (e.key === "Enter") {
+            document.getElementById("sendChatBtn").click();
+        }
+    });
+
+
+    // ====== ЛОГИКА ВЫБОРА ЧАСТИ ТЕЛА ======
+    let selectedBody = null;
+
     document.querySelectorAll('.hit-zone').forEach(zone => {
         zone.addEventListener('click', () => {
             document.querySelectorAll('.hit-zone').forEach(z => z.classList.remove('selected'));
@@ -78,61 +171,103 @@
     });
 
 
-    // ⚔️ Кнопка атаки
+    // ====== КНОПКА АТАКИ ======
     const attackBtn = document.getElementById('attackBtn');
     attackBtn.onclick = () => {
-        if (!selectedBody) { log("❗ Сначала выберите часть тела!"); return; }
+        if (!wsConnected) {
+            log("❌ Нельзя атаковать: соединение отсутствует.");
+            return;
+        }
+        if (!selectedBody) {
+            log("❗ Сначала выберите часть тела!");
+            return;
+        }
+
         attackBtn.disabled = true;
         ws.send(JSON.stringify({ type: 'attack', body: selectedBody }));
         log(`🕒 Отправлена атака по: ${selectedBody}. Ждём соперника...`);
     };
 
-    // WebSocket события
-    ws.onopen = () => {
-        log(`✅ Подключено к комнате "${gameCode}" как ${playerName}`);
-        ws.send(JSON.stringify({ type: 'join', playerName }));
-    };
 
-    ws.onmessage = (event) => {
-        const msg = JSON.parse(event.data);
+    // ====== СОБЫТИЯ WEBSOCKET (СТАРАЯ ЛОГИКА) ======
+    if (ws) {
+        ws.onopen = () => {
+            wsConnected = true;
+            log(`✅ Подключено к комнате "${gameCode}" как ${playerName}`);
+            ws.send(JSON.stringify({ type: 'join', playerName }));
+        };
 
-        if(msg.type==='join') { log(`👤 ${msg.message}`); return; }
-        if(msg.type==='info') { log(`ℹ️ ${msg.message}`); return; }
-        if(msg.type==='error') { log(`❌ ${msg.message}`); attackBtn.disabled=false; return; }
-        if(msg.type==='bothSelected') { log("⏳ Оба игрока выбрали цели, идёт расчёт атаки..."); return; }
+        ws.onclose = () => {
+            wsConnected = false;
+            log("🔒 Соединение закрыто");
+        };
 
-        if (msg.type === 'UNITS_STATE') {
-            const u1 = msg.units[0];
-            const u2 = msg.units[1];
+        ws.onerror = () => {
+            wsConnected = false;
+            log("⚠️ Ошибка соединения");
+        };
 
-            const myUnit = u1.player === playerName ? u1 : u2;
-            const enemyUnit = u1.player === playerName ? u2 : u1;
+        ws.onmessage = (event) => {
+            const msg = JSON.parse(event.data);
 
-            document.getElementById('player1Img').src = myUnit.imagePath;
-            document.getElementById('player1Name').textContent = myUnit.player;
-            document.getElementById('player1Health').style.width = (myUnit.hp / myUnit.hpMax * 100) + '%';
+            if (msg.type === 'join') {
+                log(`👤 ${msg.message}`);
+                return;
+            }
+            if (msg.type === 'info') {
+                log(`ℹ️ ${msg.message}`);
+                return;
+            }
+            if (msg.type === 'error') {
+                log(`❌ ${msg.message}`);
+                attackBtn.disabled = false;
+                return;
+            }
+            if (msg.type === 'bothSelected') {
+                log("⏳ Оба игрока выбрали цели, идёт расчёт атаки...");
+                return;
+            }
 
-            document.getElementById('player2Img').src = enemyUnit.imagePath;
-            document.getElementById('player2Name').textContent = enemyUnit.player;
-            document.getElementById('player2Health').style.width = (enemyUnit.hp / enemyUnit.hpMax * 100) + '%';
-        }
+            // --- СТАРАЯ ЛОГИКА: игроки НЕ МЕНЯЮТСЯ МЕСТАМИ ---
+            if (msg.type === 'UNITS_STATE') {
+                const u1 = msg.units[0];
+                const u2 = msg.units[1];
 
-        if(msg.type==='chat'){
-            let inner=null;
-            try { inner=JSON.parse(msg.message); } catch{}
-            if(inner && inner.turnMessages){
-                log("💥 Результат раунда:");
-                inner.turnMessages.forEach(m=>log(`→ ${m}`));
-                log(`❤️ HP Плеер 1: ${inner.attackerHp}, Плеер 2: ${inner.defenderHp}`);
-            } else log(`💬 ${msg.playerName}: ${msg.message}`);
-            attackBtn.disabled=false;
-            selectedBody=null;
-        }
-    };
+                // Определяем мою и вражескую сущность старым способом
+                const myUnit = u1.player === playerName ? u1 : u2;
+                const enemyUnit = u1.player === playerName ? u2 : u1;
 
-    ws.onclose = () => log("🔒 Соединение закрыто");
-    ws.onerror = (e) => log("⚠️ Ошибка соединения: " + e.message);
+                document.getElementById('player1Img').src = myUnit.imagePath;
+                document.getElementById('player1Name').textContent = myUnit.player;
+                document.getElementById('player1Health').style.width = (myUnit.hp / myUnit.hpMax * 100) + '%';
+
+                document.getElementById('player2Img').src = enemyUnit.imagePath;
+                document.getElementById('player2Name').textContent = enemyUnit.player;
+                document.getElementById('player2Health').style.width = (enemyUnit.hp / enemyUnit.hpMax * 100) + '%';
+
+                return;
+            }
+
+            // --- ЧАТ (как в старом скрипте) ---
+            if (msg.type === 'chat') {
+                let inner = null;
+                try { inner = JSON.parse(msg.message); } catch {}
+
+                if (inner && inner.turnMessages) {
+                    chatMsg("💥 Результат раунда:");
+                    inner.turnMessages.forEach(m => chatMsg(`→ ${m}`));
+                    chatMsg(`❤️ HP Плеер 1: ${inner.attackerHp}, Плеер 2: ${inner.defenderHp}`);
+                    attackBtn.disabled = false;
+                    selectedBody = null;
+                } else {
+                    chatMsg(`${msg.playerName}: ${msg.message}`);
+                }
+            }
+        };
+    }
+
 </script>
+
 
 </body>
 

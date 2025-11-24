@@ -146,7 +146,7 @@ body {
 .log-toggle {
     position: fixed;
     right: 0;              /* прилипает к правому краю */
-    top: 40%;              /* по середине экрана */
+    top: 25%;              /* по середине экрана */
     transform: translateY(-50%);
     padding: 10px 15px;
     background: #222;
@@ -162,4 +162,128 @@ body {
 .log-toggle:hover {
     background: #333;
 }
+/* Боковой чат — небольшое окно */
+#chat {
+    width: 260px;
+    height: 220px;
+    position: fixed;
+    right: -260px;
+    top: 40%;
+    transform: translateY(-50%);
+    background: #111;
+    padding: 15px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    border-left: 2px solid #333;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.6);
+    transition: right 0.35s ease;
+    font-family: Consolas, "Courier New", monospace;
+}
 
+/* Когда открыт */
+#chat.open {
+    right: 0;
+}
+
+/* Сообщения */
+#chat div {
+    margin: 4px 0;
+    padding-left: 6px;
+    border-left: 2px solid #333;
+    animation: fadeIn 0.25s ease;
+}
+
+/* Кнопка чата */
+.chat-toggle {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 10px 15px;
+    background: #222;
+    color: #eee;
+    border: 1px solid #444;
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    cursor: pointer;
+    z-index: 2000;
+    transition: background 0.2s;
+}
+
+.chat-toggle:hover {
+    background: #333;
+}
+/* Контейнер бокового чата */
+/* Контейнер чата */
+#chat {
+    width: 260px;
+    height: 220px;
+    position: fixed;
+    right: -260px;
+    top: 40%;
+    transform: translateY(-50%);
+    background: #111;
+    padding: 15px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;   /* колонки сверху вниз */
+    overflow: hidden;         /* скрываем прокрутку у контейнера */
+    border-left: 2px solid #333;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.6);
+    transition: right 0.35s ease;
+    font-family: Consolas, "Courier New", monospace;
+}
+
+/* Блок сообщений */
+#chatMessages {
+    flex: 1;                  /* занимает всё свободное место */
+    overflow-y: auto;         /* прокрутка только здесь */
+    margin-bottom: 5px;
+}
+
+/* Контейнер строки ввода */
+#chatInputBox {
+    display: flex;
+    width: 100%;
+    height: 36px;
+    background: #111;
+    gap: 4px;
+}
+
+
+/* Поле ввода */
+#chatInput {
+    flex: 1;
+    height: 100%;
+    background: #222;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+    color: #ddd;
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+/* Кнопка отправки */
+#sendChatBtn {
+    width: 36px;
+    height: 100%;
+    background: #333;
+    border: 1px solid #555;
+    border-radius: 6px;
+    color: #eee;
+    cursor: pointer;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+#sendChatBtn:hover {
+    background: #444;
+}
+/* Скрытие кнопки, когда окно открыто */
+.chat-toggle.hidden,
+.log-toggle.hidden {
+    display: none;
+}
