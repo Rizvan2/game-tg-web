@@ -35,4 +35,8 @@ public class SessionRegistryService {
         // возвращаем mutable копию
         return registry.getSessions(gameCode);
     }
+
+    public void replaceSession(String gameCode, String playerName, WebSocketSession newSession) {
+        registry.replaceSession(gameCode, playerName, newSession); // метод нужно добавить в RoomSessionRegistry
+    }
 }

@@ -1,12 +1,15 @@
-package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket;
+package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.handler;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gametgweb.characterSelection.domain.model.Unit;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.RoomSessionRegistry;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.utils.WebSocketContext;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.MessageDispatcherService;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.order.PlayerOrderService;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat.DuelCombatService;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat.DuelRoomService;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.DuelRoomService;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -40,12 +43,14 @@ public class DuelWebSocketHandler extends TextWebSocketHandler {
     private final DuelCombatService duelCombatService;
     private final MessageDispatcherService messageDispatcherService;
     private final ObjectMapper mapper = new ObjectMapper();
+    private final PlayerOrderService playerOrderService;
 
     @Autowired
-    public DuelWebSocketHandler(DuelRoomService duelRoomService, DuelCombatService duelCombatService, MessageDispatcherService messageDispatcherService) {
+    public DuelWebSocketHandler(DuelRoomService duelRoomService, DuelCombatService duelCombatService, MessageDispatcherService messageDispatcherService, PlayerOrderService playerOrderService) {
         this.duelRoomService = duelRoomService;
         this.duelCombatService = duelCombatService;
         this.messageDispatcherService = messageDispatcherService;
+        this.playerOrderService = playerOrderService;
     }
 
     /**
@@ -178,7 +183,7 @@ public class DuelWebSocketHandler extends TextWebSocketHandler {
         unitsState.put("type", "UNITS_STATE");
 
         List<Map<String, Object>> units = new ArrayList<>();
-        for (String playerName : duelRoomService.getPlayerOrder(gameCode)) {
+        for (String playerName : playerOrderService.getOrder(gameCode)) {
             Unit unit = duelRoomService.getUnit(gameCode, playerName);
             if (unit != null) {
                 units.add(Map.of(

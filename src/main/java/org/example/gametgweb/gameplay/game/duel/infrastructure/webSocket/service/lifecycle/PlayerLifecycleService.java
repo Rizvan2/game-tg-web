@@ -31,4 +31,11 @@ public class PlayerLifecycleService {
                 dispatcherService.broadcastLeave(ctx.gameCode(), ctx.playerName()));
         log.info("{} вышел из комнаты {}", ctx.playerName(), ctx.gameCode());
     }
+
+    public void handleReconnect(WebSocketContext ctx) {
+
+        dispatcherService.broadcastReconnect(ctx.gameCode(), ctx.playerName());
+
+        log.info("{} восстановил соединение в комнате {}", ctx.playerName(), ctx.gameCode());
+    }
 }

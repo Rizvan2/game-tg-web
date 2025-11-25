@@ -45,6 +45,13 @@
                 log(`👤 ${msg.message}`);
                 return;
             }
+            if (msg.type === 'reconnect') {
+                log(`🔄 ${msg.message}`); // Сообщение о реконнекте
+                // Можно обновить UI, если нужно:
+                // Например, сбросить таймер, включить кнопки атаки
+                attackBtn.disabled = false;
+                return;
+            }
             if (msg.type === 'info') {
                 log(`ℹ️ ${msg.message}`);
                 return;
@@ -59,12 +66,9 @@
                 return;
             }
 
-            // --- СТАРАЯ ЛОГИКА: игроки НЕ МЕНЯЮТСЯ МЕСТАМИ ---
             if (msg.type === 'UNITS_STATE') {
                 const u1 = msg.units[0];
                 const u2 = msg.units[1];
-
-                // Определяем мою и вражескую сущность старым способом
                 const myUnit = u1.player === playerName ? u1 : u2;
                 const enemyUnit = u1.player === playerName ? u2 : u1;
 
@@ -75,7 +79,6 @@
                 document.getElementById('player2Img').src = enemyUnit.imagePath;
                 document.getElementById('player2Name').textContent = enemyUnit.player;
                 document.getElementById('player2Health').style.width = (enemyUnit.hp / enemyUnit.hpMax * 100) + '%';
-
                 return;
             }
 

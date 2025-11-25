@@ -169,6 +169,23 @@ public class RoomSessionRegistry {
         log.info("Юнит игрока {} (имя юнита {}) добавлен в комнату {}", playerName, unit.getName(), gameCode);
     }
 
+    public void replaceSession(String gameCode, String playerName, WebSocketSession newSession) {
+        WebSocketSession oldSession = getSessionByPlayer(gameCode, playerName); // находим старую
+        if (oldSession != null) {
+            removeSession(gameCode, oldSession); // удаляем старую
+        }
+        addSession(gameCode, newSession); // добавляем новую
+        log.info("Сессия обновлена для игрока {} в комнате {} (реконнект)", playerName, gameCode);
+    }
+
+    public WebSocketSession getSessionByPlayer(String gameCode, String playerName) {
+        return gameSessions.getOrDefault(gameCode, Set.of())
+                .stream()
+                .filter(s -> playerName.equals(s.getAttributes().get("PLAYER_NAME")))
+                .findFirst()
+                .orElse(null);
+    }
+
     /**
      * Возвращает юнита игрока по имени в комнате.
      *

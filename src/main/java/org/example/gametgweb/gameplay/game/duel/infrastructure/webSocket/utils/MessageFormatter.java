@@ -106,6 +106,28 @@ public class MessageFormatter {
         }
     }
 
+    /**
+     * Формирует JSON-сообщение о реконнекте игрока.
+     *
+     * <p>Это приватное сообщение, отправляемое только игроку,
+     * который восстановил соединение.
+     *
+     * @param playerName имя игрока
+     * @return JSON-строка с полями: type="reconnect", playerName, message
+     */
+    public String reconnectMessage(String playerName) {
+        try {
+            return mapper.writeValueAsString(Map.of(
+                    "type", "reconnect",
+                    "playerName", playerName,
+                    "message", "Соединение восстановлено для игрока " + playerName
+            ));
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка сериализации reconnectMessage", e);
+        }
+    }
+
+
     public String format(Object payload) {
         try {
             return mapper.writeValueAsString(payload);
