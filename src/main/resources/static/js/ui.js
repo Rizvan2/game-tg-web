@@ -67,6 +67,11 @@ document.querySelectorAll('.hit-zone').forEach(zone => {
     });
 });
 
+function resetSelectedBody() {
+    selectedBody = null;
+    document.querySelectorAll('.hit-zone').forEach(z => z.classList.remove('selected'));
+}
+
 // ====== КНОПКА АТАКИ ======
 const attackBtn = document.getElementById('attackBtn');
 attackBtn.onclick = () => {
@@ -82,6 +87,8 @@ attackBtn.onclick = () => {
     }
 
     attackBtn.disabled = true;
+    // 👉 сбрасываем выделение
+    resetSelectedBody();
     log(`🕒 Отправлена атака по: ${selectedBody}. Ждём соперника...`);
 };
 
