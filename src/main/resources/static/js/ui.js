@@ -92,6 +92,44 @@ attackBtn.onclick = () => {
     log(`🕒 Отправлена атака по: ${selectedBody}. Ждём соперника...`);
 };
 
+function showBubble(playerName, text) {
+    const p1Name = document.getElementById("player1Name").innerText.trim();
+    const p2Name = document.getElementById("player2Name").innerText.trim();
+
+    let bubbleId = null;
+
+    if (playerName === p1Name) {
+        bubbleId = "player1Bubble";
+    } else if (playerName === p2Name) {
+        bubbleId = "player2Bubble";
+    } else {
+        console.warn("Не могу определить игрока для bubble:", playerName);
+        return;
+    }
+
+    const bubble = document.getElementById(bubbleId);
+
+    // === СБРОС СТАРЫХ ТАЙМЕРОВ ===
+    if (bubble.fadeTimer) clearTimeout(bubble.fadeTimer);
+    if (bubble.hideTimer) clearTimeout(bubble.hideTimer);
+
+    // === ПОКАЗ СООБЩЕНИЯ ===
+    bubble.style.opacity = "1";
+    bubble.innerText = text;
+    bubble.style.display = "block";
+
+    // === НОВЫЕ ТАЙМЕРЫ ===
+    bubble.fadeTimer = setTimeout(() => {
+        bubble.style.opacity = "0"; // плавное исчезновение
+    }, 1500);
+
+    bubble.hideTimer = setTimeout(() => {
+        bubble.style.display = "none";
+    }, 1900);
+}
+
+
+
 // ====== ОТПРАВКА ЧАТА ======
 document.getElementById("sendChatBtn").onclick = () => {
     const input = document.getElementById("chatInput");
@@ -100,7 +138,8 @@ document.getElementById("sendChatBtn").onclick = () => {
 
     const ok = window.sendChat(text);
     if (!ok) chatMsg("❌ Невозможно отправить: нет соединения с сервером.");
-
+    // 💬 Показываем bubble сразу локально
+    showBubble(window.playerName, text);
     input.value = "";
 };
 

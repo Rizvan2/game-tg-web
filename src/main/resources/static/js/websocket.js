@@ -88,15 +88,26 @@
                 try { inner = JSON.parse(msg.message); } catch {}
 
                 if (inner && inner.turnMessages) {
+                    // 👉 это не настоящий чат, а боевой лог раунда
                     chatMsg("💥 Результат раунда:");
                     inner.turnMessages.forEach(m => chatMsg(`→ ${m}`));
                     chatMsg(`❤️ HP Плеер 1: ${inner.attackerHp}, Плеер 2: ${inner.defenderHp}`);
+
                     attackBtn.disabled = false;
-                    selectedBody = null;
+                    resetSelectedBody();
+
                 } else {
-                    chatMsg(`${msg.playerName}: ${msg.message}`);
+                    // 👉 обычное сообщение игрока
+                    const sender = msg.playerName ?? msg.sender;
+                    const text = msg.message ?? msg.text;
+
+                    chatMsg(`${sender}: ${text}`);
+
+                    // 💬 показываем пузырь над моделькой
+                    showBubble(sender, text);
                 }
             }
+
         };
     }
 
