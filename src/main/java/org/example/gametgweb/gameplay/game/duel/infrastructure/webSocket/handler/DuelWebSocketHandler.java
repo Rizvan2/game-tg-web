@@ -40,13 +40,14 @@ public class DuelWebSocketHandler extends TextWebSocketHandler {
     private final DuelRoomService duelRoomService;
     private final DuelCombatService duelCombatService;
     private final MessageDispatcherService messageDispatcherService;
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper;
 
     @Autowired
-    public DuelWebSocketHandler(DuelRoomService duelRoomService, DuelCombatService duelCombatService, MessageDispatcherService messageDispatcherService) {
+    public DuelWebSocketHandler(DuelRoomService duelRoomService, DuelCombatService duelCombatService, MessageDispatcherService messageDispatcherService, ObjectMapper mapper) {
         this.duelRoomService = duelRoomService;
         this.duelCombatService = duelCombatService;
         this.messageDispatcherService = messageDispatcherService;
+        this.mapper = mapper;
     }
 
     /**
