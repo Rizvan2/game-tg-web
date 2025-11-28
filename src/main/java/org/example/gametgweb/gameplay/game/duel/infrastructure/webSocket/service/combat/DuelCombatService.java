@@ -29,12 +29,14 @@ public class DuelCombatService {
     private final DuelTurnManager turnManager;
     private final CombatService combatService;
     private final RoomSessionRegistry roomSessionRegistry;
+    private final ObjectMapper objectMapper;
 
     @Autowired
-    public DuelCombatService(DuelTurnManager turnManager, CombatService combatService, RoomSessionRegistry roomSessionRegistry) {
+    public DuelCombatService(DuelTurnManager turnManager, CombatService combatService, RoomSessionRegistry roomSessionRegistry, ObjectMapper objectMapper) {
         this.turnManager = turnManager;
         this.combatService = combatService;
         this.roomSessionRegistry = roomSessionRegistry;
+        this.objectMapper = objectMapper;
     }
 
     /**
@@ -67,7 +69,7 @@ public class DuelCombatService {
             turn.setBothSelectedNotified(true);
             roomSessionRegistry.broadcast(
                     gameCode,
-                    new ObjectMapper().writeValueAsString(Map.of("type", "bothSelected"))
+                    objectMapper.writeValueAsString(Map.of("type", "bothSelected"))
             );
         }
 
@@ -86,7 +88,7 @@ public class DuelCombatService {
 // очищаем ход после раунда
             turnManager.removeTurn(gameCode);
 
-            return new ObjectMapper().writeValueAsString(resultWithPlayers);
+            return objectMapper.writeValueAsString(resultWithPlayers);
 
         }
 
