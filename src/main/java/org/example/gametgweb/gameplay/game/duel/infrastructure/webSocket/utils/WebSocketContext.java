@@ -1,6 +1,5 @@
 package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.utils;
 
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.PrincipalUtils;
 import org.springframework.web.socket.WebSocketSession;
 
 /**
