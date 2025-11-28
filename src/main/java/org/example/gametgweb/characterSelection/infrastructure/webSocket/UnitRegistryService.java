@@ -2,9 +2,11 @@ package org.example.gametgweb.characterSelection.infrastructure.webSocket;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.gametgweb.characterSelection.domain.model.Unit;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.RoomSessionRegistry;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.RoomSessionRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -65,4 +67,9 @@ public class UnitRegistryService {
         registry.getUnit(gameCode, playerName); // для будущей логики, например очистка
         log.info("Юнит {} удален из комнаты {}", playerName, gameCode);
     }
+
+    public Map<String, Unit> getUnits(String gameCode) {
+        return registry.getGameUnits().getOrDefault(gameCode, Map.of());
+    }
+
 }

@@ -1,5 +1,6 @@
-package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket;
+package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gametgweb.characterSelection.domain.model.Unit;
 import org.springframework.stereotype.Component;
@@ -39,6 +40,7 @@ public class RoomSessionRegistry {
      * Игровые юниты игроков, сгруппированные по коду комнаты.
      * Key — gameCode, Value — Map с ключом playerName и значением UnitEntity.
      */
+    @Getter
     private final ConcurrentHashMap<String, Map<String, Unit>> gameUnits = new ConcurrentHashMap<>();
 
     // ============================================================
@@ -167,6 +169,23 @@ public class RoomSessionRegistry {
         log.info("Юнит игрока {} (имя юнита {}) добавлен в комнату {}", playerName, unit.getName(), gameCode);
     }
 
+    public void replaceSession(String gameCode, String playerName, WebSocketSession newSession) {
+        WebSocketSession oldSession = getSessionByPlayer(gameCode, playerName); // находим старую
+        if (oldSession != null) {
+            removeSession(gameCode, oldSession); // удаляем старую
+        }
+        addSession(gameCode, newSession); // добавляем новую
+        log.info("Сессия обновлена для игрока {} в комнате {} (реконнект)", playerName, gameCode);
+    }
+
+    public WebSocketSession getSessionByPlayer(String gameCode, String playerName) {
+        return gameSessions.getOrDefault(gameCode, Set.of())
+                .stream()
+                .filter(s -> playerName.equals(s.getAttributes().get("PLAYER_NAME")))
+                .findFirst()
+                .orElse(null);
+    }
+
     /**
      * Возвращает юнита игрока по имени в комнате.
      *
@@ -179,5 +198,4 @@ public class RoomSessionRegistry {
         log.info("getUnit: {} в комнате {} -> {}", playerName, gameCode, unit != null ? "найден" : "не найден");
         return unit;
     }
-
 }

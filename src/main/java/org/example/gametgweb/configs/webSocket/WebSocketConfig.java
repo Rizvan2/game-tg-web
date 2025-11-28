@@ -2,7 +2,7 @@ package org.example.gametgweb.configs.webSocket;
 
 import org.example.gametgweb.gameplay.game.campaign.infrastructure.webSocket.CampaignWebSocketHandler;
 import org.example.gametgweb.gameplay.game.campaign.infrastructure.webSocket.PlayerHandshakeInterceptor;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.DuelWebSocketHandler;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.handler.DuelWebSocketHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;

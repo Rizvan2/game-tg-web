@@ -1,0 +1,328 @@
+/* Основные настройки страницы:
+   тёмная тема, центрирование контента, базовая типографика */
+body {
+    font-family: sans-serif;
+    background: #111;
+    color: #eee;
+    text-align: center;
+    padding: 20px;
+}
+
+/* Кнопки действий игрока */
+.action-btn {
+    margin: 5px;
+    padding: 10px 15px;
+    background: #333;
+    border: none;
+    border-radius: 6px;
+    color: #eee;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+/* Ховер-эффект по кнопке */
+.action-btn:hover:not(:disabled) {
+    background: #555;
+}
+
+/* Заблокированная кнопка */
+.action-btn:disabled {
+    background: #222;
+    color: #666;
+    cursor: not-allowed;
+}
+
+/* Контейнер для двух юнитов — расставляет их по сторонам */
+.battle-container {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 900px;
+    position: relative;
+    margin-bottom: 20px;
+}
+
+/* Общий блок юнита с картинкой, полоской HP и зонами для удара */
+.unitEntity {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+/* Аватар юнита */
+.unitEntity img {
+    width: 150px;
+    height: 150px;
+    border: 2px solid #fff;
+    border-radius: 12px;
+    margin-bottom: 10px;
+}
+
+/* Контейнер полоски здоровья */
+.health-bar {
+    width: 150px;
+    height: 20px;
+    background: #555;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+/* Внутренняя часть полоски здоровья (динамичная ширина) */
+.health-bar-inner {
+    height: 100%;
+    background: #ff4b5c;
+    width: 100%;
+    transition: width 0.3s ease-in-out;
+}
+
+/* Зоны попадания */
+.hit-zone {
+    position: absolute;
+    border-radius: 50%; /* идеальный круг */
+    cursor: pointer;
+    background: rgba(255,0,0,0.2);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+/* Активная зона */
+.hit-zone.selected {
+    background: rgba(255,0,0,0.6);
+    box-shadow: 0 0 15px 5px rgba(255,0,0,0.7), 0 0 30px 10px rgba(255,255,255,0.5);
+    animation: spark 0.5s ease-in-out infinite alternate;
+}
+
+/* Искры */
+@keyframes spark {
+    0% { box-shadow: 0 0 15px 5px rgba(255,0,0,0.7), 0 0 30px 10px rgba(255,255,255,0.5); }
+    100% { box-shadow: 0 0 25px 10px rgba(255,0,0,0.9), 0 0 40px 15px rgba(255,255,255,0.7); }
+}
+
+
+
+/* Выделенная активная зона атаки */
+.hit-zone.selected {
+    outline: 2px solid #6c63ff;
+    opacity: 1;
+}
+
+/* Боковой лог — уменьшенный */
+#log {
+    width: 260px;
+    height: 220px;        /* было 100vh, теперь маленькое окошко */
+    position: fixed;
+    right: -260px;        /* скрыт */
+    top: 40%;             /* ставим по центру */
+    transform: translateY(-50%); /* выравниваем по вертикали */
+    background: #111;
+    padding: 15px;
+    box-sizing: border-box;
+
+    display: flex;
+    flex-direction: column;
+
+
+    overflow-y: auto;
+    border-left: 2px solid #333;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.6);
+    transition: right 0.35s ease;
+    font-family: Consolas, "Courier New", monospace;
+}
+
+/* Открытое состояние */
+#log.open {
+    right: 0;
+}
+
+/* Сообщения */
+#log div {
+    margin: 4px 0;
+    padding-left: 6px;
+    border-left: 2px solid #333;
+    animation: fadeIn 0.25s ease;
+}
+.log-toggle {
+    position: fixed;
+    right: 0;              /* прилипает к правому краю */
+    top: 25%;              /* по середине экрана */
+    transform: translateY(-50%);
+    padding: 10px 15px;
+    background: #222;
+    color: #eee;
+    border: 1px solid #444;
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    cursor: pointer;
+    z-index: 2000;
+    transition: background 0.2s;
+}
+
+.log-toggle:hover {
+    background: #333;
+}
+/* Боковой чат — небольшое окно */
+#chat {
+    width: 260px;
+    height: 220px;
+    position: fixed;
+    right: -260px;
+    top: 40%;
+    transform: translateY(-50%);
+    background: #111;
+    padding: 15px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    border-left: 2px solid #333;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.6);
+    transition: right 0.35s ease;
+    font-family: Consolas, "Courier New", monospace;
+}
+
+/* Когда открыт */
+#chat.open {
+    right: 0;
+}
+
+/* Сообщения */
+#chat div {
+    margin: 4px 0;
+    padding-left: 6px;
+    border-left: 2px solid #333;
+    animation: fadeIn 0.25s ease;
+}
+
+/* Кнопка чата */
+.chat-toggle {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 10px 15px;
+    background: #222;
+    color: #eee;
+    border: 1px solid #444;
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    cursor: pointer;
+    z-index: 2000;
+    transition: background 0.2s;
+}
+
+.chat-toggle:hover {
+    background: #333;
+}
+/* Контейнер бокового чата */
+/* Контейнер чата */
+#chat {
+    width: 260px;
+    height: 220px;
+    position: fixed;
+    right: -260px;
+    top: 40%;
+    transform: translateY(-50%);
+    background: #111;
+    padding: 15px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;   /* колонки сверху вниз */
+    overflow: hidden;         /* скрываем прокрутку у контейнера */
+    border-left: 2px solid #333;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.6);
+    transition: right 0.35s ease;
+    font-family: Consolas, "Courier New", monospace;
+}
+
+/* Блок сообщений */
+#chatMessages {
+    flex: 1;                  /* занимает всё свободное место */
+    overflow-y: auto;         /* прокрутка только здесь */
+    margin-bottom: 5px;
+}
+
+/* Контейнер строки ввода */
+#chatInputBox {
+    display: flex;
+    width: 100%;
+    height: 36px;
+    background: #111;
+    gap: 4px;
+}
+
+
+/* Поле ввода */
+#chatInput {
+    flex: 1;
+    height: 100%;
+    background: #222;
+    border: 1px solid #444;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+    color: #ddd;
+    box-sizing: border-box;
+    min-width: 0;
+}
+
+/* Кнопка отправки */
+#sendChatBtn {
+    width: 36px;
+    height: 100%;
+    background: #333;
+    border: 1px solid #555;
+    border-radius: 6px;
+    color: #eee;
+    cursor: pointer;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+#sendChatBtn:hover {
+    background: #444;
+}
+/* Скрытие кнопки, когда окно открыто */
+.chat-toggle.hidden,
+.log-toggle.hidden {
+    display: none;
+}
+.speech-bubble {
+    position: absolute;
+    top: -32px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 10px;
+
+    background: rgba(15, 15, 15, 0.85);
+    color: #f5f5f5;
+    font-size: 13px;
+    border-radius: 8px;
+
+    box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.12);
+    backdrop-filter: blur(3px);
+
+    white-space: nowrap;
+    pointer-events: none;
+    display: none;
+
+    opacity: 1;
+    transition: opacity 0.4s;
+}
+
+/* Треугольный хвостик */
+.speech-bubble::after {
+    content: "";
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid rgba(15,15,15,0.85);
+}
+

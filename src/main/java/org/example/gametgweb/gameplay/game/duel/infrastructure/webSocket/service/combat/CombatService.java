@@ -28,17 +28,17 @@ public class CombatService {
      * @return карта с описанием боя и текущим здоровьем
      */
     public Map<String, Object> duelRound(Unit attacker, Body bodyA, Unit defender, Body bodyD) {
-        // 1️⃣ Атака первого на второго
         String msg1 = engine.performAttack(attacker, defender, bodyA);
-
-        // 2️⃣ Атака второго на первого
         String msg2 = engine.performAttack(defender, attacker, bodyD);
 
-        // 3️⃣ Возвращаем результат, можно добавить HP юнитов
+        double attackerHpPercent = ((double) attacker.getHealth() / attacker.getMaxHealth()) * 100;
+        double defenderHpPercent = ((double) defender.getHealth() / defender.getMaxHealth()) * 100;
+
         return Map.of(
                 "turnMessages", new String[]{msg1, msg2},
-                "attackerHp", attacker.getHealth(),
-                "defenderHp", defender.getHealth()
+                "attackerHp", attackerHpPercent,
+                "defenderHp", defenderHpPercent
         );
     }
+
 }

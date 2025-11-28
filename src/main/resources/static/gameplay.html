@@ -2,187 +2,71 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Duel Test</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            background: #111;
-            color: #eee;
-            text-align: center;
-            padding: 20px;
-        }
-        .action-btn {
-            margin: 5px;
-            padding: 10px 15px;
-            background: #333;
-            border: none;
-            border-radius: 6px;
-            color: #eee;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .action-btn:hover:not(:disabled) {
-            background: #555;
-        }
-        .action-btn:disabled {
-            background: #222;
-            color: #666;
-            cursor: not-allowed;
-        }
-        #log {
-            width: 80%;
-            margin: 20px auto;
-            background: #1b1b1b;
-            border-radius: 8px;
-            padding: 10px;
-            min-height: 150px;
-            text-align: left;
-            font-size: 14px;
-            overflow-y: auto;
-        }
-    </style>
+    <title>Duel Test Fixed</title>
+    <link rel="stylesheet" href="css/duel-battle.css">
+
 </head>
+
 <body>
+<div class="battle-container">
+    <div class="unitEntity" id="player1">
+        <img id="player1Img" src="" alt="Player 1">
 
-<h2>⚔️ Duel Test Client</h2>
-<div id="attackSection"></div>
+        <div class="speech-bubble" id="player1Bubble"></div>
+
+        <div class="health-bar">
+            <div class="health-bar-inner" id="player1Health"></div>
+        </div>
+        <div id="player1Name">Плеер 1</div>
+    </div>
+
+    <div class="unitEntity" id="player2">
+        <img id="player2Img" src="" alt="Player 2">
+
+        <div class="speech-bubble" id="player2Bubble"></div>
+
+        <div class="health-bar">
+            <div class="health-bar-inner" id="player2Health"></div>
+        </div>
+        <div id="player2Name">Плеер 2</div>
+    </div>
+
+</div>
+
+<!-- Нижний большой бар с картинкой для выбора атак -->
+<div id="attackSection"
+     style="width: 100%; background: #111; padding: 10px 0; display: flex; justify-content: center; margin-bottom: 10px;">
+    <div class="unitEntity" style="position: relative; width: 112px; height: 300px;"> <!-- уже и длиннее -->
+        <img id="attackBody" src="images/body.png" class="body-img" alt="Выбор атаки"
+             style="width: 100%; height: 100%; object-fit: cover; display: block;"> <!-- растянуть на весь блок -->
+
+        <!-- Зоны попадания на теле -->
+        <div class="hit-zone" data-part="HEAD" style="top:3px; left:42px; width:22px; height:30px;"></div>
+        <div class="hit-zone" data-part="CHEST" style="top:15%; left:37%; width:25%; height:22%;"></div>
+        <div class="hit-zone" data-part="LEFT_ARM" style="top:25%; left:6%; width:15%; height:20%;"></div>
+        <div class="hit-zone" data-part="RIGHT_ARM" style="top:25%; left:79%; width:15%; height:20%;"></div>
+        <div class="hit-zone" data-part="LEFT_LEG" style="top:55%; left:28%; width:18%; height:22%;"></div>
+        <div class="hit-zone" data-part="RIGHT_LEG" style="top:55%; left:54%; width:18%; height:22%;"></div>
+
+        <!-- Кнопка атаки под картинкой -->
+        <button id="attackBtn" class="action-btn" style="margin-top: 15px; width: 100%; padding: 15px;">⚔️ Атаковать
+        </button>
+    </div>
+
+</div>
+<button id="toggleLogBtn" class="log-toggle">☰ Лог</button>
+
 <div id="log"></div>
+<button id="toggleChatBtn" class="chat-toggle">💬 Чат</button>
 
-<script>
-    const params = new URLSearchParams(window.location.search);
-    const gameCode = params.get('gameCode') || params.get('id');
-
-    // ✔️ Имя игрока и при первом входе, и при ручном вводе
-    const playerName = params.get('player')
-        || localStorage.getItem('playerName')
-        || `Player${Math.floor(Math.random() * 1000)}`;
-
-    localStorage.setItem('playerName', playerName);
-
-    const wsProtocol = location.protocol === 'https:' ? 'wss' : 'ws';
-    const wsUrl = `${wsProtocol}://${location.host}/ws/duel?gameCode=${encodeURIComponent(gameCode)}`;
-
-    let selectedBody = null;
-    let socket;
-    const logEl = document.getElementById("log");
-    const attackSection = document.getElementById("attackSection");
-
-    function log(msg) {
-        const time = new Date().toLocaleTimeString();
-        logEl.innerHTML += `<div>[${time}] ${msg}</div>`;
-        logEl.scrollTop = logEl.scrollHeight;
-    }
-
-    function send(data) {
-        if (socket && socket.readyState === WebSocket.OPEN) {
-            socket.send(JSON.stringify(data));
-        } else {
-            log("❌ Соединение не установлено");
-        }
-    }
-
-    // 🎯 Кнопки атаки
-    const hitParts = ['HEAD','CHEST','LEFT_ARM','RIGHT_ARM','LEFT_LEG','RIGHT_LEG'];
-    hitParts.forEach(part => {
-        const btn = document.createElement('button');
-        btn.textContent = part.replace('_',' ');
-        btn.classList.add('action-btn');
-        btn.onclick = () => {
-            selectedBody = part;
-            log(`🎯 Вы выбрали: ${part}`);
-        };
-        attackSection.appendChild(btn);
-    });
-
-    // ⚔️ Кнопка атаки
-    const attackBtn = document.createElement('button');
-    attackBtn.textContent = "⚔️ Атаковать";
-    attackBtn.classList.add('action-btn');
-    attackBtn.onclick = () => {
-        if (!selectedBody) {
-            log("❗ Сначала выберите часть тела!");
-            return;
-        }
-        attackBtn.disabled = true;
-        send({ type: 'attack', body: selectedBody });
-        log(`🕒 Отправлена атака по: ${selectedBody}. Ждём соперника...`);
-    };
-    attackSection.appendChild(document.createElement('br'));
-    attackSection.appendChild(attackBtn);
-
-    // 🔌 WebSocket
-    socket = new WebSocket(wsUrl);
-
-    socket.onopen = () => {
-        log(`✅ Подключено к комнате "${gameCode}" как ${playerName}`);
-        send({ type: 'join', playerName });
-    };
-
-    socket.onmessage = (event) => {
-        let msg;
-        try {
-            msg = JSON.parse(event.data);
-        } catch {
-            log(`⚠️ Ошибка парсинга (сырое): ${event.data}`);
-            return;
-        }
-
-        // 🟦 JOIN — приветствие
-        if (msg.type === 'join') {
-            log(`👤 ${msg.message}`);
-            return;
-        }
-
-        // 🟦 INFO
-        if (msg.type === 'info') {
-            log(`ℹ️ ${msg.message}`);
-            return;
-        }
-
-        // 🟦 ERROR
-        if (msg.type === 'error') {
-            log(`❌ Ошибка: ${msg.message}`);
-            attackBtn.disabled = false;
-            return;
-        }
-
-        // 🟦 BOTH SELECTED
-        if (msg.type === 'bothSelected') {
-            log(`⏳ Оба игрока выбрали цели, идёт расчёт атаки...`);
-            return;
-        }
-
-        if (msg.type === 'chat') {
-            let inner;
-            try {
-                // Пытаемся парсить только если message выглядит как JSON
-                if (typeof msg.message === "string" && msg.message.trim().startsWith("{")) {
-                    inner = JSON.parse(msg.message);
-                }
-            } catch {
-                inner = null;
-            }
-
-            if (inner && inner.turnMessages) {
-                log("💥 Результат раунда:");
-                inner.turnMessages.forEach(m => log(`→ ${m}`));
-                log(`❤️ HP A: ${inner.attackerHp}, HP B: ${inner.defenderHp}`);
-            } else {
-                log(`💬 ${msg.playerName}: ${msg.message}`);
-            }
-
-            attackBtn.disabled = false;
-            selectedBody = null;
-            return;
-        }
-
-        // 🟦 Если ничего не подошло
-        log(`📨 Неизвестное сообщение: ${event.data}`);
-    };
-
-    socket.onclose = () => log("🔒 Соединение закрыто");
-    socket.onerror  = (e) => log("⚠️ Ошибка соединения: " + e.message);
-</script>
-
+<div id="chat">
+    <div id="chatMessages"></div>
+    <div id="chatInputBox">
+        <input id="chatInput" type="text" placeholder="Введите сообщение...">
+        <button id="sendChatBtn">➤</button>
+    </div>
+</div>
+<script src="js/ui.js"></script>
+<script src="js/websocket.js"></script>
 </body>
 </html>

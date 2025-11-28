@@ -1,12 +1,18 @@
-package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket;
+package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.handler;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.DuelRoomService;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.AttackMessageDTO;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.ChatMessageDTO;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.ErrorMessageDTO;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.InfoMessageDTO;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.RoomSessionRegistry;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.MessageDispatcherService;
-import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat.DuelCombatService;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat.DuelRoomService;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.utils.WebSocketContext;
+import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -15,7 +21,6 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * {@code DuelWebSocketHandler} — обработчик WebSocket-соединений для комнат дуэлей.
@@ -35,13 +40,14 @@ public class DuelWebSocketHandler extends TextWebSocketHandler {
     private final DuelRoomService duelRoomService;
     private final DuelCombatService duelCombatService;
     private final MessageDispatcherService messageDispatcherService;
-    private final ObjectMapper mapper = new ObjectMapper();
+    private final ObjectMapper mapper;
 
     @Autowired
-    public DuelWebSocketHandler(DuelRoomService duelRoomService, DuelCombatService duelCombatService, MessageDispatcherService messageDispatcherService) {
+    public DuelWebSocketHandler(DuelRoomService duelRoomService, DuelCombatService duelCombatService, MessageDispatcherService messageDispatcherService, ObjectMapper mapper) {
         this.duelRoomService = duelRoomService;
         this.duelCombatService = duelCombatService;
         this.messageDispatcherService = messageDispatcherService;
+        this.mapper = mapper;
     }
 
     /**
@@ -80,19 +86,6 @@ public class DuelWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    /**
-     * Обрабатывает входящие текстовые сообщения от игроков.
-     * <p>
-     * Сообщения должны быть в формате JSON с полем {@code type}:
-     * <ul>
-     *   <li>{@code "chat"} — текстовое сообщение, рассылается всем игрокам комнаты</li>
-     *   <li>{@code "attack"} — атака, обрабатывается через {@link DuelCombatService}</li>
-     * </ul>
-     *
-     * @param session активная WebSocket-сессия
-     * @param message текстовое сообщение от игрока
-     * @throws Exception если произошла ошибка парсинга или обработки сообщения
-     */
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         var ctx = WebSocketContext.from(session);
@@ -104,25 +97,24 @@ public class DuelWebSocketHandler extends TextWebSocketHandler {
         switch (type) {
             case "chat" -> {
                 String text = payload.has("message") ? payload.get("message").asText() : "";
-                messageDispatcherService.broadcastChat(ctx.gameCode(),ctx.playerName(), text);
+                ChatMessageDTO chatDto = new ChatMessageDTO(ctx.playerName(), text);
+                messageDispatcherService.broadcastChat(
+                        ctx.gameCode(),
+                        chatDto.getEffectiveSender(), // <--- здесь
+                        chatDto.getMessage()
+                );
             }
             case "attack" -> handleAttack(ctx, payload);
         }
     }
 
-    /**
-     * Обрабатывает действие "атака" от игрока.
-     * 1. Валидирует полученный JSON.
-     * 2. Преобразует строку в enum Body.
-     * 3. Передает данные в сервис дуэли.
-     * 4. Возвращает результат или сообщение "ожидания соперника".
-     */
     private void handleAttack(WebSocketContext ctx, JsonNode payload) {
         String gameCode = ctx.gameCode();
         String player = ctx.playerName();
 
         try {
-            Body body = extractBody(payload, gameCode, player);
+            AttackMessageDTO attack = mapper.treeToValue(payload, AttackMessageDTO.class);
+            Body body = attack.bodyEnum();
             if (body == null) return;
 
             processAttackAndRespond(gameCode, player, body);
@@ -131,41 +123,26 @@ public class DuelWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    /**
-     * Извлекает и валидирует выбранную часть тела из JSON.
-     * Отправляет сообщение об ошибке, если структура неверна.
-     */
-    private Body extractBody(JsonNode payload, String gameCode, String player) throws IOException {
-        if (payload == null || !payload.hasNonNull("body")) {
-            sendError(gameCode, player, "Missing 'body' in attack payload");
-            return null;
-        }
-
-        try {
-            return Body.valueOf(payload.get("body").asText().toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            sendError(gameCode, player, "Invalid body: " + payload.get("body").asText());
-            return null;
-        }
-    }
-
-    /**
-     * Вызывает доменный сервис дуэли и реагирует на его результат.
-     */
     private void processAttackAndRespond(String gameCode, String player, Body body) throws Exception {
         String resultJson = duelCombatService.processAttack(gameCode, player, body);
 
         if (resultJson != null) {
-            messageDispatcherService.broadcastChat(gameCode,player, resultJson); // оба игрока выбрали — отправляем результат боя
+            broadcastRoundResult(gameCode, player, resultJson);
+            duelRoomService.sendUnitsState(gameCode);
         } else {
-            var info = Map.of("type", "info", "message", "Move registered. Waiting for opponent...");
-            messageDispatcherService.sendToPlayer(gameCode, player, mapper.writeValueAsString(info));
+            sendWaitingMessage(gameCode, player);
         }
     }
 
-    /**
-     * Обрабатывает серверные исключения.
-     */
+    private void broadcastRoundResult(String gameCode, String player, String resultJson) {
+        messageDispatcherService.broadcastChat(gameCode, player, resultJson);
+    }
+
+    private void sendWaitingMessage(String gameCode, String player) throws Exception {
+        InfoMessageDTO info = new InfoMessageDTO("Move registered. Waiting for opponent...");
+        messageDispatcherService.sendToPlayer(gameCode, player, new ObjectMapper().writeValueAsString(info));
+    }
+
     private void handleServerError(String gameCode, String player, Exception e) {
         log.error("Error processing attack", e);
         try {
@@ -175,20 +152,11 @@ public class DuelWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-    /**
-     * Универсальная отправка сообщения об ошибке игроку.
-     */
     private void sendError(String gameCode, String player, String message) throws IOException {
-        var err = Map.of("type", "error", "message", message);
+        ErrorMessageDTO err = new ErrorMessageDTO(message);
         messageDispatcherService.sendToPlayer(gameCode, player, mapper.writeValueAsString(err));
     }
 
-    /**
-     * Закрывает соединение с ошибкой, если отсутствует обязательный параметр {@code gameCode}.
-     *
-     * @param session WebSocket-сессия для закрытия
-     * @throws IOException при сбое закрытия соединения
-     */
     private void closeBadSession(WebSocketSession session) throws IOException {
         session.close(CloseStatus.BAD_DATA.withReason("Missing gameCode parameter"));
     }
