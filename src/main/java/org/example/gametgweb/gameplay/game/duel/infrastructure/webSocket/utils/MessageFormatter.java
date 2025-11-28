@@ -1,10 +1,11 @@
 package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.ChatMessageDTO;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.InfoMessageDTO;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.JoinLeaveMessageDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
 
 /**
  * {@code MessageFormatter} — сервис сериализации сообщений WebSocket в корректный JSON.
@@ -52,18 +53,9 @@ public class MessageFormatter {
      * @return JSON-строка с полями: type="join", playerName, gameCode, message
      */
     public String joinMessage(String playerName, String gameCode) {
-        try {
-            return mapper.writeValueAsString(Map.of(
-                    "type", "join",
-                    "playerName", playerName,
-                    "gameCode", gameCode,
-                    "message", playerName + " подключился к комнате " + gameCode + "!"
-            ));
-        } catch (Exception e) {
-            throw new RuntimeException("Ошибка сериализации joinMessage", e);
-        }
+        JoinLeaveMessageDTO dto = new JoinLeaveMessageDTO("join", playerName, gameCode, playerName + " подключился к комнате " + gameCode + "!");
+        return format(dto);
     }
-
     /**
      * Формирует JSON-сообщение о выходе игрока из игровой комнаты.
      *
@@ -72,61 +64,19 @@ public class MessageFormatter {
      * @return JSON-строка с полями: type="leave", playerName, gameCode, message
      */
     public String leaveMessage(String playerName, String gameCode) {
-        try {
-            return mapper.writeValueAsString(Map.of(
-                    "type", "leave",
-                    "playerName", playerName,
-                    "gameCode", gameCode,
-                    "message", playerName + " вышел из комнаты " + gameCode + "!"
-            ));
-        } catch (Exception e) {
-            throw new RuntimeException("Ошибка сериализации leaveMessage", e);
-        }
+        JoinLeaveMessageDTO dto = new JoinLeaveMessageDTO("leave", playerName, gameCode, playerName + " вышел из комнаты " + gameCode + "!");
+        return format(dto);
     }
 
-    /**
-     * Формирует JSON-сообщение чата.
-     *
-     * <p>Используется как для внутренних игровых сообщений,
-     * так и для пользовательского текста.
-     *
-     * @param playerName имя игрока, отправившего сообщение
-     * @param message    текстовое содержимое сообщения
-     * @return JSON-строка с полями: type="chat", playerName, message
-     */
     public String chatMessage(String playerName, String message) {
-        try {
-            return mapper.writeValueAsString(Map.of(
-                    "type", "chat",
-                    "playerName", playerName,
-                    "message", message
-            ));
-        } catch (Exception e) {
-            throw new RuntimeException("Ошибка сериализации chatMessage", e);
-        }
+        ChatMessageDTO dto = new ChatMessageDTO(playerName, message);
+        return format(dto);
     }
 
-    /**
-     * Формирует JSON-сообщение о реконнекте игрока.
-     *
-     * <p>Это приватное сообщение, отправляемое только игроку,
-     * который восстановил соединение.
-     *
-     * @param playerName имя игрока
-     * @return JSON-строка с полями: type="reconnect", playerName, message
-     */
     public String reconnectMessage(String playerName) {
-        try {
-            return mapper.writeValueAsString(Map.of(
-                    "type", "reconnect",
-                    "playerName", playerName,
-                    "message", "Соединение восстановлено для игрока " + playerName
-            ));
-        } catch (Exception e) {
-            throw new RuntimeException("Ошибка сериализации reconnectMessage", e);
-        }
+        InfoMessageDTO dto = new InfoMessageDTO("reconnect", "Соединение восстановлено для игрока " + playerName);
+        return format(dto);
     }
-
 
     public String format(Object payload) {
         try {

@@ -5,16 +5,20 @@ import org.example.gametgweb.characterSelection.domain.model.Unit;
 import org.example.gametgweb.characterSelection.infrastructure.webSocket.UnitRegistryService;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
 import org.example.gametgweb.gameplay.game.duel.domain.repository.PlayerRepositoryImpl;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.UnitStateDTO;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.UnitsStateMessageDTO;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.SessionRegistryService;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.MessageDispatcherService;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.lifecycle.PlayerLifecycleService;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.order.PlayerOrderService;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.SessionRegistryService;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.utils.WebSocketContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * DuelRoomService — сервис управления комнатами дуэлей и игроками.
@@ -82,6 +86,7 @@ public class DuelRoomService {
     private boolean isReconnect(String gameCode, String playerName) {
         return playerOrderService.contains(gameCode, playerName);
     }
+
     private void attachPlayerName(WebSocketSession session, String playerName) {
         session.getAttributes().put("PLAYER_NAME", playerName);
     }
@@ -131,7 +136,6 @@ public class DuelRoomService {
     }
 
 
-
     /**
      * Удаляет игрока из комнаты.
      */
@@ -144,34 +148,34 @@ public class DuelRoomService {
         playerLifecycleService.handleLeave(ctx);
     }
 
-    private void sendUnitsState(String gameCode) {
+    public void sendUnitsState(String gameCode) {
+        List<String> order = playerOrderService.getOrder(gameCode);
         Set<WebSocketSession> sessions = sessionRegistry.getSessions(gameCode);
 
-        // Получаем список игроков в порядке входа (добавьте такой список в DuelRoomService)
-        List<String> playerOrder = playerOrderService.getOrder(gameCode); // например, ["Alice", "Bob"]
+        List<UnitStateDTO> units = new ArrayList<>();
 
-        List<Map<String, Object>> units = new ArrayList<>();
-        for (String playerName : playerOrder) {
-            Unit unit = unitRegistry.getUnit(gameCode, playerName);
-            if (unit != null) {
-                Map<String, Object> unitMap = new HashMap<>();
-                unitMap.put("player", playerName);
-                unitMap.put("unitName", unit.getName());
-                unitMap.put("hp", unit.getHealth());
-                unitMap.put("hpMax", unit.getMaxHealth());
-                unitMap.put("imagePath", unit.getImagePath());
-                units.add(unitMap);
-            }
+        for (String player : order) {
+            Unit unit = unitRegistry.getUnit(gameCode, player);
+            if (unit == null) continue;
+
+            units.add(new UnitStateDTO(
+                    unit.getId(),
+                    player,
+                    unit.getName(),
+                    unit.getHealth(),
+                    unit.getMaxHealth(),
+                    unit.getImagePath()
+            ));
         }
 
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("type", "UNITS_STATE");
-        payload.put("units", units);
+        UnitsStateMessageDTO payload =
+                new UnitsStateMessageDTO(units);
 
         for (WebSocketSession session : sessions) {
             messageDispatcher.send(session, payload);
         }
     }
+
 
     /**
      * Возвращает копию набора активных сессий для комнаты.
