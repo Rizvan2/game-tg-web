@@ -82,9 +82,7 @@ public class RoomSessionRegistry {
     }
 
 
-    /**
-     * Чистит закрытые сессии в ОРИГИНАЛЬНОМ наборе.
-     */
+
     private void cleanupClosedSessions(String gameCode) {
         Set<WebSocketSession> sessions = gameSessions.get(gameCode);
         if (sessions == null) return;
@@ -92,12 +90,14 @@ public class RoomSessionRegistry {
         sessions.removeIf(s -> !s.isOpen());
 
         if (sessions.isEmpty()) {
-            gameSessions.remove(gameCode);
-            gameUnits.remove(gameCode);
-            log.info("Комната {} пуста и удалена", gameCode);
+            log.info("Комната {} временно без активных сессий", gameCode);
+            // ❗ НЕ удаляем gameSessions и gameUnits
+            return;
         }
+
         logPlayersInRoom(gameCode);
     }
+
 
     /**
      * Находит сессию игрока по имени.
