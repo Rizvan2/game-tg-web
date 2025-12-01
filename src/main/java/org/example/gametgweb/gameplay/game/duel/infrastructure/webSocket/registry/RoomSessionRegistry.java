@@ -10,6 +10,7 @@ import org.springframework.web.socket.WebSocketSession;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -38,7 +39,7 @@ public class RoomSessionRegistry {
 
     /**
      * Игровые юниты игроков, сгруппированные по коду комнаты.
-     * Key — gameCode, Value — Map с ключом playerName и значением UnitEntity.
+     * Key — gameCode, Value — Map playerName -> Unit
      */
     @Getter
     private final ConcurrentHashMap<String, Map<String, Unit>> gameUnits = new ConcurrentHashMap<>();
@@ -54,8 +55,12 @@ public class RoomSessionRegistry {
      * @param session  WebSocket-сессия игрока
      */
     public void addSession(String gameCode, WebSocketSession session) {
-        gameSessions.computeIfAbsent(gameCode, k -> ConcurrentHashMap.newKeySet()).add(session);
+        gameSessions
+                .computeIfAbsent(gameCode, k -> ConcurrentHashMap.newKeySet())
+                .add(session);
+
         log.info("Добавлена сессия {} в комнату {}", session.getId(), gameCode);
+        logPlayersInRoom(gameCode);
     }
 
     /**
@@ -66,6 +71,55 @@ public class RoomSessionRegistry {
      */
     public void removeSession(String gameCode, WebSocketSession session) {
         safeRemoveSession(gameCode, session);
+        logPlayersInRoom(gameCode);
+    }
+
+    /**
+     * Возвращает набор ОРИГИНАЛЬНЫХ сессий (НЕ копия)
+     */
+    public Set<WebSocketSession> getSessionsRaw(String gameCode) {
+        return gameSessions.getOrDefault(gameCode, ConcurrentHashMap.newKeySet());
+    }
+
+
+    /**
+     * Чистит закрытые сессии в ОРИГИНАЛЬНОМ наборе.
+     */
+    private void cleanupClosedSessions(String gameCode) {
+        Set<WebSocketSession> sessions = gameSessions.get(gameCode);
+        if (sessions == null) return;
+
+        sessions.removeIf(s -> !s.isOpen());
+
+        if (sessions.isEmpty()) {
+            gameSessions.remove(gameCode);
+            gameUnits.remove(gameCode);
+            log.info("Комната {} пуста и удалена", gameCode);
+        }
+        logPlayersInRoom(gameCode);
+    }
+
+    /**
+     * Находит сессию игрока по имени.
+     */
+    public WebSocketSession getSessionByPlayer(String gameCode, String playerName) {
+        return getSessionsRaw(gameCode)
+                .stream()
+                .filter(s -> playerName.equals(s.getAttributes().get("PLAYER_NAME")))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * Безопасно удаляет сессию.
+     */
+    private void safeRemoveSession(String gameCode, WebSocketSession session) {
+        Set<WebSocketSession> sessions = gameSessions.get(gameCode);
+        if (sessions == null) return;
+        sessions.remove(session);
+        log.info("Удалена сессия {} из комнаты {}", session.getId(), gameCode);
+
+        cleanupClosedSessions(gameCode);
     }
 
     /**
@@ -133,25 +187,7 @@ public class RoomSessionRegistry {
     }
 
 
-    /**
-     * Безопасно удаляет сессию и очищает комнату, если она пуста.
-     *
-     * @param gameCode код комнаты
-     * @param session  WebSocket-сессия игрока
-     */
-    private void safeRemoveSession(String gameCode, WebSocketSession session) {
-        Set<WebSocketSession> sessions = gameSessions.get(gameCode);
-        if (sessions == null) return;
 
-        sessions.remove(session);
-        log.info("Удалена сессия {} из комнаты {}", session.getId(), gameCode);
-
-        if (sessions.isEmpty()) {
-            gameSessions.remove(gameCode);
-            gameUnits.remove(gameCode);
-            log.info("Комната {} пуста — удалена из реестра", gameCode);
-        }
-    }
 
     // ============================================================
     // ================= Работа с игровыми юнитами =================
@@ -178,14 +214,6 @@ public class RoomSessionRegistry {
         log.info("Сессия обновлена для игрока {} в комнате {} (реконнект)", playerName, gameCode);
     }
 
-    public WebSocketSession getSessionByPlayer(String gameCode, String playerName) {
-        return gameSessions.getOrDefault(gameCode, Set.of())
-                .stream()
-                .filter(s -> playerName.equals(s.getAttributes().get("PLAYER_NAME")))
-                .findFirst()
-                .orElse(null);
-    }
-
     /**
      * Возвращает юнита игрока по имени в комнате.
      *
@@ -197,5 +225,26 @@ public class RoomSessionRegistry {
         Unit unit = gameUnits.getOrDefault(gameCode, new ConcurrentHashMap<>()).get(playerName);
         log.info("getUnit: {} в комнате {} -> {}", playerName, gameCode, unit != null ? "найден" : "не найден");
         return unit;
+    }
+
+    /**
+     * Логирует всех активных игроков в комнате.
+     *
+     * @param gameCode код комнаты
+     */
+    public void logPlayersInRoom(String gameCode) {
+        Set<WebSocketSession> sessions = gameSessions.getOrDefault(gameCode, Set.of());
+        if (sessions.isEmpty()) {
+            log.info("Комната {} пуста", gameCode);
+            return;
+        }
+
+        String players = sessions.stream()
+                .map(s -> (String) s.getAttributes().get("PLAYER_NAME"))
+                .filter(Objects::nonNull)
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("неизвестные игроки");
+
+        log.info("Комната {} содержит игроков: {}", gameCode, players);
     }
 }
