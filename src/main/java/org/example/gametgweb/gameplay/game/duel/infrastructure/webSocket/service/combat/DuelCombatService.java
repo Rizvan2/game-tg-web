@@ -2,6 +2,7 @@ package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.servic
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.gametgweb.characterSelection.domain.model.Unit;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.UnitRegistryService;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.DuelTurnManager;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.RoomSessionRegistry;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
@@ -29,13 +30,15 @@ public class DuelCombatService {
     private final DuelTurnManager turnManager;
     private final CombatService combatService;
     private final RoomSessionRegistry roomSessionRegistry;
+    private final UnitRegistryService unitRegistryService;
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public DuelCombatService(DuelTurnManager turnManager, CombatService combatService, RoomSessionRegistry roomSessionRegistry, ObjectMapper objectMapper) {
+    public DuelCombatService(DuelTurnManager turnManager, CombatService combatService, RoomSessionRegistry roomSessionRegistry, UnitRegistryService unitRegistryService, ObjectMapper objectMapper) {
         this.turnManager = turnManager;
         this.combatService = combatService;
         this.roomSessionRegistry = roomSessionRegistry;
+        this.unitRegistryService = unitRegistryService;
         this.objectMapper = objectMapper;
     }
 
@@ -75,8 +78,8 @@ public class DuelCombatService {
 
         // если оба игрока нажали "Атаковать" → считаем раунд
         if (turn.isReady()) {
-            Unit unitEntity1 = roomSessionRegistry.getUnit(gameCode, turn.getPlayer1());
-            Unit unitEntity2 = roomSessionRegistry.getUnit(gameCode, turn.getPlayer2());
+            Unit unitEntity1 = unitRegistryService.getUnit(gameCode, turn.getPlayer1());
+            Unit unitEntity2 = unitRegistryService.getUnit(gameCode, turn.getPlayer2());
 
             var result = combatService.duelRound(unitEntity1, turn.getBody1(), unitEntity2, turn.getBody2());
 
