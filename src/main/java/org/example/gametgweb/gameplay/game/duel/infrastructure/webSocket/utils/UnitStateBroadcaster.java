@@ -1,8 +1,8 @@
-package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket;
+package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.gametgweb.characterSelection.domain.model.Unit;
-import org.example.gametgweb.characterSelection.infrastructure.webSocket.UnitRegistryService;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.UnitRegistryService;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.UnitStateDTO;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.UnitsStateMessageDTO;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.SessionRegistryService;

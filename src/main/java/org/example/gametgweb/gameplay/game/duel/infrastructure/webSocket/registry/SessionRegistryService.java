@@ -51,28 +51,10 @@ public class SessionRegistryService {
     }
 
     /**
-     * Возвращает копию набора активных сессий для комнаты.
-     *
-     * @param gameCode код комнаты
-     * @return множество WebSocket-сессий; если комнаты нет, возвращает пустой набор
+     * Возвращает набор ОРИГИНАЛЬНЫХ сессий (НЕ копия)
      */
     public Set<WebSocketSession> getSessions(String gameCode) {
-        // возвращаем mutable копию
-        return registry.getSessions(gameCode);
-    }
-
-    /**
-     * Заменяет старую сессию игрока новой в указанной комнате.
-     *
-     * <p>Этот метод требует реализации в {@link RoomSessionRegistry} логики
-     * поиска старой сессии по имени игрока и её замены.</p>
-     *
-     * @param gameCode   Код комнаты.
-     * @param playerName Имя игрока, чья сессия заменяется.
-     * @param newSession Новая WebSocket-сессия.
-     */
-    public void replaceSession(String gameCode, String playerName, WebSocketSession newSession) {
-        registry.replaceSession(gameCode, playerName, newSession); // метод нужно добавить в RoomSessionRegistry
+        return registry.getSessionsRaw(gameCode);
     }
 
     /**
@@ -86,7 +68,8 @@ public class SessionRegistryService {
      */
     public void replacePlayerSession(String gameCode, String playerName, WebSocketSession newSession) {
         attachPlayerName(newSession, playerName);
-        replaceSession(gameCode, playerName, newSession);
+        registry.replaceSession(gameCode, playerName, newSession);
+        log.info("Сессия игрока {} в комнате {} заменена на новую.", playerName, gameCode);
     }
 
     /**
