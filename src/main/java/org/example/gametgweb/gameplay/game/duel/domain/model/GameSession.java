@@ -1,10 +1,10 @@
 package org.example.gametgweb.gameplay.game.duel.domain.model;
 
+import org.example.gametgweb.gameplay.game.duel.shared.domain.GameState;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.example.gametgweb.gameplay.game.duel.shared.domain.GameState;
 
 public class GameSession {
 
@@ -26,6 +26,7 @@ public class GameSession {
         this.id = id;
         this.gameCode = gameCode;
         this.state = state;
+        this.players = players;
     }
 
     public Long getId() {
