@@ -68,6 +68,6 @@ public class UnitRepositoryImpl implements UnitRepository {
      */
     @Override
     public void deleteById(long id) {
-        jpaUnitRepository.deleteById((int) id);
+        jpaUnitRepository.deleteById(id);
     }
 }

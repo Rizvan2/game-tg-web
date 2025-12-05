@@ -12,7 +12,7 @@ import java.util.Optional;
  * Позволяет выполнять CRUD-операции и искать юниты по имени.
  */
 @Repository
-public interface JpaUnitRepository extends JpaRepository<UnitEntity, Integer> {
+public interface JpaUnitRepository extends JpaRepository<UnitEntity, Long> {
 
     /**
      * Находит юнита по его имени.
