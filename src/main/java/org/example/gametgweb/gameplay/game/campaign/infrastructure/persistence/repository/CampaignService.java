@@ -1,10 +1,10 @@
 package org.example.gametgweb.gameplay.game.campaign.infrastructure.persistence.repository;
 
 import lombok.RequiredArgsConstructor;
-import org.example.gametgweb.characterSelection.domain.model.Unit;
-import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.UnitEntity;
-import org.example.gametgweb.characterSelection.infrastructure.persistence.mapper.UnitMapper;
-import org.example.gametgweb.characterSelection.infrastructure.persistence.repository.JpaUnitRepository;
+import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.PlayerUnitEntity;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.mapper.PlayerUnitMapper;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.repository.JpaPlayerUnitRepository;
 import org.example.gametgweb.gameplay.game.campaign.domain.repository.CampaignRepository;
 import org.example.gametgweb.gameplay.game.campaign.infrastructure.persistence.entity.CampaignEntity;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 public class CampaignService {
 
     private final CampaignRepository campaignRepository;
-    private final JpaUnitRepository jpaUnitRepository;
+    private final JpaPlayerUnitRepository jpaUnitRepository;
 
     /** Запуск новой кампании для игрока
      * @param player игрок начавший компанию
@@ -27,7 +27,7 @@ public class CampaignService {
     public CampaignEntity startCampaign(Player player, String enemyUnitName) {
         // Создаём кампанию с юнитами
         CampaignEntity campaignEntity = CampaignEntity.builder()
-                .playerUnitEntity(UnitMapper.toEntity(getPlayerUnit(player)))
+                .playerUnitEntity(PlayerUnitMapper.toEntity(getPlayerUnit(player)))
                 .enemyUnitEntity(getEnemyUnit(enemyUnitName))
                 .build();
 
@@ -44,8 +44,8 @@ public class CampaignService {
      * @return Юнит переданного игрока
      * @throws IllegalStateException если у игрока нету выбранного юнита
      */
-    private Unit getPlayerUnit(Player player) {
-        Unit playerUnitEntity = player.getActiveUnit();
+    private PlayerUnit getPlayerUnit(Player player) {
+        PlayerUnit playerUnitEntity = player.getActiveUnit();
         if (playerUnitEntity == null) {
             throw new IllegalStateException("У игрока не выбран активный юнит");
         }
@@ -57,7 +57,7 @@ public class CampaignService {
      * @param name Противник которого мы ищем
      * @return UnitEntity с совпадающим именем
      */
-    private UnitEntity getEnemyUnit(String name) {
+    private PlayerUnitEntity getEnemyUnit(String name) {
         // выбираем первого врага (например, по имени)
         return jpaUnitRepository.findByName(name)
                 .orElseThrow(() -> new IllegalStateException("Не найден юнит" + name));

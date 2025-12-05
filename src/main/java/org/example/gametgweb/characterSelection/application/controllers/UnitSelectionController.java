@@ -3,8 +3,8 @@ package org.example.gametgweb.characterSelection.application.controllers;
 import org.example.gametgweb.characterSelection.api.dto.PlayerResponse;
 import org.example.gametgweb.characterSelection.api.dto.SelectUnitRequest;
 import org.example.gametgweb.characterSelection.application.services.CharacterSelectionService;
+import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
-import org.example.gametgweb.characterSelection.domain.model.Unit;
 import org.example.gametgweb.gameplay.game.duel.shared.PlayerDetails;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -81,7 +81,7 @@ public class UnitSelectionController {
      * </pre>
      */
     @GetMapping
-    public ResponseEntity<List<Unit>> getAllUnits() {
+    public ResponseEntity<List<PlayerUnit>> getAllUnits() {
         return ResponseEntity.ok(selectionService.getAllActiveUnits());
     }
 }

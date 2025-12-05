@@ -2,7 +2,7 @@ package org.example.gametgweb.gameplay.game.duel.domain.model;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.example.gametgweb.characterSelection.domain.model.Unit;
+import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
 
 import java.util.Objects;
 
@@ -26,9 +26,9 @@ public class Player {
     private GameSession gameSession;
 
     /** ID активного юнита, которым игрок управляет прямо сейчас */
-    private Unit activeUnit;
+    private PlayerUnit activeUnit;
 
-    public Player(Long id, String username, GameSession gameSession, Unit activeUnit) {
+    public Player(Long id, String username, GameSession gameSession, PlayerUnit activeUnit) {
         this.id = id;
         this.username = username;
         this.gameSession = gameSession;

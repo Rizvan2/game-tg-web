@@ -3,7 +3,7 @@ package org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.enti
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.UnitEntity;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.PlayerUnitEntity;
 
 /**
  * Упрощённая JPA Entity для игрока в игре.
@@ -35,12 +35,12 @@ public class PlayerEntity{
      */
     @ManyToOne
     @JoinColumn(name = "active_unit")
-    private UnitEntity activeUnitEntity;
+    private PlayerUnitEntity activeUnitEntity;
 
     // ====== Конструкторы ======
     public PlayerEntity() {}
 
-    public PlayerEntity(String  password, String username, UnitEntity activeUnitEntity) {
+    public PlayerEntity(String  password, String username, PlayerUnitEntity activeUnitEntity) {
         this.password = password;
         this.username = username;
         this.activeUnitEntity = activeUnitEntity;

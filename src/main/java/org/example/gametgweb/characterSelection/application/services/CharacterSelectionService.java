@@ -1,10 +1,10 @@
 package org.example.gametgweb.characterSelection.application.services;
 
 import org.example.gametgweb.characterSelection.api.dto.SelectUnitRequest;
+import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
+import org.example.gametgweb.characterSelection.domain.repository.PlayerUnitRepositoryImpl;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
-import org.example.gametgweb.characterSelection.domain.model.Unit;
 import org.example.gametgweb.gameplay.game.duel.domain.repository.PlayerRepositoryImpl;
-import org.example.gametgweb.characterSelection.domain.repository.UnitRepositoryImpl;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.mapper.PlayerMapper;
 import org.example.gametgweb.gameplay.game.duel.shared.PlayerDetails;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ import java.util.List;
 @Service
 public class CharacterSelectionService {
 
-    private final UnitRepositoryImpl unitRepository;
+    private final PlayerUnitRepositoryImpl unitRepository;
     private final PlayerRepositoryImpl playerRepository;
 
     /**
@@ -31,7 +31,7 @@ public class CharacterSelectionService {
      * @param playerRepository Репозиторий для доступа и сохранения данных игрока.
      */
     @Autowired
-    public CharacterSelectionService(UnitRepositoryImpl unitRepository, PlayerRepositoryImpl playerRepository) {
+    public CharacterSelectionService(PlayerUnitRepositoryImpl unitRepository, PlayerRepositoryImpl playerRepository) {
         this.unitRepository = unitRepository;
         this.playerRepository = playerRepository;
     }
@@ -58,7 +58,7 @@ public class CharacterSelectionService {
         Player player = PlayerMapper.toDomain(playerDetails.playerEntity());
 
         // 1. Ищем юнита
-        Unit unit = unitRepository.findByName(request.unitName())
+        PlayerUnit unit = unitRepository.findByName(request.unitName())
                 .orElseThrow(() -> new IllegalArgumentException("Юнит с таким именем не найден: " + request.unitName()));
 
         // 2. Ставим выбранного юнита игроку
@@ -73,7 +73,7 @@ public class CharacterSelectionService {
      * @return Все игровые юниты
      */
     @Transactional(readOnly = true)
-    public List<Unit> getAllActiveUnits() {
+    public List<PlayerUnit> getAllActiveUnits() {
         return unitRepository.findAll();
     }
 }

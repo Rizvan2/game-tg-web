@@ -2,7 +2,7 @@ package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.servic
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.gametgweb.characterSelection.domain.model.Unit;
+import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.DuelTurn;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.DuelTurnManager;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.RoomSessionRegistry;
@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * <ul>
  *     <li>Добавление хода игрока через {@link DuelTurnManager};</li>
  *     <li>Определение готовности хода (когда оба игрока сделали выбор);</li>
- *     <li>Вызов {@link CombatService#duelRound(Unit, Body, Unit, Body)} для расчёта результатов боя;</li>
+ *     <li>Вызов {@link CombatService#duelRound(PlayerUnit, Body, PlayerUnit, Body)} для расчёта результатов боя;</li>
  *     <li>Очистку хода после завершения раунда;</li>
  *     <li>Возврат результата боя в виде JSON строки.</li>
  * </ul>
@@ -125,10 +125,10 @@ public class DuelCombatService {
      */
     private String readingRound(DuelTurn turn, String gameCode) throws JsonProcessingException {
         if (turn.isReady()) {
-            Unit u1 = unitRegistryService.getUnit(gameCode, turn.getPlayer1());
-            Unit u2 = unitRegistryService.getUnit(gameCode, turn.getPlayer2());
+            PlayerUnit u1 = unitRegistryService.getUnit(gameCode, turn.getPlayer1());
+            PlayerUnit u2 = unitRegistryService.getUnit(gameCode, turn.getPlayer2());
 
-            var result = combatService.duelRound(u1, turn.getBody1(), u2, turn.getBody2());
+            Map<String, Object> result = combatService.duelRound(u1, turn.getBody1(), u2, turn.getBody2());
 
             // Добавляем явные поля для фронта
             Map<String, Object> response = new HashMap<>(result);

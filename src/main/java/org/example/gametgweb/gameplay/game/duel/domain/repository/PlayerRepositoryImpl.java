@@ -1,9 +1,10 @@
 package org.example.gametgweb.gameplay.game.duel.domain.repository;
 
+import org.example.gametgweb.characterSelection.infrastructure.persistence.mapper.PlayerUnitMapper;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.repository.JpaPlayerUnitRepository;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.mapper.PlayerMapper;
-import org.example.gametgweb.characterSelection.infrastructure.persistence.mapper.UnitMapper;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.repository.JpaPlayerRepository;
 import org.springframework.stereotype.Repository;
 
@@ -21,9 +22,11 @@ import java.util.stream.Collectors;
 public class PlayerRepositoryImpl implements PlayerRepository {
 
     private final JpaPlayerRepository jpaRepository;
+    private final JpaPlayerUnitRepository jpaUnitRepository;
 
-    public PlayerRepositoryImpl(JpaPlayerRepository jpaRepository) {
+    public PlayerRepositoryImpl(JpaPlayerRepository jpaRepository, JpaPlayerUnitRepository jpaUnitRepository) {
         this.jpaRepository = jpaRepository;
+        this.jpaUnitRepository = jpaUnitRepository;
     }
 
     /**
@@ -54,7 +57,7 @@ public class PlayerRepositoryImpl implements PlayerRepository {
 
         existing.setUsername(player.getUsername());
         if (player.getActiveUnit() != null) {
-            existing.setActiveUnitEntity(UnitMapper.toEntity(player.getActiveUnit()));
+            existing.setActiveUnitEntity(PlayerUnitMapper.toEntity(player.getActiveUnit()));
         }
 
         PlayerEntity saved = jpaRepository.save(existing);
@@ -68,7 +71,7 @@ public class PlayerRepositoryImpl implements PlayerRepository {
      */
     @Override
     public void deletePlayer(Player player) {
-        PlayerEntity entity = PlayerMapper.mapPlayerToEntity(player, null, jpaRepository);
+        PlayerEntity entity = PlayerMapper.mapPlayerToEntity(player, null, jpaRepository, jpaUnitRepository);
         jpaRepository.delete(entity);
     }
 
@@ -80,7 +83,7 @@ public class PlayerRepositoryImpl implements PlayerRepository {
      */
     @Override
     public Player updatePlayer(Player player) {
-        PlayerEntity entity = PlayerMapper.mapPlayerToEntity(player, null, jpaRepository);
+        PlayerEntity entity = PlayerMapper.mapPlayerToEntity(player, null, jpaRepository, jpaUnitRepository);
         PlayerEntity updated = jpaRepository.save(entity);
         return PlayerMapper.toDomain(updated);
     }
