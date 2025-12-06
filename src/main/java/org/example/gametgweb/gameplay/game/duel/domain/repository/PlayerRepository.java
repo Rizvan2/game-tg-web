@@ -29,14 +29,14 @@ public interface PlayerRepository {
      * @param player доменная модель игрока
      * @return сохранённая доменная модель {@link Player}
      */
-    Player savePlayer(Player player);
+    Player save(Player player);
 
     /**
      * Удаляет игрока из базы данных.
      *
-     * @param player доменная модель игрока для удаления
+     * @param id уникальный идентификатор игрока
      */
-    void deletePlayer(Player player);
+    void delete(long id);
 
     /**
      * Обновляет данные существующего игрока.
@@ -44,7 +44,7 @@ public interface PlayerRepository {
      * @param player доменная модель игрока с обновлёнными данными
      * @return обновлённая доменная модель {@link Player}
      */
-    Player updatePlayer(Player player);
+    Player update(Player player);
 
     /**
      * Устанавливает состояние игрока в доменной модели.
