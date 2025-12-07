@@ -43,7 +43,9 @@ public class GameSessionEntity {
     @Column(nullable = false)
     private GameState state;
 
-    @OneToMany(mappedBy = "gameSessionEntity", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "gameSessionEntity",
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE},
+            fetch = FetchType.EAGER)
     private List<PlayerEntity> players = new ArrayList<>();
 
     /**
