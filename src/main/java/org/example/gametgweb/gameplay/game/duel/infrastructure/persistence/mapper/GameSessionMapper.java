@@ -1,9 +1,8 @@
 package org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.mapper;
 
-import org.example.gametgweb.characterSelection.infrastructure.persistence.repository.JpaPlayerUnitRepository;
 import org.example.gametgweb.gameplay.game.duel.domain.model.GameSession;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.GameSessionEntity;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.GameSessionEntity;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.repository.JpaPlayerRepository;
 
@@ -49,18 +48,18 @@ public class GameSessionMapper {
      * @return JPA-сущность {@link GameSessionEntity}, пригодная для сохранения в базу данных
      */
     public static GameSessionEntity toEntity(GameSession domain,
-                                             JpaPlayerRepository playerRepo,
-                                             JpaPlayerUnitRepository unitRepo) {
+                                             JpaPlayerRepository playerRepo) {
         if (domain == null) return null;
 
         GameSessionEntity entity = new GameSessionEntity();
+
         entity.setId(domain.getId());
         entity.setGameCode(domain.getGameCode());
         entity.setState(domain.getState());
 
         if (domain.getPlayers() != null) {
             List<PlayerEntity> playerEntities = domain.getPlayers().stream()
-                    .map(p -> PlayerMapper.mapPlayerToEntity(p, entity,playerRepo, unitRepo))
+                    .map(p -> PlayerMapper.toEntity(p, playerRepo))
                     .collect(Collectors.toList());
             entity.setPlayers(playerEntities);
         }

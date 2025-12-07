@@ -1,6 +1,5 @@
 package org.example.gametgweb.gameplay.game.duel.domain.repository;
 
-import org.example.gametgweb.characterSelection.infrastructure.persistence.repository.JpaPlayerUnitRepository;
 import org.example.gametgweb.gameplay.game.duel.domain.model.GameSession;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.GameSessionEntity;
@@ -29,16 +28,13 @@ public class GameSessionRepositoryImpl implements GameSessionRepository {
     private final JpaGameSessionRepository jpaGameSessionRepository;
     private final PlayerRepositoryImpl playerRepository;
     private final JpaPlayerRepository jpaPlayerRepository;
-    private final JpaPlayerUnitRepository jpaPlayerUnitRepository;
 
 
     public GameSessionRepositoryImpl(JpaGameSessionRepository jpaGameSessionRepository,
-                                     PlayerRepositoryImpl playerRepository,
-                                     JpaPlayerRepository jpaPlayerRepository, JpaPlayerUnitRepository jpaPlayerUnitRepository) {
+                                     PlayerRepositoryImpl playerRepository, JpaPlayerRepository jpaPlayerRepository) {
         this.jpaGameSessionRepository = jpaGameSessionRepository;
         this.playerRepository = playerRepository;
         this.jpaPlayerRepository = jpaPlayerRepository;
-        this.jpaPlayerUnitRepository = jpaPlayerUnitRepository;
     }
 
     /**
@@ -102,7 +98,7 @@ public class GameSessionRepositoryImpl implements GameSessionRepository {
     private GameSession createNewGameSession(String gameCode) {
         GameSession game = new GameSession(gameCode, GameState.WAITING);
         long generatedId = jpaGameSessionRepository
-                .save(GameSessionMapper.toEntity(game, jpaPlayerRepository, jpaPlayerUnitRepository))
+                .save(GameSessionMapper.toEntity(game, jpaPlayerRepository))
                 .getId();
         game.setId(generatedId);
         return game;
@@ -131,7 +127,7 @@ public class GameSessionRepositoryImpl implements GameSessionRepository {
     @Override
     @Transactional
     public void save(GameSession game) {
-        GameSessionEntity entity = GameSessionMapper.toEntity(game, jpaPlayerRepository, jpaPlayerUnitRepository);
+        GameSessionEntity entity = GameSessionMapper.toEntity(game, jpaPlayerRepository);
         jpaGameSessionRepository.save(entity);
     }
 
@@ -143,7 +139,7 @@ public class GameSessionRepositoryImpl implements GameSessionRepository {
     @Override
     @Transactional
     public void updateGame(GameSession game) {
-        GameSessionEntity entity = GameSessionMapper.toEntity(game, jpaPlayerRepository, jpaPlayerUnitRepository);
+        GameSessionEntity entity = GameSessionMapper.toEntity(game, jpaPlayerRepository);
         jpaGameSessionRepository.save(entity);
     }
 
