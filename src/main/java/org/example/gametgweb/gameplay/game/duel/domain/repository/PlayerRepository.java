@@ -29,7 +29,7 @@ public interface PlayerRepository {
      * @param player доменная модель игрока
      * @return сохранённая доменная модель {@link Player}
      */
-    Player save(Player player);
+//    Player save(Player player);
 
     /**
      * Удаляет игрока из базы данных.
@@ -45,17 +45,6 @@ public interface PlayerRepository {
      * @return обновлённая доменная модель {@link Player}
      */
     Player update(Player player);
-
-    /**
-     * Устанавливает состояние игрока в доменной модели.
-     * <p>
-     * Могут использоваться операции бизнес-логики, например для изменения
-     * активного юнита, статуса или других свойств игрока.
-     *
-     * @param player доменная модель игрока
-     * @return доменная модель {@link Player} после установки состояния
-     */
-    Player setPlayer(Player player);
 
     /**
      * Находит игрока по имени пользователя (username).

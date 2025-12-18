@@ -6,7 +6,6 @@ import java.util.Optional;
 
 public interface GameSessionRepository {
 
-
     /**
      * Находит игру по коду.
      *
@@ -14,6 +13,13 @@ public interface GameSessionRepository {
      * @return объект {@link GameSession}, если найден
      */
     Optional<GameSession> findByGameCode(String gameCode);
+
+    /**
+     * Обновляет состояние существующей игры.
+     *
+     * @param game игра для обновления
+     */
+    void updateGame(GameSession game);
 
     /**
      * Сохраняет или устанавливает текущее состояние игры.
@@ -27,7 +33,6 @@ public interface GameSessionRepository {
      *
      * @param id идентификатор игры
      */
-    void deleteGame(Long id);
 
     /**
      * Создаёт новую игру с заданным кодом и первым игроком.
@@ -38,10 +43,5 @@ public interface GameSessionRepository {
      */
     GameSession joinOrCreateGame(String gameCode, Long playerId);
 
-    /**
-     * Обновляет состояние существующей игры.
-     *
-     * @param game игра для обновления
-     */
-    void updateGame(GameSession game);
+    void deleteGame(Long id);
 }
