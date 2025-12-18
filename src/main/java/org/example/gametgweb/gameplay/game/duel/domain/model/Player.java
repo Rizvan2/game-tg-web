@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Игрок в игре (доменная сущность)
@@ -33,6 +34,10 @@ public class Player {
         this.username = username;
         this.gameSession = gameSession;
         this.activeUnit = activeUnit;
+    }
+
+    public Optional<PlayerUnit> getActiveUnit() {
+        return Optional.ofNullable(activeUnit);
     }
 
     @Override
