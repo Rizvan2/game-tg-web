@@ -1,6 +1,7 @@
 package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.UnitRegistryService;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
 import org.example.gametgweb.gameplay.game.duel.domain.repository.PlayerRepositoryImpl;
@@ -49,10 +50,11 @@ public class UnitInitializationService {
      */
     public void handleNewJoin(String gameCode, String playerName) {
         Player playerEntity = playerService.findByUsername(playerName);
-        if (playerEntity != null && playerEntity.getActiveUnit() != null) {
-            unitRegistry.registerUnit(gameCode, playerName, playerEntity.getActiveUnit());
+        PlayerUnit playerUnit = playerEntity.getActiveUnit().orElse(null);
+        if (playerEntity != null && playerUnit != null) {
+            unitRegistry.registerUnit(gameCode, playerName, playerUnit);
             log.info("Юнит {} зарегистрирован для игрока {} в комнате {}",
-                    playerEntity.getActiveUnit().getName(), playerName, gameCode);
+                    playerUnit.getName(), playerName, gameCode);
         }
     }
 }

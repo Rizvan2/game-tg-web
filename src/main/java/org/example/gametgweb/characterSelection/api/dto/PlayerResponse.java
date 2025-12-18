@@ -1,5 +1,6 @@
 package org.example.gametgweb.characterSelection.api.dto;
 
+import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
 
 /**
@@ -28,7 +29,9 @@ public record PlayerResponse(
         return new PlayerResponse(
                 player.getId(),
                 player.getUsername(),
-                player.getActiveUnit() != null ? player.getActiveUnit().getId() : null
+                player.getActiveUnit()
+                        .map(PlayerUnit::getId)
+                        .orElse(null)
         );
     }
 }

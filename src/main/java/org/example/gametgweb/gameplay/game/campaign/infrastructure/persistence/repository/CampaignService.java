@@ -45,11 +45,9 @@ public class CampaignService {
      * @throws IllegalStateException если у игрока нету выбранного юнита
      */
     private PlayerUnit getPlayerUnit(Player player) {
-        PlayerUnit playerUnitEntity = player.getActiveUnit();
-        if (playerUnitEntity == null) {
-            throw new IllegalStateException("У игрока не выбран активный юнит");
-        }
-        return playerUnitEntity;
+
+        return player.getActiveUnit()
+                .orElseThrow(() -> new IllegalStateException("У игрока не выбран активный юнит"));
     }
 
     /**
