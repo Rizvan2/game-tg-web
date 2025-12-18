@@ -65,8 +65,28 @@ public class CharacterSelectionService {
         player.setActiveUnit(unit);
 
         // 3. Сохраняем игрока
-        return playerRepository.savePlayer(player);
+        return playerRepository.update(player);
     }
+//    @Transactional
+//    public Player selectUnitForPlayer(SelectUnitRequest request, PlayerDetails playerDetails) {
+//
+//        // 0. ВСЕГДА грузим игрока из БД
+//        Player player = playerRepository.findById(playerDetails.playerEntity().getId())
+//                .orElseThrow(() -> new IllegalStateException("Player not found in DB"));
+//
+//        // 1. Ищем юнита
+//        PlayerUnit unit = unitRepository.findByName(request.unitName())
+//                .orElseThrow(() -> new IllegalArgumentException(
+//                        "Юнит с таким именем не найден: " + request.unitName()
+//                ));
+//
+//        // 2. Ставим выбранного юнита
+//        player.setActiveUnit(unit);
+//
+//        // 3. Сохраняем
+//        return playerRepository.update(player);
+//    }
+
 
     /**
      * Возвращает список всех игровых юнитов

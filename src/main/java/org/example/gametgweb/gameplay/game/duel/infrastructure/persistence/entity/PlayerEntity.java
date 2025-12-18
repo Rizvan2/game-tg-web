@@ -13,14 +13,14 @@ import org.example.gametgweb.characterSelection.infrastructure.persistence.entit
 @Table(name = "players")
 @Getter
 @Setter
-public class PlayerEntity{
+public class PlayerEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String  password;
+    private String password;
 
     @Column(nullable = false, unique = true)
     private String username;
@@ -38,9 +38,10 @@ public class PlayerEntity{
     private PlayerUnitEntity activeUnitEntity;
 
     // ====== Конструкторы ======
-    public PlayerEntity() {}
+    public PlayerEntity() {
+    }
 
-    public PlayerEntity(String  password, String username, PlayerUnitEntity activeUnitEntity) {
+    public PlayerEntity(String password, String username, PlayerUnitEntity activeUnitEntity) {
         this.password = password;
         this.username = username;
         this.activeUnitEntity = activeUnitEntity;
