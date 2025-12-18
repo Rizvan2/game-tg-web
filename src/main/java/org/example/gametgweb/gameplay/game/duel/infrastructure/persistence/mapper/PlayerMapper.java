@@ -1,9 +1,10 @@
 package org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.mapper;
 
+import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
 import org.example.gametgweb.characterSelection.infrastructure.persistence.mapper.PlayerUnitMapper;
+import org.example.gametgweb.gameplay.game.duel.api.dto.PlayerUpdateDto;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.repository.JpaPlayerRepository;
 
 /**
  * Маппер для преобразования между доменной моделью {@link Player} и JPA-сущностью {@link PlayerEntity}.
@@ -25,30 +26,30 @@ public class PlayerMapper {
                 pe.getId(),
                 pe.getUsername(),
                 pe.getGameSessionEntity() != null ? GameSessionMapper.toDomain(pe.getGameSessionEntity()) : null,
-                PlayerUnitMapper.toDomain(pe.getActiveUnitEntity())
+                pe.getActiveUnitEntity() != null ? PlayerUnitMapper.toDomain(pe.getActiveUnitEntity()) : null
         );
     }
 
     /**
-     * Преобразует доменную модель {@link Player} в JPA-сущность {@link PlayerEntity}.
+     * Преобразует доменную модель {@link Player} в DTO {@link PlayerUpdateDto}.
      * <p>
-     * Использует {@link JpaPlayerRepository} для поиска существующей сущности в базе.
-     * Это необходимо, чтобы Hibernate не создавал новую сущность и корректно обновлял существующую.
+     * DTO содержит только поля, которые могут быть изменены в БД:
+     * id, username, gameSessionId, activeUnitId.
+     * Поля gameSessionId и activeUnitId могут быть null, если соответствующие объекты отсутствуют.
+     * <p>
+     * Используется при обновлении существующего {@link PlayerEntity} через репозиторий.
      *
-     * @param player           доменная модель игрока
-     * @param playerRepository репозиторий для поиска сущности игрока в базе
-     * @return существующая или обновлённая JPA-сущность {@link PlayerEntity}
-     * @throws IllegalStateException если игрок с указанным ID не найден в базе
+     * @param player доменная модель с обновляемыми полями
+     * @return {@link PlayerUpdateDto} с данными для обновления сущности
      */
-    public static PlayerEntity toEntity(Player player, JpaPlayerRepository playerRepository) {
-        PlayerEntity entity = playerRepository.findById(player.getId())
-                .orElseThrow(() -> new IllegalStateException("Player not found"));
+    public static PlayerUpdateDto toDto(Player player) {
+        Long gameSessionId = player.getGameSession() != null ? player.getGameSession().getId() : null;
+        Long activeUnitId = player.getActiveUnit().map(PlayerUnit::getId).orElse(null);
 
-        entity.setId(player.getId());
-        entity.setUsername(player.getUsername());
-        entity.setGameSessionEntity(GameSessionMapper.toEntity(player.getGameSession(), playerRepository));
-        entity.setActiveUnitEntity(PlayerUnitMapper.toEntity(player.getActiveUnit()));
-
-        return entity;
+        return new PlayerUpdateDto(
+                player.getId(),
+                player.getUsername(),
+                gameSessionId,
+                activeUnitId);
     }
 }

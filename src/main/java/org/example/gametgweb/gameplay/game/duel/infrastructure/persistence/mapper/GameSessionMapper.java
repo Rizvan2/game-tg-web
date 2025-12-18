@@ -1,25 +1,35 @@
 package org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.mapper;
 
+import org.example.gametgweb.gameplay.game.duel.api.dto.GameSessionEntityDto;
+import org.example.gametgweb.gameplay.game.duel.api.dto.PlayerUpdateDto;
 import org.example.gametgweb.gameplay.game.duel.domain.model.GameSession;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.GameSessionEntity;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.repository.JpaPlayerRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * Маппер для преобразования между доменной моделью {@link GameSession}
- * и JPA-сущностью {@link GameSessionEntity}.
+ * и DTO/сущностью для слоя инфраструктуры {@link GameSessionEntityDto} / {@link GameSessionEntity}.
  * <p>
- * Используется в инфраструктурном слое для изоляции доменной логики
- * от деталей хранения данных (ORM, SQL и т.д.).
+ * Отвечает за:
+ * <ul>
+ *     <li>Конвертацию JPA-сущностей в доменные модели.</li>
+ *     <li>Конвертацию доменных моделей в DTO для передачи данных между слоями.</li>
+ *     <li>Изоляцию бизнес-логики от деталей хранения данных (ORM, база).</li>
+ * </ul>
+ * <p>
+ * Примечание: этот класс не изменяет состояние сущностей, а только преобразует данные.
  */
 public class GameSessionMapper {
 
     /**
      * Преобразует {@link GameSessionEntity} в доменную модель {@link GameSession}.
+     * <p>
+     * Если входная сущность равна null, возвращается null.
+     * Если список игроков в сущности null, в доменной модели используется пустой список.
      *
      * @param entity объект JPA-сущности, полученный из базы данных
      * @return доменная модель {@link GameSession}, отражающая бизнес-логику
@@ -31,7 +41,7 @@ public class GameSessionMapper {
                 ? entity.getPlayers().stream()
                 .map(PlayerMapper::toDomain)
                 .collect(Collectors.toList())
-                : List.of();
+                : new ArrayList<>();
 
         return new GameSession(
                 entity.getId(),
@@ -42,26 +52,38 @@ public class GameSessionMapper {
     }
 
     /**
-     * Преобразует доменную модель {@link GameSession} в JPA-сущность {@link GameSessionEntity}.
+     * Преобразует доменную модель {@link GameSession} в DTO {@link GameSessionEntityDto}.
+     * <p>
+     * Используется для передачи данных о сессии и игроках на слой инфраструктуры или к API.
+     * В случае если список игроков пустой или отсутствует, возвращается пустой список.
      *
-     * @param domain доменная модель, содержащая бизнес-данные
-     * @return JPA-сущность {@link GameSessionEntity}, пригодная для сохранения в базу данных
+     * @param domain доменная модель {@link GameSession}, содержащая данные сессии и игроков
+     * @return DTO {@link GameSessionEntityDto}, содержащий идентификатор сессии, код игры,
+     *         состояние и список игроков в виде {@link PlayerUpdateDto}; если domain равен null,
+     *         возвращается null
      */
-    public static GameSessionEntity toEntity(GameSession domain,
-                                             JpaPlayerRepository playerRepo) {
+    public static GameSessionEntityDto toDto (GameSession domain) {
         if (domain == null) return null;
-
-        GameSessionEntity entity = new GameSessionEntity();
-
-        entity.setId(domain.getId());
-        entity.setGameCode(domain.getGameCode());
-        entity.setState(domain.getState());
+        GameSessionEntityDto entity = new GameSessionEntityDto(
+                domain.getId(),
+                domain.getGameCode(),
+                domain.getState(),
+                new ArrayList<>()
+        );
 
         if (domain.getPlayers() != null) {
-            List<PlayerEntity> playerEntities = domain.getPlayers().stream()
-                    .map(p -> PlayerMapper.toEntity(p, playerRepo))
+
+            // Важно .collect(Collectors.toList()); возвращает не мутабельный лист чтобы его можно было изменять, так и задумано
+            List<PlayerUpdateDto> playerEntities = domain.getPlayers().stream()
+                    .map(PlayerMapper::toDto)
                     .collect(Collectors.toList());
-            entity.setPlayers(playerEntities);
+
+            return new GameSessionEntityDto(
+                    domain.getId(),
+                    domain.getGameCode(),
+                    domain.getState(),
+                    playerEntities
+            );
         }
 
         return entity;
