@@ -3,7 +3,8 @@ package org.example.gametgweb.characterSelection.application.controllers;
 import org.example.gametgweb.characterSelection.api.dto.PlayerResponse;
 import org.example.gametgweb.characterSelection.api.dto.SelectUnitRequest;
 import org.example.gametgweb.characterSelection.application.services.CharacterSelectionService;
-import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
+import org.example.gametgweb.characterSelection.domain.model.Unit;
+import org.example.gametgweb.characterSelection.domain.repository.UnitRepositoryImpl;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
 import org.example.gametgweb.gameplay.game.duel.shared.PlayerDetails;
 import org.springframework.http.ResponseEntity;
@@ -29,9 +30,11 @@ import java.util.List;
 public class UnitSelectionController {
 
     private final CharacterSelectionService selectionService;
+    private final UnitRepositoryImpl unitRepository;
 
-    public UnitSelectionController(CharacterSelectionService selectionService) {
+    public UnitSelectionController(CharacterSelectionService selectionService, UnitRepositoryImpl unitRepository) {
         this.selectionService = selectionService;
+        this.unitRepository = unitRepository;
     }
 
     /**
@@ -81,7 +84,7 @@ public class UnitSelectionController {
      * </pre>
      */
     @GetMapping
-    public ResponseEntity<List<PlayerUnit>> getAllUnits() {
-        return ResponseEntity.ok(selectionService.getAllActiveUnits());
+    public ResponseEntity<List<Unit>> getAllUnits() {
+        return ResponseEntity.ok(unitRepository.findAll());
     }
 }
