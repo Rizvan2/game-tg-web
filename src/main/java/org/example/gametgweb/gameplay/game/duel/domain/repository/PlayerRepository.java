@@ -39,14 +39,6 @@ public interface PlayerRepository {
     void delete(long id);
 
     /**
-     * Обновляет данные существующего игрока.
-     *
-     * @param player доменная модель игрока с обновлёнными данными
-     * @return обновлённая доменная модель {@link Player}
-     */
-    Player update(Player player);
-
-    /**
      * Находит игрока по имени пользователя (username).
      *
      * @param username имя пользователя
