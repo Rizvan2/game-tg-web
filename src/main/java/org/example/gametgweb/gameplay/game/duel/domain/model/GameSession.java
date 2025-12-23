@@ -56,4 +56,12 @@ public class GameSession {
     public void finish() {
         this.state = GameState.FINISHED;
     }
+
+    public Player getPlayerByName(String name) {
+        return players.stream()
+                .filter(p -> p.getUsername().equals(name))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Player " + name + " not found in session"));
+    }
+
 }
