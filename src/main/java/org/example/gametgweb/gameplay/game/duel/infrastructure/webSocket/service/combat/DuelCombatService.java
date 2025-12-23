@@ -3,15 +3,19 @@ package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.servic
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
+import org.example.gametgweb.gameplay.game.duel.api.dto.DuelRoundResponseDto;
+import org.example.gametgweb.gameplay.game.duel.application.services.DuelFinishService;
+import org.example.gametgweb.gameplay.game.duel.domain.repository.GameSessionRepositoryImpl;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.DuelTurn;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.DuelTurnManager;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.DuelRoundResult;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.RoomSessionRegistry;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.UnitRegistryService;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionDefinition;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,7 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *     <li>Возврат результата боя в виде JSON строки.</li>
  * </ul>
  */
-@Component
+@Service
 public class DuelCombatService {
 
     private final DuelTurnManager turnManager;
@@ -35,12 +39,15 @@ public class DuelCombatService {
     private final RoomSessionRegistry roomSessionRegistry;
     private final UnitRegistryService unitRegistryService;
     private final ObjectMapper objectMapper;
+    private final DuelFinishService duelFinishService;
+    private final GameSessionRepositoryImpl gameSessionRepository;
     /**
      * Потокобезопасная карта для хранения объектов-мониторов, используемых для синхронизации
      * доступа к ходу дуэли (DuelTurn) по коду комнаты.
      * Key: gameCode, Value: Object (монитор блокировки)
      */
     private final ConcurrentHashMap<String, Object> locks = new ConcurrentHashMap<>();
+    private final TransactionDefinition transactionDefinition;
 
     /**
      * Конструктор для внедрения зависимостей.
@@ -52,12 +59,15 @@ public class DuelCombatService {
      * @param objectMapper        Объект для сериализации ответов в JSON.
      */
     @Autowired
-    public DuelCombatService(DuelTurnManager turnManager, CombatService combatService, RoomSessionRegistry roomSessionRegistry, UnitRegistryService unitRegistryService, ObjectMapper objectMapper) {
+    public DuelCombatService(DuelTurnManager turnManager, CombatService combatService, RoomSessionRegistry roomSessionRegistry, UnitRegistryService unitRegistryService, ObjectMapper objectMapper, DuelFinishService duelFinishService, GameSessionRepositoryImpl gameSessionRepository, TransactionDefinition transactionDefinition) {
         this.turnManager = turnManager;
         this.combatService = combatService;
         this.roomSessionRegistry = roomSessionRegistry;
         this.unitRegistryService = unitRegistryService;
         this.objectMapper = objectMapper;
+        this.duelFinishService = duelFinishService;
+        this.gameSessionRepository = gameSessionRepository;
+        this.transactionDefinition = transactionDefinition;
     }
 
     /**
@@ -128,16 +138,20 @@ public class DuelCombatService {
             PlayerUnit u1 = unitRegistryService.getUnit(gameCode, turn.getPlayer1());
             PlayerUnit u2 = unitRegistryService.getUnit(gameCode, turn.getPlayer2());
 
-            Map<String, Object> result = combatService.duelRound(u1, turn.getBody1(), u2, turn.getBody2());
+            DuelRoundResult result = combatService.duelRound(u1, turn.getBody1(), u2, turn.getBody2());
+
 
             // Добавляем явные поля для фронта
-            Map<String, Object> response = new HashMap<>(result);
-            response.put("attacker", u1.getName());
-            response.put("defender", u2.getName());
+            DuelRoundResponseDto response = new DuelRoundResponseDto(
+                    u1.getName(),
+                    u2.getName(),
+                    result.turnMessages(),
+                    result.attackerHp(),
+                    result.defenderHp()
+            );
 
             // очищаем ход после раунда
             turnManager.removeTurn(gameCode);
-
             return objectMapper.writeValueAsString(response);
         }
 
