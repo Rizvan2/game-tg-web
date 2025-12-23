@@ -4,6 +4,7 @@ import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -15,7 +16,7 @@ import java.util.Map;
  * <p>Используется {@link DuelTurnManager} для управления ходами по каждой игровой комнате.
  */
 public class DuelTurn {
-    private final Map<String, Body> moves = new HashMap<>();
+    private final Map<String, Body> moves = new LinkedHashMap<>();
     private final Map<String, Boolean> readyFlags = new HashMap<>(); // игрок нажал "Атаковать"
     private boolean bothSelectedNotified = false;
 
