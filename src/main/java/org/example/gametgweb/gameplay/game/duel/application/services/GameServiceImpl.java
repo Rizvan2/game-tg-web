@@ -64,6 +64,11 @@ public class GameServiceImpl implements GameService {
         jpaGameSessionRepository.deleteById(id);
     }
 
+    @Override
+    public void deleteByGameCode(String gameCode) {
+        jpaGameSessionRepository.deleteByGameCode(gameCode);
+    }
+
     /**
      * Создаёт новую игру или возвращает существующую, а затем привязывает к ней игрока.
      * <p>
