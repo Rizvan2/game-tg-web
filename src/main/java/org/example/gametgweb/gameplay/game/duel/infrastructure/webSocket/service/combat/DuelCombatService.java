@@ -2,19 +2,18 @@ package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.servic
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
-import org.example.gametgweb.gameplay.game.duel.api.dto.DuelRoundResponseDto;
-import org.example.gametgweb.gameplay.game.duel.application.services.DuelFinishService;
-import org.example.gametgweb.gameplay.game.duel.domain.repository.GameSessionRepositoryImpl;
+import org.example.gametgweb.gameplay.game.duel.application.services.DuelDeathDetector;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.DuelTurn;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.DuelTurnManager;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.DuelRoundResponseDto;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.DuelRoundResult;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.RoomSessionRegistry;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.UnitRegistryService;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionDefinition;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *     <li>Возврат результата боя в виде JSON строки.</li>
  * </ul>
  */
+@Slf4j
 @Service
 public class DuelCombatService {
 
@@ -39,15 +39,14 @@ public class DuelCombatService {
     private final RoomSessionRegistry roomSessionRegistry;
     private final UnitRegistryService unitRegistryService;
     private final ObjectMapper objectMapper;
-    private final DuelFinishService duelFinishService;
-    private final GameSessionRepositoryImpl gameSessionRepository;
+    private final DuelDeathDetector duelDeathDetector;
+
     /**
      * Потокобезопасная карта для хранения объектов-мониторов, используемых для синхронизации
      * доступа к ходу дуэли (DuelTurn) по коду комнаты.
      * Key: gameCode, Value: Object (монитор блокировки)
      */
     private final ConcurrentHashMap<String, Object> locks = new ConcurrentHashMap<>();
-    private final TransactionDefinition transactionDefinition;
 
     /**
      * Конструктор для внедрения зависимостей.
@@ -59,15 +58,18 @@ public class DuelCombatService {
      * @param objectMapper        Объект для сериализации ответов в JSON.
      */
     @Autowired
-    public DuelCombatService(DuelTurnManager turnManager, CombatService combatService, RoomSessionRegistry roomSessionRegistry, UnitRegistryService unitRegistryService, ObjectMapper objectMapper, DuelFinishService duelFinishService, GameSessionRepositoryImpl gameSessionRepository, TransactionDefinition transactionDefinition) {
+    public DuelCombatService(DuelTurnManager turnManager,
+                             CombatService combatService,
+                             RoomSessionRegistry roomSessionRegistry,
+                             UnitRegistryService unitRegistryService,
+                             ObjectMapper objectMapper,
+                             DuelDeathDetector duelDeathDetector) {
         this.turnManager = turnManager;
         this.combatService = combatService;
         this.roomSessionRegistry = roomSessionRegistry;
         this.unitRegistryService = unitRegistryService;
         this.objectMapper = objectMapper;
-        this.duelFinishService = duelFinishService;
-        this.gameSessionRepository = gameSessionRepository;
-        this.transactionDefinition = transactionDefinition;
+        this.duelDeathDetector = duelDeathDetector;
     }
 
     /**
@@ -149,6 +151,8 @@ public class DuelCombatService {
                     result.attackerHp(),
                     result.defenderHp()
             );
+
+            duelDeathDetector.checkAndPublishDuelResult(gameCode, u1, u2);
 
             // очищаем ход после раунда
             turnManager.removeTurn(gameCode);
