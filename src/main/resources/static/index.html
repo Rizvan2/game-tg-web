@@ -46,7 +46,7 @@
 
       if (!response.ok) throw new Error('Ошибка при запуске дуэли');
 
-      window.location.href = `/gameplay.html?gameCode=${encodeURIComponent(roomId)}`;
+      window.location.href = `/duel-battle.html?gameCode=${encodeURIComponent(roomId)}`;
     } catch (e) {
       status.textContent = 'Ошибка: ' + e.message;
     }
