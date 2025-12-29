@@ -80,4 +80,10 @@ public class UnitRegistryService {
     public Map<String, PlayerUnit> getUnits(String gameCode) {
         return getGameUnits().getOrDefault(gameCode, Map.of());
     }
+
+    public String resolvePlayer(String gameCode, PlayerUnit unit) {
+        return getUnitToPlayerMap()
+                .getOrDefault(gameCode, Map.of())
+                .get(unit.getName());
+    }
 }
