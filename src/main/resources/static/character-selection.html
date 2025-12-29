@@ -15,18 +15,21 @@
             max-width: 900px;
             margin-top: 30px;
         }
+
         .unit-card {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             padding: 15px;
             text-align: center;
             cursor: pointer;
             transition: 0.2s ease;
         }
+
         .unit-card:hover {
             transform: scale(1.05);
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
         }
+
         .unit-card img {
             width: 130px;
             height: 130px;
@@ -34,6 +37,7 @@
             border: 2px solid #fff;
             margin-bottom: 10px;
         }
+
         .select-btn {
             margin-top: 10px;
             padding: 8px 15px;
@@ -44,9 +48,11 @@
             cursor: pointer;
             font-size: 0.9em;
         }
+
         .select-btn:hover {
             background: #5848c2;
         }
+
         #backBtn {
             position: fixed;
             top: 20px;
@@ -59,6 +65,7 @@
             border-radius: 12px;
             transition: background-color 0.3s, transform 0.2s;
         }
+
         h1 {
             margin-top: 100px; /* например, чтобы ниже кнопки */
             text-align: center;
@@ -72,6 +79,22 @@
 
 <div id="unitsContainer" class="units-grid"></div>
 
+
+<div id="nameModal"
+     style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); align-items:center; justify-content:center;">
+    <div style="background:#1e1e2e; padding:20px; border-radius:12px; width:300px; text-align:center;">
+        <h3>Имя юнита</h3>
+        <input id="unitNameInput"
+               type="text"
+               placeholder="Например: Сэр NullPointer"
+               style="width:100%; padding:8px; border-radius:8px; border:none; margin-top:10px;">
+        <div style="margin-top:15px;">
+            <button id="confirmNameBtn" class="select-btn">Подтвердить</button>
+        </div>
+    </div>
+</div>
+
+</body>
 <script>
     async function loadUnits() {
         const response = await fetch('/units');
@@ -90,21 +113,38 @@
             `;
 
             // обработчик выбора юнита
-            card.querySelector('button').onclick = async () => {
-                await fetch('/units/select', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ unitName: unit.name })
-                });
-                window.location.href = "/index.html";
-            };
-
+            card.querySelector('button').onclick = () => openModal(unit);
             container.appendChild(card);
+
         });
     }
 
     loadUnits();
-</script>
 
-</body>
+    let selectedUnit = null;
+
+    function openModal(unit) {
+        selectedUnit = unit;
+        document.getElementById('unitNameInput').value = '';
+        document.getElementById('nameModal').style.display = 'flex';
+    }
+
+    async function confirmSelection() {
+        const customName = document.getElementById('unitNameInput').value.trim();
+
+        await fetch('/units/select', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                unitName: selectedUnit.name,
+                customUnitName: customName || null
+            })
+        });
+
+        window.location.href = "/index.html";
+    }
+
+    document.getElementById('confirmNameBtn').onclick = confirmSelection;
+
+</script>
 </html>

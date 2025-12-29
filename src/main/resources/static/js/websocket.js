@@ -39,6 +39,8 @@
         };
 
         ws.onmessage = (event) => {
+            console.log("🛰️ RAW MESSAGE:", event.data); // <- прямо в начале
+
             const msg = JSON.parse(event.data);
 
             if (msg.type === 'join') {
@@ -68,7 +70,8 @@
             if (msg.type === 'duelResult') {
                 console.log("🏁 DUEL RESULT EVENT RECEIVED");
                 console.log("➡️ resultText:", msg.resultText);
-                console.log("➡️ full payload:", msg);
+                console.log("➡️ targetPlayer:", msg.targetPlayer);
+                console.log("➡️ full payload:", msg); // весь объект для отладки
 
                 showDuelResult(msg.resultText);
                 return;
@@ -176,7 +179,10 @@
         ws.send(JSON.stringify({ type: "attack", body }));
         return true;
     };
+
     function showDuelResult(text) {
+        console.log("🏆 Вызов showDuelResult:", text); // <-- логируем событие
+
         const modal = document.getElementById('duelResultModal');
         const title = document.getElementById('duelResultTitle');
 
@@ -184,8 +190,9 @@
         modal.style.display = 'flex';
     }
 
+
     document.getElementById('exitToMenuBtn').addEventListener('click', () => {
-        window.location.href = '/index';
+        window.location.href = '/';
     });
 
 })();
