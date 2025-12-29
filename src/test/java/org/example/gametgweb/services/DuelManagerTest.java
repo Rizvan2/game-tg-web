@@ -45,7 +45,7 @@
 //        verifyNoInteractions(playerService); // DuelManager не работает с игроками напрямую
 //
 //        // Проверка результата
-//        assertEquals("/gameplay.html?id=123", link);
+//        assertEquals("/duel-battle.html?id=123", link);
 //    }
 //
 //

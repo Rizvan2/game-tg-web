@@ -50,11 +50,17 @@ public class UnitInitializationService {
      */
     public void handleNewJoin(String gameCode, String playerName) {
         Player playerEntity = playerService.findByUsername(playerName);
+        if (playerEntity == null) return;
+
         PlayerUnit playerUnit = playerEntity.getActiveUnit().orElse(null);
-        if (playerEntity != null && playerUnit != null) {
-            unitRegistry.registerUnit(gameCode, playerName, playerUnit);
-            log.info("Юнит {} зарегистрирован для игрока {} в комнате {}",
-                    playerUnit.getName(), playerName, gameCode);
-        }
+        if (playerUnit == null) return;
+
+        // Кладем полностью загруженный юнит в реестр
+        unitRegistry.registerUnit(gameCode, playerName, playerUnit);
+
+        log.info("Юнит {} зарегистрирован для игрока {} в комнате {} с айди {}",
+                playerUnit.getName(), playerName, gameCode, playerUnit.getId());
     }
+
+
 }
