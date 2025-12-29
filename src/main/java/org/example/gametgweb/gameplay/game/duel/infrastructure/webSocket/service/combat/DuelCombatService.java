@@ -140,6 +140,9 @@ public class DuelCombatService {
             PlayerUnit u1 = unitRegistryService.getUnit(gameCode, turn.getPlayer1());
             PlayerUnit u2 = unitRegistryService.getUnit(gameCode, turn.getPlayer2());
 
+            log.info(String.valueOf(u1.getId()));
+            log.info(String.valueOf(u2.getId()));
+
             DuelRoundResult result = combatService.duelRound(u1, turn.getBody1(), u2, turn.getBody2());
 
 
@@ -152,8 +155,10 @@ public class DuelCombatService {
                     result.defenderHp()
             );
 
-            duelDeathDetector.checkAndPublishDuelResult(gameCode, u1, u2);
+            String player1Name = unitRegistryService.resolvePlayer(gameCode, u1);
+            String player2Name = unitRegistryService.resolvePlayer(gameCode, u2);
 
+            duelDeathDetector.checkAndPublishDuelResult(gameCode, u1, u2, player1Name, player2Name);
             // очищаем ход после раунда
             turnManager.removeTurn(gameCode);
             return objectMapper.writeValueAsString(response);

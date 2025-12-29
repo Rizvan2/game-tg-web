@@ -1,8 +1,10 @@
 package org.example.gametgweb.characterSelection.application.services;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.gametgweb.characterSelection.api.dto.SelectUnitRequest;
 import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
 import org.example.gametgweb.characterSelection.domain.repository.PlayerUnitRepositoryImpl;
+import org.example.gametgweb.characterSelection.domain.repository.UnitRepositoryImpl;
 import org.example.gametgweb.gameplay.game.duel.application.services.PlayerUnitSelectionService;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.mapper.PlayerMapper;
@@ -16,10 +18,12 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>
  * Взаимодействует с репозиториями для поиска юнитов и обновления данных игрока.
  */
+@Slf4j
 @Service
 public class CharacterSelectionService {
 
-    private final PlayerUnitRepositoryImpl unitRepository;
+    private final UnitRepositoryImpl unitRepository;
+    private final PlayerUnitRepositoryImpl playerUnitRepository;
     private final PlayerUnitSelectionService playerUnitSelectionService;
 
     /**
@@ -28,21 +32,29 @@ public class CharacterSelectionService {
      * @param unitRepository Репозиторий для доступа к данным юнитов.
      */
     @Autowired
-    public CharacterSelectionService(PlayerUnitRepositoryImpl unitRepository, PlayerUnitSelectionService playerUnitSelectionService) {
+    public CharacterSelectionService(UnitRepositoryImpl unitRepository, PlayerUnitRepositoryImpl playerUnitRepository, PlayerUnitSelectionService playerUnitSelectionService) {
         this.unitRepository = unitRepository;
+        this.playerUnitRepository = playerUnitRepository;
         this.playerUnitSelectionService = playerUnitSelectionService;
     }
 
 
     @Transactional
     public Player selectUnitForPlayer(SelectUnitRequest request, PlayerDetails playerDetails) {
-        // Преобразование сущности игрока из Spring Security в доменную модель
+        log.info(request.customUnitName(), request.unitName());
         Player player = PlayerMapper.toDomain(playerDetails.playerEntity());
 
-        // 1. Ищем юнита
-        PlayerUnit unit = unitRepository.findByName(request.unitName())
-                .orElseThrow(() -> new IllegalArgumentException("Юнит с таким именем не найден: " + request.unitName()));
+        PlayerUnit unit = new PlayerUnit(
+                unitRepository.findByName(request.unitName())
+                        .orElseThrow(() -> new IllegalArgumentException("Юнит с таким именем не найден: " + request.unitName())),
+                request.customUnitName()
+        );
 
-        return playerUnitSelectionService.selectUnitForPlayer(player, unit);
+        // Сохраняем и используем объект с присвоенным id
+        PlayerUnit savedUnit = playerUnitRepository.save(unit);
+        log.info(savedUnit.getId().toString());
+
+        return playerUnitSelectionService.selectUnitForPlayer(player, savedUnit);
     }
+
 }

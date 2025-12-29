@@ -17,23 +17,23 @@ public class DuelDeathDetector {
         this.eventPublisher = eventPublisher;
     }
 
-    public void checkAndPublishDuelResult(String gameCode, PlayerUnit u1, PlayerUnit u2) {
+    public void checkAndPublishDuelResult(String gameCode, PlayerUnit u1, PlayerUnit u2, String player1Name, String player2Name) {
 
         if (!u1.isAlive() && !u2.isAlive()) {
-            eventPublisher.publishEvent(new DuelDrawEvent(gameCode, u1, u2));
-            log.info("Оба юнита погибли: {} и {}", u1, u2);
+            eventPublisher.publishEvent(new DuelDrawEvent(gameCode, u1, u2, player1Name, player2Name));
+            log.info("Оба игрока проиграли: {} и {}", player1Name, player2Name);
             return;
         }
 
         if (!u1.isAlive()) {
-            eventPublisher.publishEvent(new DuelFinishedEvent(gameCode, u2, u1));
-            log.info("Юнит {} победил, юнит {} сбрасывается", u2, u1);
+            eventPublisher.publishEvent(new DuelFinishedEvent(gameCode, u2, u1, player1Name, player2Name));
+            log.info("Игрок {} победил, юнит игрока {} сбрасывается", player2Name, player1Name);
             return;
         }
 
         if (!u2.isAlive()) {
-            eventPublisher.publishEvent(new DuelFinishedEvent(gameCode, u1, u2));
-            log.info("Юнит {} победил, юнит {} сбрасывается", u1, u2);
+            eventPublisher.publishEvent(new DuelFinishedEvent(gameCode, u1, u2, player1Name, player2Name));
+            log.info("Игрок {} победил, юнит игрока {} сбрасывается", player1Name, player2Name);
         }
     }
 }
