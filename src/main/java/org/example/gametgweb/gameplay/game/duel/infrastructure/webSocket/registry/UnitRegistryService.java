@@ -20,6 +20,12 @@ public class UnitRegistryService {
     private final ConcurrentHashMap<String, Map<String, PlayerUnit>> gameUnits = new ConcurrentHashMap<>();
 
     /**
+     * Имена игроков по именам их юнитов
+     * Key — String unit.getName(), Value — String playerName
+     */
+    private final ConcurrentHashMap<String, Map<String, String>> unitToPlayerMap = new ConcurrentHashMap<>();
+
+    /**
      * Регистрирует юнита игрока в комнате.
      *
      * @param gameCode   код комнаты
@@ -28,6 +34,8 @@ public class UnitRegistryService {
      */
     public void registerUnit(String gameCode, String playerName, PlayerUnit unit) {
         gameUnits.computeIfAbsent(gameCode, k -> new ConcurrentHashMap<>()).put(playerName, unit);
+        unitToPlayerMap.computeIfAbsent(gameCode, k -> new ConcurrentHashMap<>())
+                .put(unit.getName(), playerName);
         log.info("Юнит игрока {} (имя юнита {}) добавлен в комнату {}", playerName, unit.getName(), gameCode);
     }
 
@@ -58,9 +66,16 @@ public class UnitRegistryService {
      * @param playerName имя игрока
      */
     public void removeUnit(String gameCode, String playerName) {
-        getUnit(gameCode, playerName); // для будущей логики, например очистка
+        PlayerUnit unit = gameUnits.getOrDefault(gameCode, Map.of()).remove(playerName);
+        if (unit != null) {
+            Map<String, String> unitMap = unitToPlayerMap.get(gameCode);
+            if (unitMap != null) {
+                unitMap.remove(unit.getName());
+            }
+        }
         log.info("Юнит {} удален из комнаты {}", playerName, gameCode);
     }
+
 
     public Map<String, PlayerUnit> getUnits(String gameCode) {
         return getGameUnits().getOrDefault(gameCode, Map.of());
