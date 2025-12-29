@@ -1,5 +1,6 @@
 package org.example.gametgweb.gameplay.game.duel.application.services;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
 import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.PlayerUnitEntity;
 import org.example.gametgweb.characterSelection.infrastructure.persistence.mapper.PlayerUnitMapper;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
  * (HP, эффекты, кулдауны и т.п.) при повторном выборе того же типа юнита.
  * </p>
  */
+@Slf4j
 @Service
 public class PlayerUnitSelectionService {
 
@@ -60,7 +62,8 @@ public class PlayerUnitSelectionService {
     public Player selectUnitForPlayer(Player player, PlayerUnit unit) {
         PlayerEntity entity = jpaPlayerRepository.findById(player.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Player not found"));
-
+        log.info(unit.getId().toString());
+        log.info("айди вроде найден");
         PlayerUnitEntity playerUnitEntity = playerUnitRepository.findById(unit.getId())
                 .orElseGet(() -> PlayerUnitMapper.toEntity(unit));
 
