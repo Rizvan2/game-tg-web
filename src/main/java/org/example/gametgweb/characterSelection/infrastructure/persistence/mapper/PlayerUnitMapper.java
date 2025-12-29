@@ -33,14 +33,20 @@ public class PlayerUnitMapper {
      * @return JPA-сущность юнита
      */
     public static PlayerUnitEntity toEntity(PlayerUnit unit) {
-        return new PlayerUnitEntity(
-                unit.getId(),
-                UnitMapper.toEntity(unit.getTemplate()),
-                unit.getName(),
-                unit.getMaxHealth(),
-                unit.getHealth(),
-                unit.getDamage(),
-                unit.getImagePath()
-        );
+        PlayerUnitEntity entity = new PlayerUnitEntity();
+
+        // id — только если есть
+        if (unit.getId() != null) {
+            entity.setId(unit.getId());
+        }
+
+        entity.setTemplate(UnitMapper.toEntity(unit.getTemplate()));
+        entity.setName(unit.getName());
+        entity.setMaxHealth(unit.getMaxHealth());
+        entity.setHealth(unit.getHealth());
+        entity.setDamage(unit.getDamage());
+        entity.setImagePath(unit.getImagePath());
+
+        return entity;
     }
 }
