@@ -12,8 +12,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
-
 /**
  * DuelFinishEventListener — слушатель доменных событий окончания дуэли.
  *
@@ -71,8 +69,8 @@ public class DuelFinishEventListener {
         PlayerUnit winner = event.winner();
         PlayerUnit loser = event.loser();
 
-        String winnerPlayerName = resolvePlayer(event.gameCode(), winner);
-        String loserPlayerName = resolvePlayer(event.gameCode(), loser);
+        String winnerPlayerName = unitRegistryService.resolvePlayer(event.gameCode(), winner);
+        String loserPlayerName = unitRegistryService.resolvePlayer(event.gameCode(), loser);
 
         duelResultNotifier.sendWin(event.gameCode(), winnerPlayerName);
         duelResultNotifier.sendLose(event.gameCode(), loserPlayerName);
@@ -95,18 +93,12 @@ public class DuelFinishEventListener {
         PlayerUnit loser1 = event.loser1();
         PlayerUnit loser2 = event.loser2();
 
-        String loserPlayerName1 = resolvePlayer(event.gameCode(), loser1);
-        String loserPlayerName2 = resolvePlayer(event.gameCode(), loser2);
+        String loserPlayerName1 = unitRegistryService.resolvePlayer(event.gameCode(), loser1);
+        String loserPlayerName2 = unitRegistryService.resolvePlayer(event.gameCode(), loser2);
 
         duelResultNotifier.sendLose(event.gameCode(), loserPlayerName1);
         duelResultNotifier.sendLose(event.gameCode(), loserPlayerName2);
 
         duelFinishService.finishDuelWithDoubleDeath(event.gameCode(), loser1, loser2);
-    }
-
-    private String resolvePlayer(String gameCode, PlayerUnit unit) {
-        return unitRegistryService.getUnitToPlayerMap()
-                .getOrDefault(gameCode, Map.of())
-                .get(unit.getName());
     }
 }
