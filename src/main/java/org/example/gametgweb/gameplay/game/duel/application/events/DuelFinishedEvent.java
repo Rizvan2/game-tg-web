@@ -5,5 +5,7 @@ import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
 public record DuelFinishedEvent(
         String gameCode,
         PlayerUnit winner,
-        PlayerUnit loser
+        PlayerUnit loser,
+        String player1Name,
+        String player2Name
 ) {}
