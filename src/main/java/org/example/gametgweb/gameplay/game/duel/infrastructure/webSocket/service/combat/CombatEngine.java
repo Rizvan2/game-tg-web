@@ -1,7 +1,7 @@
 package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.gametgweb.characterSelection.domain.model.Unit;
+import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 import org.springframework.stereotype.Component;
 
@@ -17,11 +17,11 @@ public class CombatEngine {
      * @param target часть тела, в которую идёт удар
      * @return текстовое описание хода
      */
-    public String performAttack(Unit attacker, Unit defender, Body target) {
+    public String performAttack(PlayerUnit attacker, PlayerUnit defender, Body target) {
         if (attacker == null || defender == null)
             throw new IllegalArgumentException("Attacker или defender не могут быть null");
 
-        long damage = calculateDamage(attacker, defender, target);
+        long damage = calculateDamage(attacker, target);
         defender.takeDamage(target, damage);
 
         String message = "%s атакует %s в %s на %d урона".formatted(
@@ -38,7 +38,7 @@ public class CombatEngine {
     /**
      * Здесь можно добавить механику критов, брони, уклонения и т.д.
      */
-    private long calculateDamage(Unit attacker, Unit defender, Body target) {
+    private long calculateDamage(PlayerUnit attacker, Body target) {
         long baseDamage = attacker.getDamage();
 
         // Критический удар 10%

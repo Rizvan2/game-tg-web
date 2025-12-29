@@ -1,6 +1,7 @@
 package org.example.gametgweb.characterSelection.domain.model;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.GameUnit;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
@@ -9,12 +10,13 @@ import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
  * Доменная модель юнита — отражает игровую логику, а не структуру таблицы.
  */
 @Getter
+@Setter
 @Slf4j
 public class Unit implements GameUnit {
 
     private final long id;
     private final String name;
-    private final long maxHealth;
+    private long maxHealth;
     private long health;
     private final long damage;
     private final String imagePath;
@@ -49,6 +51,7 @@ public class Unit implements GameUnit {
     }
 
     /** Лечение */
+    @Override
     public void heal(long amount) {
         if (amount < 0) throw new IllegalArgumentException("Heal amount cannot be negative");
         this.health = Math.min(this.maxHealth, this.health + amount);

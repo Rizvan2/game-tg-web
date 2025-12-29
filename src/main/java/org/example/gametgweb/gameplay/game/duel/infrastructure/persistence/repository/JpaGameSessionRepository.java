@@ -23,4 +23,6 @@ public interface JpaGameSessionRepository extends JpaRepository<GameSessionEntit
      *         или пустой {@link Optional}, если сессия с таким кодом отсутствует
      */
     Optional<GameSessionEntity> findByGameCode(String gameCode);
+
+    void deleteByGameCode(String gameCode);
 }

@@ -1,11 +1,11 @@
 package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.utils;
 
 import lombok.extern.slf4j.Slf4j;
-import org.example.gametgweb.characterSelection.domain.model.Unit;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.UnitRegistryService;
+import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.UnitStateDTO;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.UnitsStateMessageDTO;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.SessionRegistryService;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.UnitRegistryService;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.MessageDispatcherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -80,7 +80,7 @@ public class UnitStateBroadcaster {
         List<UnitStateDTO> units = new ArrayList<>();
 
         for (String player : playerOrder) {
-            Unit unit = unitRegistry.getUnit(gameCode, player);
+            PlayerUnit unit = unitRegistry.getUnit(gameCode, player);
             if (unit == null) continue;
 
             units.add(new UnitStateDTO(

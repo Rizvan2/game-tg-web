@@ -325,4 +325,38 @@ body {
     border-right: 6px solid transparent;
     border-top: 6px solid rgba(15,15,15,0.85);
 }
+/* результат боя */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    display: none;               /* 👈 скрыта по умолчанию */
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-window {
+    background: rgba(20, 20, 20, 0.95);
+    color: #fff;
+    padding: 40px 60px;
+    border-radius: 16px;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(0,0,0,0.8);
+}
+
+.modal-window h1 {
+    margin-bottom: 30px;
+    font-size: 48px;       /* увеличиваем размер */
+    color: #FFD700;        /* золотисто-жёлтый цвет */
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.7); /* тень для контраста */
+    word-wrap: break-word; /* перенос длинного текста */
+}
+
+.modal-window button {
+    padding: 12px 24px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
 

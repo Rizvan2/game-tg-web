@@ -1,62 +1,55 @@
 package org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.mapper;
 
-import org.example.gametgweb.characterSelection.infrastructure.persistence.mapper.UnitMapper;
+import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.mapper.PlayerUnitMapper;
+import org.example.gametgweb.gameplay.game.duel.api.dto.PlayerUpdateDto;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
-import org.example.gametgweb.characterSelection.domain.model.Unit;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.GameSessionEntity;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.repository.JpaPlayerRepository;
 
+/**
+ * Маппер для преобразования между доменной моделью {@link Player} и JPA-сущностью {@link PlayerEntity}.
+ * <p>
+ * Используется для изоляции доменной логики от инфраструктуры.
+ * Обрабатывает также активного юнита игрока ({@link PlayerUnitMapper}), включая текущее состояние и связь с шаблоном юнита.
+ */
 public class PlayerMapper {
     /**
-     * Преобразует {@link PlayerEntity} в доменную модель {@link Player}.
-     * <p>
-     * GameSession не заполняется, чтобы избежать циклических зависимостей.
+     * Преобразует JPA-сущность {@link PlayerEntity} в доменную модель {@link Player}.
      *
-     * @param pe JPA-сущность игрока
-     * @return доменная модель {@link Player}
+     * @param pe JPA-сущность игрока, полученная из базы данных
+     * @return доменная модель {@link Player}, отражающая бизнес-логику
      */
     public static Player toDomain(PlayerEntity pe) {
-        Unit activeUnit = pe.getActiveUnitEntity() != null
-                ? UnitMapper.toDomain(pe.getActiveUnitEntity())
-                : null;
+        if (pe == null) return null;
 
         return new Player(
                 pe.getId(),
                 pe.getUsername(),
-                null, // GameSession заполняется выше, чтобы не делать рекурсию
-                activeUnit
+                pe.getGameSessionEntity() != null ? GameSessionMapper.toDomain(pe.getGameSessionEntity()) : null,
+                pe.getActiveUnitEntity() != null ? PlayerUnitMapper.toDomain(pe.getActiveUnitEntity()) : null
         );
     }
 
     /**
-     * Преобразует доменную модель {@link Player} в JPA-сущность {@link PlayerEntity}.
+     * Преобразует доменную модель {@link Player} в DTO {@link PlayerUpdateDto}.
      * <p>
-     * Устанавливает обратную связь с {@link GameSessionEntity}.
+     * DTO содержит только поля, которые могут быть изменены в БД:
+     * id, username, gameSessionId, activeUnitId.
+     * Поля gameSessionId и activeUnitId могут быть null, если соответствующие объекты отсутствуют.
+     * <p>
+     * Используется при обновлении существующего {@link PlayerEntity} через репозиторий.
      *
-     * @param p доменная модель игрока
-     * @param gameSessionEntity ссылка на игровую сессию (для связи OneToMany)
-     * @return JPA-сущность игрока
+     * @param player доменная модель с обновляемыми полями
+     * @return {@link PlayerUpdateDto} с данными для обновления сущности
      */
-    public static PlayerEntity mapPlayerToEntity(Player p
-            , GameSessionEntity gameSessionEntity, JpaPlayerRepository playerRepo) {
-        PlayerEntity pe;
+    public static PlayerUpdateDto toDto(Player player) {
+        Long gameSessionId = player.getGameSession() != null ? player.getGameSession().getId() : null;
+        Long activeUnitId = player.getActiveUnit().map(PlayerUnit::getId).orElse(null);
 
-        if (p.getId() != null) {
-            // Достаем существующую сущность из БД, чтобы пароль остался
-            pe = playerRepo.findById(p.getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Player not found"));
-            pe.setUsername(p.getUsername());
-        } else {
-            pe = new PlayerEntity();
-            pe.setUsername(p.getUsername());
-            pe.setPassword("default"); // или бросить исключение, если это невозможно
-        }
-
-        pe.setGameSessionEntity(gameSessionEntity);
-        if (p.getActiveUnit() != null) {
-            pe.setActiveUnitEntity(UnitMapper.toEntity(p.getActiveUnit()));
-        }
-        return pe;
+        return new PlayerUpdateDto(
+                player.getId(),
+                player.getUsername(),
+                gameSessionId,
+                activeUnitId);
     }
 }

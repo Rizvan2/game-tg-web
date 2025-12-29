@@ -34,7 +34,7 @@ public class DuelManager {
      *
      * @param gameCode Код игры, по которому игрок подключается или создаётся игра
      * @param playerId ID игрока, который хочет присоединиться
-     * @return Ссылка на страницу игры, например "/gameplay.html?id=123"
+     * @return Ссылка на страницу игры, например "/duel-battle.html?id=123"
      * @throws IllegalArgumentException если игрок с указанным ID не найден
      */
     public String joinOrCreateGame(String gameCode, Long playerId) {
@@ -42,7 +42,7 @@ public class DuelManager {
     }
     /** Формирует ссылку на страницу игры */
     private String buildGameLink(GameSession game) {
-        return "/gameplay.html?id=" + game.getId();
+        return "/duel-battle.html?id=" + game.getId();
     }
 }
 

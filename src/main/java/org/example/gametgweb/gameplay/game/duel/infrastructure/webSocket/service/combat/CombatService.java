@@ -1,11 +1,10 @@
 package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat;
 
 import lombok.RequiredArgsConstructor;
-import org.example.gametgweb.characterSelection.domain.model.Unit;
+import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.DuelRoundResult;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -13,7 +12,7 @@ public class CombatService {
 
     private final CombatEngine engine;
 
-    public String attack(Unit attacker, Unit defender, Body body) {
+    public String attack(PlayerUnit attacker, PlayerUnit defender, Body body) {
         return engine.performAttack(attacker, defender, body);
     }
 
@@ -27,18 +26,16 @@ public class CombatService {
      * @param bodyD часть тела, выбранная вторым игроком для атаки
      * @return карта с описанием боя и текущим здоровьем
      */
-    public Map<String, Object> duelRound(Unit attacker, Body bodyA, Unit defender, Body bodyD) {
+    public DuelRoundResult duelRound(PlayerUnit attacker, Body bodyA, PlayerUnit defender, Body bodyD) {
         String msg1 = engine.performAttack(attacker, defender, bodyA);
         String msg2 = engine.performAttack(defender, attacker, bodyD);
 
-        double attackerHpPercent = ((double) attacker.getHealth() / attacker.getMaxHealth()) * 100;
-        double defenderHpPercent = ((double) defender.getHealth() / defender.getMaxHealth()) * 100;
+        long attackerHpPercent = (attacker.getHealth() / attacker.getMaxHealth()) * 100;
+        long defenderHpPercent = (defender.getHealth() / defender.getMaxHealth()) * 100;
 
-        return Map.of(
-                "turnMessages", new String[]{msg1, msg2},
-                "attackerHp", attackerHpPercent,
-                "defenderHp", defenderHpPercent
-        );
+        return new DuelRoundResult(new String[]{msg1, msg2},
+                attackerHpPercent,
+                defenderHpPercent);
     }
 
 }

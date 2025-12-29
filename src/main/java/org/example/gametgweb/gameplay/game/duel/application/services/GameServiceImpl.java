@@ -60,8 +60,13 @@ public class GameServiceImpl implements GameService {
      * @param id уникальный идентификатор игры
      */
     @Override
-    public void deleteGame(Long id) {
+    public void delete(Long id) {
         jpaGameSessionRepository.deleteById(id);
+    }
+
+    @Override
+    public void deleteByGameCode(String gameCode) {
+        jpaGameSessionRepository.deleteByGameCode(gameCode);
     }
 
     /**

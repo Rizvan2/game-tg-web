@@ -2,7 +2,7 @@ package org.example.gametgweb.gameplay.game.campaign.infrastructure.persistence.
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.UnitEntity;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.PlayerUnitEntity;
 
 /**
  * Сущность, представляющая кампанию (сюжетный бой) игрока.
@@ -27,11 +27,11 @@ public class CampaignEntity {
 
     /** Боевая единица игрока, участвующая в кампании. */
     @ManyToOne(optional = false)
-    private UnitEntity playerUnitEntity;
+    private PlayerUnitEntity playerUnitEntity;
 
     /** Вражеский юнит, против которого идёт бой. */
     @ManyToOne(optional = false)
-    private UnitEntity enemyUnitEntity;
+    private PlayerUnitEntity enemyUnitEntity;
 
     /** Флаг завершённости кампании (true, если бой завершён). */
     @Column(nullable = false)

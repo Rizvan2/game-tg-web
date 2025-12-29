@@ -39,6 +39,8 @@
         };
 
         ws.onmessage = (event) => {
+            console.log("🛰️ RAW MESSAGE:", event.data); // <- прямо в начале
+
             const msg = JSON.parse(event.data);
 
             if (msg.type === 'join') {
@@ -65,22 +67,76 @@
                 log("⏳ Оба игрока выбрали цели, идёт расчёт атаки...");
                 return;
             }
+            if (msg.type === 'duelResult') {
+                console.log("🏁 DUEL RESULT EVENT RECEIVED");
+                console.log("➡️ resultText:", msg.resultText);
+                console.log("➡️ targetPlayer:", msg.targetPlayer);
+                console.log("➡️ full payload:", msg); // весь объект для отладки
 
-            if (msg.type === 'UNITS_STATE') {
-                const u1 = msg.units[0];
-                const u2 = msg.units[1];
-                const myUnit = u1.player === playerName ? u1 : u2;
-                const enemyUnit = u1.player === playerName ? u2 : u1;
-
-                document.getElementById('player1Img').src = myUnit.imagePath;
-                document.getElementById('player1Name').textContent = myUnit.player;
-                document.getElementById('player1Health').style.width = (myUnit.hp / myUnit.hpMax * 100) + '%';
-
-                document.getElementById('player2Img').src = enemyUnit.imagePath;
-                document.getElementById('player2Name').textContent = enemyUnit.player;
-                document.getElementById('player2Health').style.width = (enemyUnit.hp / enemyUnit.hpMax * 100) + '%';
+                showDuelResult(msg.resultText);
                 return;
             }
+
+
+            if (msg.type === 'UNITS_STATE') {
+                if (!Array.isArray(msg.units)) return;
+
+                const slots = [null, null]; // Слот 1 и Слот 2
+
+                msg.units.forEach(u => {
+                    // Сначала проверяем, не занят ли юнит уже слотом
+                    if (slots[0] && slots[0].playerId === u.playerId) {
+                        slots[0] = u; // обновляем
+                        return;
+                    }
+                    if (slots[1] && slots[1].playerId === u.playerId) {
+                        slots[1] = u;
+                        return;
+                    }
+
+                    // Если есть пустой слот, ставим туда
+                    if (!slots[0]) slots[0] = u;
+                    else if (!slots[1]) slots[1] = u;
+                });
+
+                // Обновляем UI
+                slots.forEach((unit, idx) => {
+                    const slotNum = idx + 1;
+                    if (unit) {
+                        setUnitToSlot(slotNum, unit);
+                    } else {
+                        clearSlot(slotNum);
+                    }
+                });
+            }
+            function setUnitToSlot(slot, unit) {
+                const img = document.getElementById(`player${slot}Img`);
+                const name = document.getElementById(`player${slot}Name`);
+                const health = document.getElementById(`player${slot}Health`);
+
+                if (name.textContent === unit.player) {
+                    console.log(`ℹ️ Слот ${slot} уже содержит юнита ${unit.player}, обновляем HP и картинку`);
+                } else {
+                    console.log(`✅ Слот ${slot} обновлен: ${unit.player} (${unit.hp}/${unit.hpMax} HP)`);
+                }
+
+                img.src = unit.imagePath;
+                name.textContent = unit.player;
+                health.style.width = (unit.hp / unit.hpMax * 100) + '%';
+            }
+
+            function clearSlot(slot) {
+                const img = document.getElementById(`player${slot}Img`);
+                const name = document.getElementById(`player${slot}Name`);
+                const health = document.getElementById(`player${slot}Health`);
+
+                img.src = '/img/waiting.png';
+                name.textContent = slot === 1 ? 'Ожидание вашего юнита…' : 'Ожидание соперника…';
+                health.style.width = '0%';
+                console.log(`ℹ️ Слот ${slot} очищен`);
+            }
+
+
 
             // --- ЧАТ (как в старом скрипте) ---
             if (msg.type === 'chat') {
@@ -123,4 +179,20 @@
         ws.send(JSON.stringify({ type: "attack", body }));
         return true;
     };
+
+    function showDuelResult(text) {
+        console.log("🏆 Вызов showDuelResult:", text); // <-- логируем событие
+
+        const modal = document.getElementById('duelResultModal');
+        const title = document.getElementById('duelResultTitle');
+
+        title.textContent = text;
+        modal.style.display = 'flex';
+    }
+
+
+    document.getElementById('exitToMenuBtn').addEventListener('click', () => {
+        window.location.href = '/';
+    });
+
 })();

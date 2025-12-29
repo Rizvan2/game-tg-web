@@ -2,16 +2,19 @@ package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.servic
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.example.gametgweb.characterSelection.domain.model.Unit;
+import lombok.extern.slf4j.Slf4j;
+import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
+import org.example.gametgweb.gameplay.game.duel.application.services.DuelDeathDetector;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.DuelTurn;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.DuelTurnManager;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.DuelRoundResponseDto;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.DuelRoundResult;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.RoomSessionRegistry;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.UnitRegistryService;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,12 +25,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * <ul>
  *     <li>Добавление хода игрока через {@link DuelTurnManager};</li>
  *     <li>Определение готовности хода (когда оба игрока сделали выбор);</li>
- *     <li>Вызов {@link CombatService#duelRound(Unit, Body, Unit, Body)} для расчёта результатов боя;</li>
+ *     <li>Вызов {@link CombatService#duelRound(PlayerUnit, Body, PlayerUnit, Body)} для расчёта результатов боя;</li>
  *     <li>Очистку хода после завершения раунда;</li>
  *     <li>Возврат результата боя в виде JSON строки.</li>
  * </ul>
  */
-@Component
+@Slf4j
+@Service
 public class DuelCombatService {
 
     private final DuelTurnManager turnManager;
@@ -35,6 +39,8 @@ public class DuelCombatService {
     private final RoomSessionRegistry roomSessionRegistry;
     private final UnitRegistryService unitRegistryService;
     private final ObjectMapper objectMapper;
+    private final DuelDeathDetector duelDeathDetector;
+
     /**
      * Потокобезопасная карта для хранения объектов-мониторов, используемых для синхронизации
      * доступа к ходу дуэли (DuelTurn) по коду комнаты.
@@ -52,12 +58,18 @@ public class DuelCombatService {
      * @param objectMapper        Объект для сериализации ответов в JSON.
      */
     @Autowired
-    public DuelCombatService(DuelTurnManager turnManager, CombatService combatService, RoomSessionRegistry roomSessionRegistry, UnitRegistryService unitRegistryService, ObjectMapper objectMapper) {
+    public DuelCombatService(DuelTurnManager turnManager,
+                             CombatService combatService,
+                             RoomSessionRegistry roomSessionRegistry,
+                             UnitRegistryService unitRegistryService,
+                             ObjectMapper objectMapper,
+                             DuelDeathDetector duelDeathDetector) {
         this.turnManager = turnManager;
         this.combatService = combatService;
         this.roomSessionRegistry = roomSessionRegistry;
         this.unitRegistryService = unitRegistryService;
         this.objectMapper = objectMapper;
+        this.duelDeathDetector = duelDeathDetector;
     }
 
     /**
@@ -125,19 +137,30 @@ public class DuelCombatService {
      */
     private String readingRound(DuelTurn turn, String gameCode) throws JsonProcessingException {
         if (turn.isReady()) {
-            Unit u1 = unitRegistryService.getUnit(gameCode, turn.getPlayer1());
-            Unit u2 = unitRegistryService.getUnit(gameCode, turn.getPlayer2());
+            PlayerUnit u1 = unitRegistryService.getUnit(gameCode, turn.getPlayer1());
+            PlayerUnit u2 = unitRegistryService.getUnit(gameCode, turn.getPlayer2());
 
-            var result = combatService.duelRound(u1, turn.getBody1(), u2, turn.getBody2());
+            log.info(String.valueOf(u1.getId()));
+            log.info(String.valueOf(u2.getId()));
+
+            DuelRoundResult result = combatService.duelRound(u1, turn.getBody1(), u2, turn.getBody2());
+
 
             // Добавляем явные поля для фронта
-            Map<String, Object> response = new HashMap<>(result);
-            response.put("attacker", u1.getName());
-            response.put("defender", u2.getName());
+            DuelRoundResponseDto response = new DuelRoundResponseDto(
+                    u1.getName(),
+                    u2.getName(),
+                    result.turnMessages(),
+                    result.attackerHp(),
+                    result.defenderHp()
+            );
 
+            String player1Name = unitRegistryService.resolvePlayer(gameCode, u1);
+            String player2Name = unitRegistryService.resolvePlayer(gameCode, u2);
+
+            duelDeathDetector.checkAndPublishDuelResult(gameCode, u1, u2, player1Name, player2Name);
             // очищаем ход после раунда
             turnManager.removeTurn(gameCode);
-
             return objectMapper.writeValueAsString(response);
         }
 

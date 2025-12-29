@@ -31,7 +31,9 @@ public interface GameService {
      *
      * @param id идентификатор игры
      */
-    void deleteGame(Long id);
+    void delete(Long id);
+
+    void deleteByGameCode(String gameCode);
 
     /**
      * Создаёт новую игру с заданным кодом и первым игроком.

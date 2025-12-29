@@ -1,11 +1,15 @@
 package org.example.gametgweb.gameplay.game.duel.domain.model;
 
+import lombok.Getter;
+import lombok.Setter;
+import org.example.gametgweb.gameplay.game.duel.shared.domain.GameState;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.example.gametgweb.gameplay.game.duel.shared.domain.GameState;
-
+@Setter
+@Getter
 public class GameSession {
 
     private Long id;
@@ -17,42 +21,17 @@ public class GameSession {
         this.gameCode = gameCode;
         this.state = state;
     }
+
     public GameSession(Long id, String gameCode, GameState state) {
         this.id = id;
         this.gameCode = gameCode;
         this.state = state;
     }
+
     public GameSession(Long id, String gameCode, GameState state, List<Player> players) {
         this.id = id;
         this.gameCode = gameCode;
         this.state = state;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getGameCode() {
-        return gameCode;
-    }
-
-    public void setGameCode(String gameCode) {
-        this.gameCode = gameCode;
-    }
-
-    public GameState getState() {
-        return state;
-    }
-
-    public void setState(GameState state) {
-        this.state = state;
-    }
-
-    public void setPlayers(List<Player> players) {
         this.players = players;
     }
 
@@ -77,4 +56,12 @@ public class GameSession {
     public void finish() {
         this.state = GameState.FINISHED;
     }
+
+    public Player getPlayerByName(String name) {
+        return players.stream()
+                .filter(p -> p.getUsername().equals(name))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Player " + name + " not found in session"));
+    }
+
 }

@@ -3,9 +3,9 @@ package org.example.gametgweb.gameplay.game.duel.domain.repository;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.mapper.PlayerMapper;
-import org.example.gametgweb.characterSelection.infrastructure.persistence.mapper.UnitMapper;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.repository.JpaPlayerRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,13 +17,14 @@ import java.util.stream.Collectors;
  * Отвечает за маппинг между доменной моделью {@link Player} и JPA-сущностью {@link PlayerEntity}.
  * Управляет сохранением, обновлением, удалением и поиском игроков, не затрагивая чувствительные данные (пароль).
  */
-@Repository
+@Service
 public class PlayerRepositoryImpl implements PlayerRepository {
 
-    private final JpaPlayerRepository jpaRepository;
+    private final JpaPlayerRepository jpaPlayerRepository;
 
-    public PlayerRepositoryImpl(JpaPlayerRepository jpaRepository) {
-        this.jpaRepository = jpaRepository;
+    @Autowired
+    public PlayerRepositoryImpl(JpaPlayerRepository jpaPlayerRepository) {
+        this.jpaPlayerRepository = jpaPlayerRepository;
     }
 
     /**
@@ -34,68 +35,21 @@ public class PlayerRepositoryImpl implements PlayerRepository {
      */
     @Override
     public Optional<Player> findById(Long id) {
-        return jpaRepository.findById(id)
+        return jpaPlayerRepository.findById(id)
                 .map(PlayerMapper::toDomain);
     }
 
-    /**
-     * Сохраняет изменения игрока в базе данных.
-     * <p>
-     * Обновляются только username и активный юнит, пароль остаётся неизменным.
-     *
-     * @param player доменная модель игрока
-     * @return обновлённая доменная модель {@link Player}
-     * @throws IllegalArgumentException если игрок не найден
-     */
-    @Override
-    public Player savePlayer(Player player) {
-        PlayerEntity existing = jpaRepository.findById(player.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Player not found"));
-
-        existing.setUsername(player.getUsername());
-        if (player.getActiveUnit() != null) {
-            existing.setActiveUnitEntity(UnitMapper.toEntity(player.getActiveUnit()));
-        }
-
-        PlayerEntity saved = jpaRepository.save(existing);
-        return PlayerMapper.toDomain(saved);
-    }
 
     /**
      * Удаляет игрока из базы данных.
      *
-     * @param player доменная модель игрока
+     * @param id уникальный идентификатор игрока
      */
     @Override
-    public void deletePlayer(Player player) {
-        PlayerEntity entity = PlayerMapper.mapPlayerToEntity(player, null, jpaRepository);
-        jpaRepository.delete(entity);
-    }
-
-    /**
-     * Обновляет игрока в базе данных.
-     *
-     * @param player доменная модель игрока
-     * @return обновлённая доменная модель {@link Player}
-     */
-    @Override
-    public Player updatePlayer(Player player) {
-        PlayerEntity entity = PlayerMapper.mapPlayerToEntity(player, null, jpaRepository);
-        PlayerEntity updated = jpaRepository.save(entity);
-        return PlayerMapper.toDomain(updated);
-    }
-
-    /**
-     * Устанавливает состояние игрока.
-     * <p>
-     * Использует {@link #updatePlayer(Player)} как основную операцию.
-     *
-     * @param player доменная модель игрока
-     * @return обновлённая доменная модель {@link Player}
-     */
-    @Override
-    public Player setPlayer(Player player) {
-        return updatePlayer(player);
+    public void delete(long id) {
+        PlayerEntity entity = jpaPlayerRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Player not found"));
+        jpaPlayerRepository.delete(entity);
     }
 
     /**
@@ -107,7 +61,7 @@ public class PlayerRepositoryImpl implements PlayerRepository {
      */
     @Override
     public Player findByUsername(String username) {
-        PlayerEntity entity = jpaRepository.findByUsername(username)
+        PlayerEntity entity = jpaPlayerRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("Игрок не найден: " + username));
         return PlayerMapper.toDomain(entity);
     }
@@ -118,7 +72,7 @@ public class PlayerRepositoryImpl implements PlayerRepository {
      * @return список доменных моделей {@link Player}
      */
     public List<Player> findAll() {
-        return jpaRepository.findAll().stream()
+        return jpaPlayerRepository.findAll().stream()
                 .map(PlayerMapper::toDomain)
                 .collect(Collectors.toList());
     }

@@ -7,5 +7,7 @@ package org.example.gametgweb.characterSelection.api.dto;
  */
 public record SelectUnitRequest(
         /** Имя юнита, выбранного игроком */
-        String unitName
+        String unitName,
+        //Имя юнита которое задает игрок
+        String customUnitName
 ) {}

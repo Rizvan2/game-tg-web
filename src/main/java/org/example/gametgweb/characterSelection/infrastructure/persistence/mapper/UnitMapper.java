@@ -29,7 +29,7 @@ public class UnitMapper {
      */
     public static UnitEntity toEntity(Unit unit) {
         return new UnitEntity(
-                (int) unit.getId(),
+                unit.getId(),
                 unit.getName(),
                 unit.getMaxHealth(),
                 unit.getHealth(),

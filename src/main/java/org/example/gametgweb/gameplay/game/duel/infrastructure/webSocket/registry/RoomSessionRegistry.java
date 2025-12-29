@@ -142,20 +142,26 @@ public class RoomSessionRegistry {
      * @param message    текст сообщения
      */
     public void sendToPlayer(String gameCode, String playerName, String message) {
+        log.info("🔥 sendToPlayer вызван: gameCode={}, playerName={}", gameCode, playerName);
+
         Set<WebSocketSession> sessions = getSessions(gameCode);
-        if (sessions == null || sessions.isEmpty()) return;
+        if (sessions == null || sessions.isEmpty()) {
+            log.warn("⚠️ Нет сессий для комнаты {}", gameCode);
+            return;
+        }
 
         // Удаляем закрытые сессии
         sessions.removeIf(s -> !s.isOpen());
 
-        // Находим сессию игрока и отправляем сообщение
         sessions.stream()
                 .filter(s -> playerName.equals(s.getAttributes().get("PLAYER_NAME")))
                 .forEach(s -> {
+                    log.info("✉️ Отправляем сообщение игроку {} (sessionId={})", playerName, s.getId());
                     try {
                         s.sendMessage(new TextMessage(message));
+                        log.info("✅ Сообщение отправлено игроку {}", playerName);
                     } catch (IOException e) {
-                        log.error("Ошибка при отправке игроку {}: {}", playerName, e.getMessage());
+                        log.error("❌ Ошибка при отправке игроку {}: {}", playerName, e.getMessage());
                         safeRemoveSession(gameCode, s);
                     }
                 });
