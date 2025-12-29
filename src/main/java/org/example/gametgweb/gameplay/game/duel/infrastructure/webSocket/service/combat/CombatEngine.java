@@ -21,7 +21,7 @@ public class CombatEngine {
         if (attacker == null || defender == null)
             throw new IllegalArgumentException("Attacker или defender не могут быть null");
 
-        long damage = calculateDamage(attacker, defender, target);
+        long damage = calculateDamage(attacker, target);
         defender.takeDamage(target, damage);
 
         String message = "%s атакует %s в %s на %d урона".formatted(
@@ -38,7 +38,7 @@ public class CombatEngine {
     /**
      * Здесь можно добавить механику критов, брони, уклонения и т.д.
      */
-    private long calculateDamage(PlayerUnit attacker, PlayerUnit defender, Body target) {
+    private long calculateDamage(PlayerUnit attacker, Body target) {
         long baseDamage = attacker.getDamage();
 
         // Критический удар 10%
