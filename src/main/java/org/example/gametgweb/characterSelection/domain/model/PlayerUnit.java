@@ -34,14 +34,13 @@ public class PlayerUnit implements GameUnit {
     private String imagePath;
     private long damage;
 
-    public PlayerUnit(Unit template) {
-        this.id = template.getId();
+    public PlayerUnit(Unit template, String customName) {
         this.template = template;
 
         // Начальные параметры берём из шаблона
+        this.name = customName;
         this.health = template.getHealth();
         this.maxHealth = template.getMaxHealth();
-        this.name = template.getName();
         this.imagePath = template.getImagePath();
         this.damage = template.getDamage();
     }
@@ -62,7 +61,6 @@ public class PlayerUnit implements GameUnit {
     public void resetToTemplate() {
         this.health = template.getHealth();
         this.maxHealth = template.getMaxHealth();
-        this.name = template.getName();
         this.imagePath = template.getImagePath();
         this.damage = template.getDamage();
     }
