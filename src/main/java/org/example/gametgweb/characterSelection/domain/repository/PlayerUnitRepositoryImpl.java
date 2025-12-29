@@ -45,6 +45,11 @@ public class PlayerUnitRepositoryImpl implements PlayerUnitRepository {
                 .map(PlayerUnitMapper::toDomain);
     }
 
+    public Optional<PlayerUnit> findById(Long id) {
+        return jpaPlayerUnitRepository.findById(id)
+                .map(PlayerUnitMapper::toDomain);
+    }
+
     /**
      * Сохраняет или обновляет состояние юнита игрока.
      *
