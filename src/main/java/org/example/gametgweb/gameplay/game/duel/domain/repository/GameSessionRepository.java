@@ -26,22 +26,21 @@ public interface GameSessionRepository {
      *
      * @param game игра для сохранения
      */
-    void save(GameSession game);
+    GameSession save(GameSession game);
+
 
     /**
      * Удаляет игру по её идентификатору.
      *
      * @param id идентификатор игры
      */
-
-    /**
-     * Создаёт новую игру с заданным кодом и первым игроком.
-     *
-     * @param gameCode код игры
-     * @param playerId идентификатор первого игрока
-     * @return созданная {@link GameSession}
-     */
-    GameSession joinOrCreateGame(String gameCode, Long playerId);
-
     void deleteGame(Long id);
+
+    default void updateOrSaveGame(GameSession game) {
+        if (game.getId() != null) {
+            updateGame(game);
+        } else {
+            save(game);
+        }
+    }
 }
