@@ -66,8 +66,19 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public void deleteByGameCode(String gameCode) {
-        jpaGameSessionRepository.deleteByGameCode(gameCode);
+        GameSessionEntity session = jpaGameSessionRepository.findByGameCode(gameCode)
+                .orElseThrow(() -> new IllegalArgumentException("Game not found"));
+
+        // 🔥 разрываем связи
+        for (PlayerEntity player : session.getPlayers()) {
+            player.setGameSessionEntity(null);
+        }
+
+        session.getPlayers().clear();
+
+        jpaGameSessionRepository.delete(session);
     }
+
 
     /**
      * Создаёт новую игру или возвращает существующую, а затем привязывает к ней игрока.
@@ -122,7 +133,7 @@ public class GameServiceImpl implements GameService {
     private void attachPlayerToGame(Long playerId, GameSessionEntity game) {
         PlayerEntity player = jpaPlayerRepository.findById(playerId)
                 .orElseThrow(() -> new IllegalArgumentException("Player not found with id: " + playerId));
-        game.setPlayer(player);
+        game.addPlayer(player);
     }
 
     /**
