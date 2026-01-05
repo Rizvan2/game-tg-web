@@ -1,7 +1,9 @@
 package org.example.gametgweb.gameplay.game.duel.domain.repository;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.gametgweb.gameplay.game.duel.api.dto.GameSessionEntityDto;
 import org.example.gametgweb.gameplay.game.duel.domain.model.GameSession;
+import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.GameSessionEntity;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.mapper.GameSessionMapper;
@@ -45,6 +47,7 @@ import java.util.stream.Collectors;
  */
 
 @Service
+@Slf4j
 public class GameSessionRepositoryImpl implements GameSessionRepository {
 
     private final JpaGameSessionRepository jpaGameSessionRepository;
@@ -70,6 +73,48 @@ public class GameSessionRepositoryImpl implements GameSessionRepository {
     }
 
     /**
+     * Возвращает все игровые сессии.
+     *
+     * <p>
+     * Загружает {@link GameSessionEntity} из базы,
+     * логирует состояние игроков до маппинга,
+     * преобразует в доменные {@link GameSession}
+     * и логирует результат после маппинга.
+     * </p>
+     *
+     * @return список игровых сессий
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<GameSession> findAll() {
+        List<GameSessionEntity> entities = jpaGameSessionRepository.findAll();
+
+        // Логируем прямо из JPA, до маппинга
+        for (GameSessionEntity g : entities) {
+            String playerNames = g.getPlayers().stream()
+                    .map(p -> String.format("Player[id=%d, username=%s]", p.getId(), p.getUsername()))
+                    .collect(Collectors.joining(", "));
+            log.info("Before mapping - Game {} has {} players: {}", g.getGameCode(), g.getPlayers().size(), playerNames);
+        }
+
+        // Маппим в домен
+        List<GameSession> sessions = entities.stream()
+                .map(GameSessionMapper::toDomain)
+                .toList();
+
+        // Логируем уже доменные модели
+        for (GameSession g : sessions) {
+            String playerNames = g.getPlayers().stream()
+                    .map(Player::getUsername)
+                    .collect(Collectors.joining(", "));
+            log.info("After mapping - Game {} has {} players: {}", g.getGameCode(), g.getPlayers().size(), playerNames);
+        }
+
+        return sessions;
+    }
+
+
+    /**
      * Обновляет существующую игровую сессию в базе данных.
      * <p>
      * Находит сущность {@link GameSessionEntity} по идентификатору сессии,
@@ -89,9 +134,15 @@ public class GameSessionRepositoryImpl implements GameSessionRepository {
         GameSessionEntity entity = jpaGameSessionRepository
                 .findById(dto.id())
                 .orElseThrow(() -> new IllegalStateException("Session not found"));
+        log.info("Before update - players in DTO: {}", dto.players()); // логируем входящих игроков
 
         updateEntityFromDto(entity, dto);
-        jpaGameSessionRepository.save(entity);
+        GameSessionEntity saved = jpaGameSessionRepository.save(entity);
+        log.info("After update - players in DB: {}",
+                saved.getPlayers().stream()
+                        .map(p -> String.format("Player[id=%d, username=%s]", p.getId(), p.getUsername()))
+                        .toList()
+        );
     }
 
     /**
@@ -109,7 +160,16 @@ public class GameSessionRepositoryImpl implements GameSessionRepository {
         GameSessionEntityDto entityDto = GameSessionMapper.toDto(game);
         GameSessionEntity gameSessionEntity = new GameSessionEntity();
         updateEntityFromDto(gameSessionEntity, entityDto);
-        return GameSessionMapper.toDomain(jpaGameSessionRepository.save(gameSessionEntity));
+        log.info("Before save - players in DTO: {}", entityDto.players()); // логируем входящих игроков
+
+        GameSessionEntity saved = jpaGameSessionRepository.save(gameSessionEntity);
+
+        log.info("After save - players in DB: {}",
+                saved.getPlayers().stream()
+                        .map(p -> String.format("Player[id=%d, username=%s]", p.getId(), p.getUsername()))
+                        .toList()
+        );
+        return GameSessionMapper.toDomain(saved);
     }
 
     /**

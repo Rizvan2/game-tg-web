@@ -2,6 +2,7 @@ package org.example.gametgweb.gameplay.game.duel.domain.repository;
 
 import org.example.gametgweb.gameplay.game.duel.domain.model.GameSession;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface GameSessionRepository {
@@ -14,6 +15,7 @@ public interface GameSessionRepository {
      */
     Optional<GameSession> findByGameCode(String gameCode);
 
+    List<GameSession> findAll();
     /**
      * Обновляет состояние существующей игры.
      *
