@@ -1,6 +1,7 @@
 package org.example.gametgweb.gameplay.game.duel.application.services;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.gametgweb.gameplay.game.duel.api.dto.GameSessionDto;
 import org.example.gametgweb.gameplay.game.duel.domain.exception.GameAlreadyExistsException;
 import org.example.gametgweb.gameplay.game.duel.domain.model.GameSession;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
@@ -9,6 +10,9 @@ import org.example.gametgweb.gameplay.game.duel.domain.repository.PlayerReposito
 import org.example.gametgweb.gameplay.game.duel.shared.domain.GameState;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Сервис для управления игровыми сессиями дуэли.
@@ -80,9 +84,33 @@ public class GameSessionService {
         log.info("Создана игра: id={}, gameCode={}, players={}",
                 game.getId(), game.getGameCode(), game.getPlayers().size());
 
-        attachPlayerToGame(playerId, game);
+        attachAndSaveOrUpdate(playerId, game);
 
         return game;
+    }
+
+    /**
+     * Возвращает список активных игровых сессий.
+     *
+     * <p>
+     * Загружает все сессии из репозитория,
+     * логирует игроков в каждой сессии
+     * и маппит результат в {@link GameSessionDto}.
+     * </p>
+     *
+     * @return список DTO игровых сессий
+     */
+    @Transactional(readOnly = true)
+    public List<GameSessionDto> getAllSessions() {
+        return repository.findAll().stream()
+                .peek(gs -> {
+                    String playerNames = gs.getPlayers().stream()
+                            .map(Player::getUsername)
+                            .collect(Collectors.joining(", "));
+                    log.info("Game {} has {} players: {}", gs.getGameCode(), gs.getPlayers().size(), playerNames);
+                })
+                .map(gs -> new GameSessionDto(gs.getGameCode(), gs.getPlayers().size()))
+                .toList();
     }
 
     /**
@@ -94,6 +122,8 @@ public class GameSessionService {
      */
     private GameSession attachAndSaveOrUpdate(Long playerId, GameSession game) {
         attachPlayerToGame(playerId, game);
+        log.info("Перед сохранением: {} игроков в игре {}", game.getPlayers().size(), game.getGameCode());
+
         repository.updateOrSaveGame(game);
         return game;
     }
