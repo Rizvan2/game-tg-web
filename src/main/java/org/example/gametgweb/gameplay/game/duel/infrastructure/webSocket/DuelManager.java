@@ -1,9 +1,12 @@
 package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket;
 
+import org.example.gametgweb.gameplay.game.duel.api.dto.GameSessionDto;
 import org.example.gametgweb.gameplay.game.duel.application.services.GameSessionService;
 import org.example.gametgweb.gameplay.game.duel.domain.model.GameSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * Сервисный менеджер для управления созданием и присоединением игроков к дуэльным играм.
@@ -77,6 +80,10 @@ public class DuelManager {
      */
     public String joinGame(String gameCode, Long playerId) {
         return buildGameLink(gameService.joinGame(gameCode, playerId));
+    }
+
+    public List<GameSessionDto> getAllDuels() {
+        return gameService.getAllSessions();
     }
 
     /**
