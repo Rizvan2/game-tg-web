@@ -3,8 +3,11 @@ package org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.mapp
 import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
 import org.example.gametgweb.characterSelection.infrastructure.persistence.mapper.PlayerUnitMapper;
 import org.example.gametgweb.gameplay.game.duel.api.dto.PlayerUpdateDto;
+import org.example.gametgweb.gameplay.game.duel.domain.model.GameSession;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entity.PlayerEntity;
+
+import java.util.ArrayList;
 
 /**
  * Маппер для преобразования между доменной моделью {@link Player} и JPA-сущностью {@link PlayerEntity}.
@@ -22,14 +25,19 @@ public class PlayerMapper {
     public static Player toDomain(PlayerEntity pe) {
         if (pe == null) return null;
 
+        GameSession lightweightSession = null;
+        if (pe.getGameSessionEntity() != null) {
+            Long gsId = pe.getGameSessionEntity().getId(); // безопасно — не инициализирует прокси
+            lightweightSession = new GameSession(gsId, null, null, new ArrayList<>());
+        }
+
         return new Player(
                 pe.getId(),
                 pe.getUsername(),
-                pe.getGameSessionEntity() != null ? GameSessionMapper.toDomain(pe.getGameSessionEntity()) : null,
+                lightweightSession,
                 pe.getActiveUnitEntity() != null ? PlayerUnitMapper.toDomain(pe.getActiveUnitEntity()) : null
         );
     }
-
     /**
      * Преобразует доменную модель {@link Player} в DTO {@link PlayerUpdateDto}.
      * <p>
