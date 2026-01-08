@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/lobby.css">
+
+    <title>Лобби</title>
+</head>
+<body>
+<a href="/" id="backBtn">⬅ На главную</a>
+
+<!-- Текущий игрок -->
+<div class="lobby-player" id="lobbyPlayer1">
+    <img id="lobbyPlayerImg" src="images/default-unit.png" alt="Player Avatar">
+    <div class="lobby-player-info">
+        <div id="lobbyPlayerName">Плеер 1</div>
+        <div class="lobby-health-bar">
+            <div class="lobby-health-bar-inner" id="lobbyPlayerHealth" style="width: 100%;"></div>
+        </div>
+        <div id="lobbyPlayerDamage">DMG: 0</div>
+    </div>
+</div>
+<!-- Создание комнаты -->
+<div class="create-room">
+    <input type="text" id="roomId" placeholder="Название комнаты">
+    <button id="createRoomBtn">Создать комнату</button>
+    <div id="createRoomStatus"></div>
+</div>
+
+<!-- Список активных комнат -->
+<div class="lobby-rooms" id="lobbyRooms"></div>
+
+<script>
+    let isJoining = false;
+
+    // Загружаем юнит текущего игрока
+    async function loadMyUnit() {
+        try {
+            const res = await fetch('/GetPlayerUnit');
+            const unit = await res.json();
+
+            // Картинка
+            document.getElementById('lobbyPlayerImg').src = unit.imagePath || '/images/default-unit.png';
+            // Имя
+            document.getElementById('lobbyPlayerName').textContent = unit.name;
+            // Урон
+            document.getElementById('lobbyPlayerDamage').textContent = 'DMG: ' + unit.damage;
+            // Полоска здоровья
+            const hpPercent = (unit.health / unit.maxHealth) * 100;
+            document.getElementById('lobbyPlayerHealth').style.width = hpPercent + '%';
+
+            // Цифровое отображение HP
+            let hpTextEl = document.getElementById('lobbyPlayerHpText');
+            if (!hpTextEl) {
+                const parent = document.getElementById('lobbyPlayer1').querySelector('.lobby-player-info');
+                hpTextEl = document.createElement('div');
+                hpTextEl.id = 'lobbyPlayerHpText';
+                hpTextEl.style.marginTop = '2px';
+                parent.appendChild(hpTextEl);
+            }
+            hpTextEl.textContent = `${unit.health} / ${unit.maxHealth} HP`;
+
+        } catch (err) {
+            console.error('Ошибка при загрузке юнита:', err);
+        }
+    }
+
+    // Загружаем список комнат
+    async function loadRooms() {
+        try {
+            const res = await fetch('/GetAllDuels'); // лучше GET, а не POST
+            const rooms = await res.json();
+
+            const container = document.getElementById('lobbyRooms');
+            container.innerHTML = '';
+
+            rooms.forEach(room => {
+                const roomDiv = document.createElement('div');
+                roomDiv.className = 'lobby-room';
+                const currentPlayers = room.playersCount; // число игроков в комнате
+                const maxPlayers = 2; // если всегда дуэль 1v1
+
+                roomDiv.innerHTML = `
+                <span class="room-code">${room.gameCode}</span>
+                <span class="room-players">${currentPlayers} / ${maxPlayers}</span>
+                <button class="join-btn" onclick="joinDuel('${room.gameCode}')">Присоединиться</button>
+            `;
+                container.appendChild(roomDiv);
+            });
+        } catch (err) {
+            console.error('Ошибка при загрузке комнат:', err);
+        }
+    }
+
+    async function joinDuel(gameCode) {
+        try {
+            const res = await fetch(`/JoinDuel?gameCode=${gameCode}`, { method: 'POST' });
+            const msg = await res.text();
+            alert(msg);
+            // После успешного присоединения — редирект
+            window.location.href = `/duel-battle.html?gameCode=${gameCode}`;
+        } catch (err) {
+            console.error(err);
+            alert('Не удалось присоединиться');
+        }
+    }
+    // Автообновление комнат каждые 15 секунд
+    setInterval(loadRooms, 15000);
+
+    // Инициализация
+    loadMyUnit();
+    loadRooms();
+
+    // --- Создать комнату ---
+    const createRoomBtn = document.getElementById('createRoomBtn');
+    const status = document.getElementById('status');
+
+    let isCreating = false;
+
+    createRoomBtn.addEventListener('click', async () => {
+        if (isCreating) return; // ⛔ защита от дабл-клика
+
+        const roomId = document.getElementById('roomId').value.trim();
+        if (!roomId) {
+            status.textContent = 'Введите название комнаты!';
+            return;
+        }
+
+        isCreating = true;
+        createRoomBtn.disabled = true;
+
+        try {
+            const response = await fetch('/CreateDuel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ gameCode: roomId })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                status.textContent = errorText || 'Не удалось создать комнату';
+                return;
+            }
+
+            const gameLink = await response.text();
+            window.location.href = gameLink; // редирект
+        } catch (e) {
+            status.textContent = 'Ошибка: ' + e.message;
+        } finally {
+            // если редирект не произошёл — возвращаем кнопку
+            isCreating = false;
+            createRoomBtn.disabled = false;
+        }
+    });
+
+
+</script>
+
+</body>
+</html>
