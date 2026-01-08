@@ -39,7 +39,8 @@ body {
     width: 100%;
     max-width: 900px;
     position: relative;
-    margin-bottom: 20px;
+    margin: 40px auto 10px; /* сдвиг вниз */
+
 }
 
 /* Общий блок юнита с картинкой, полоской HP и зонами для удара */
@@ -358,5 +359,16 @@ body {
     font-size: 16px;
     cursor: pointer;
 }
-
+#backBtn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    text-decoration: none;
+    color: #fff;
+    font-size: 1.1em;
+    background-color: #6c63ff;
+    padding: 6px 10px; /* меньше по высоте, больше по ширине */
+    border-radius: 12px;
+    transition: background-color 0.3s, transform 0.2s;
+}
 

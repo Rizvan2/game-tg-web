@@ -14,26 +14,23 @@
 
 <h1>Duel Game</h1>
 
-<label for="roomId">Введите номер комнаты:</label>
-<input type="text" id="roomId" placeholder="123">
-<button id="duelBtn">Начать дуэль</button>
-<button id="campaignBtn" style="margin-top: 15px;">Начать кампанию</button>
+<input type="text" id="roomId" placeholder="Название комнаты">
+<button id="duelBtn">Присоединиться / Создать</button>
+<a href="/lobby.html">
+  <button type="button">Лобби</button>
+</a>
 <!-- Новая кнопка выбора персонажа -->
-<button id="selectCharacterBtn" style="margin-top: 15px;">Выбрать персонажа</button>
+<button id="selectCharacterBtn">Выбрать персонажа</button>
 <p id="status"></p>
-
 <script>
   const duelBtn = document.getElementById('duelBtn');
-  const campaignBtn = document.getElementById('campaignBtn');
-  const selectCharacterBtn = document.getElementById('selectCharacterBtn'); // новая кнопка
+  const selectCharacterBtn = document.getElementById('selectCharacterBtn');
 
-  const status = document.getElementById('status');
-
-  // --- Дуэль ---
+  // --- Запуск дуэли ---
   duelBtn.addEventListener('click', async () => {
     const roomId = document.getElementById('roomId').value.trim();
     if (!roomId) {
-      status.textContent = 'Введите номер комнаты!';
+      status.textContent = 'Введите код комнаты!';
       return;
     }
 
@@ -52,29 +49,9 @@
     }
   });
 
-  // --- Кампания ---
-  campaignBtn.addEventListener('click', async () => {
-    try {
-      const response = await fetch(`/campaign/startCampaign`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-      });
-
-      if (!response.ok) throw new Error('Ошибка при запуске кампании');
-
-      const text = await response.text();
-      // вытаскиваем имя врага из ответа: "Бой начат против: Turk Warrior"
-      const enemyName = text.match(/против: (.+)$/)[1];
-
-      // редирект на страницу кампании
-      window.location.href = `/campaign.html?enemyName=${encodeURIComponent(enemyName)}`;
-    } catch (e) {
-      status.textContent = 'Ошибка: ' + e.message;
-    }
-  });
-  // --- Новая кнопка "Выбрать персонажа" ---
+  // --- Выбор персонажа ---
   selectCharacterBtn.addEventListener('click', () => {
-    window.location.href = "character-selection.html"; // путь к твоей странице выбора
+    window.location.href = "character-selection.html";
   });
 </script>
 

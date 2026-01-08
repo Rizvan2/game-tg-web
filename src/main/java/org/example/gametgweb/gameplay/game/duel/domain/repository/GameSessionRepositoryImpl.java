@@ -1,5 +1,6 @@
 package org.example.gametgweb.gameplay.game.duel.domain.repository;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.gametgweb.gameplay.game.duel.api.dto.GameSessionEntityDto;
 import org.example.gametgweb.gameplay.game.duel.domain.model.GameSession;
 import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
@@ -8,8 +9,7 @@ import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.entit
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.mapper.GameSessionMapper;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.repository.JpaGameSessionRepository;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.persistence.repository.JpaPlayerRepository;
-import org.example.gametgweb.gameplay.game.duel.shared.domain.GameState;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -26,12 +26,9 @@ import java.util.stream.Collectors;
  *
  * <p>Логика работы с игроками:
  * <ul>
- *     <li>Первый игрок создаёт сессию через {@link #joinOrCreateGame(String, Long)} — создаётся новая доменная модель.</li>
  *     <li>Состояние сессии сохраняется в базу через {@link #save(GameSession)}.</li>
  *     <li>Последующие игроки подтягивают существующую сессию из базы через {@link #findByGameCode(String)}.</li>
- *     <li>Игрок добавляется к доменной модели с помощью {@link #attachPlayerToGame(Long, GameSession)}, проверяя,
- *         что он ещё не в списке игроков и что сессия в состоянии {@link org.example.gametgweb.gameplay.game.duel.shared.domain.GameState#WAITING}.</li>
- *     <li>После добавления нового игрока агрегат синхронизируется с сущностью базы через {@link #updateGame(GameSession)}.</li>
+ *      *     <li>После добавления нового игрока агрегат синхронизируется с сущностью базы через {@link #updateGame(GameSession)}.</li>
  *     <li>При этом {@link #updateEntityFromDto(GameSessionEntity, GameSessionEntityDto)} получает DTO, содержащий
  *         полный актуальный список игроков (старые и новые), и заменяет коллекцию игроков сущности,
  *         чтобы Hibernate корректно обновил связи в базе.</li>
@@ -49,18 +46,17 @@ import java.util.stream.Collectors;
  * что при обновлении сущности не потеряются игроки, которые уже были сохранены в базе.
  */
 
-@Repository
+@Service
+@Slf4j
 public class GameSessionRepositoryImpl implements GameSessionRepository {
 
     private final JpaGameSessionRepository jpaGameSessionRepository;
-    private final PlayerRepositoryImpl playerRepository;
     private final JpaPlayerRepository jpaPlayerRepository;
 
 
     public GameSessionRepositoryImpl(JpaGameSessionRepository jpaGameSessionRepository,
-                                     PlayerRepositoryImpl playerRepository, JpaPlayerRepository jpaPlayerRepository) {
+                                     JpaPlayerRepository jpaPlayerRepository) {
         this.jpaGameSessionRepository = jpaGameSessionRepository;
-        this.playerRepository = playerRepository;
         this.jpaPlayerRepository = jpaPlayerRepository;
     }
 
@@ -77,29 +73,46 @@ public class GameSessionRepositoryImpl implements GameSessionRepository {
     }
 
     /**
-     * Позволяет игроку присоединиться к существующей сессии
-     * или создать новую, если она не найдена.
+     * Возвращает все игровые сессии.
      *
-     * @param gameCode уникальный код сессии
-     * @param playerId идентификатор игрока
-     * @return доменная модель {@link GameSession} после обновления
-     * @throws IllegalArgumentException если playerId = null или игрок не найден
+     * <p>
+     * Загружает {@link GameSessionEntity} из базы,
+     * логирует состояние игроков до маппинга,
+     * преобразует в доменные {@link GameSession}
+     * и логирует результат после маппинга.
+     * </p>
+     *
+     * @return список игровых сессий
      */
     @Override
-    @Transactional
-    public GameSession joinOrCreateGame(String gameCode, Long playerId) {
-        GameSession game = findOrCreateGameSession(gameCode);
+    @Transactional(readOnly = true)
+    public List<GameSession> findAll() {
+        List<GameSessionEntity> entities = jpaGameSessionRepository.findAll();
 
-        if (playerId == null) {
-            throw new IllegalArgumentException("Player ID must not be null");
+        // Логируем прямо из JPA, до маппинга
+        for (GameSessionEntity g : entities) {
+            String playerNames = g.getPlayers().stream()
+                    .map(p -> String.format("Player[id=%d, username=%s]", p.getId(), p.getUsername()))
+                    .collect(Collectors.joining(", "));
+            log.info("Before mapping - Game {} has {} players: {}", g.getGameCode(), g.getPlayers().size(), playerNames);
         }
 
-        attachPlayerToGame(playerId, game);
+        // Маппим в домен
+        List<GameSession> sessions = entities.stream()
+                .map(GameSessionMapper::toDomain)
+                .toList();
 
-        updateOrSaveGame(game);
+        // Логируем уже доменные модели
+        for (GameSession g : sessions) {
+            String playerNames = g.getPlayers().stream()
+                    .map(Player::getUsername)
+                    .collect(Collectors.joining(", "));
+            log.info("After mapping - Game {} has {} players: {}", g.getGameCode(), g.getPlayers().size(), playerNames);
+        }
 
-        return game;
+        return sessions;
     }
+
 
     /**
      * Обновляет существующую игровую сессию в базе данных.
@@ -121,9 +134,15 @@ public class GameSessionRepositoryImpl implements GameSessionRepository {
         GameSessionEntity entity = jpaGameSessionRepository
                 .findById(dto.id())
                 .orElseThrow(() -> new IllegalStateException("Session not found"));
+        log.info("Before update - players in DTO: {}", dto.players()); // логируем входящих игроков
 
         updateEntityFromDto(entity, dto);
-        jpaGameSessionRepository.save(entity);
+        GameSessionEntity saved = jpaGameSessionRepository.save(entity);
+        log.info("After update - players in DB: {}",
+                saved.getPlayers().stream()
+                        .map(p -> String.format("Player[id=%d, username=%s]", p.getId(), p.getUsername()))
+                        .toList()
+        );
     }
 
     /**
@@ -137,11 +156,20 @@ public class GameSessionRepositoryImpl implements GameSessionRepository {
      */
     @Override
     @Transactional
-    public void save(GameSession game) {
+    public GameSession save(GameSession game) {
         GameSessionEntityDto entityDto = GameSessionMapper.toDto(game);
         GameSessionEntity gameSessionEntity = new GameSessionEntity();
         updateEntityFromDto(gameSessionEntity, entityDto);
-        jpaGameSessionRepository.save(gameSessionEntity);
+        log.info("Before save - players in DTO: {}", entityDto.players()); // логируем входящих игроков
+
+        GameSessionEntity saved = jpaGameSessionRepository.save(gameSessionEntity);
+
+        log.info("After save - players in DB: {}",
+                saved.getPlayers().stream()
+                        .map(p -> String.format("Player[id=%d, username=%s]", p.getId(), p.getUsername()))
+                        .toList()
+        );
+        return GameSessionMapper.toDomain(saved);
     }
 
     /**
@@ -153,52 +181,6 @@ public class GameSessionRepositoryImpl implements GameSessionRepository {
     @Transactional
     public void deleteGame(Long id) {
         jpaGameSessionRepository.deleteById(id);
-    }
-
-    private void updateOrSaveGame(GameSession game) {
-        if (game.getId() != null) {
-            updateGame(game);
-        } else {
-            save(game);
-        }
-    }
-
-    /**
-     * Находит существующую сессию по коду или создаёт новую.
-     *
-     * @param gameCode код сессии
-     * @return доменная модель {@link GameSession}
-     */
-    private GameSession findOrCreateGameSession(String gameCode) {
-        return jpaGameSessionRepository.findByGameCode(gameCode)
-                .map(GameSessionMapper::toDomain)
-                .orElseGet(() -> createNewGameSession(gameCode));
-    }
-
-    /**
-     * Создаёт новую игровую сессию в состоянии {@link GameState#WAITING}
-     * и сохраняет её в базу.
-     *
-     * @param gameCode код создаваемой игры
-     * @return доменная модель {@link GameSession} с установленным ID
-     */
-    private GameSession createNewGameSession(String gameCode) {
-        return new GameSession(gameCode, GameState.WAITING);
-    }
-
-    /**
-     * Привязывает игрока к сессии, если он ещё не добавлен.
-     *
-     * @param playerId ID игрока
-     * @param game     доменная модель игры {@link GameSession}
-     * @throws IllegalArgumentException если игрок не найден
-     */
-    private void attachPlayerToGame(Long playerId, GameSession game) {
-        Player player = playerRepository.findById(playerId)
-                .orElseThrow(() -> new IllegalArgumentException("Player not found"));
-        if (!game.getPlayers().contains(player)) {
-            game.addPlayer(player);
-        }
     }
 
     /**
@@ -223,6 +205,4 @@ public class GameSessionRepositoryImpl implements GameSessionRepository {
             entity.setPlayers(playerEntities);
         }
     }
-
-
 }

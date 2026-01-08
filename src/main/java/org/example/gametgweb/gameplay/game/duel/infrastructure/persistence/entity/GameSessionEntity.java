@@ -64,8 +64,26 @@ public class GameSessionEntity {
         this.state = state;
     }
 
-    public void setPlayer(PlayerEntity player) {
-        this.players.add(player);
+    public void setPlayers(List<PlayerEntity> players) {
+        // Отвязываем старых игроков
+        for (PlayerEntity player : this.players) {
+            player.setGameSessionEntity(null);
+        }
+        this.players.clear();
+
+        // Привязываем новых
+        if (players != null) {
+            for (PlayerEntity player : players) {
+                this.players.add(player);
+                player.setGameSessionEntity(this); // важная строчка!
+            }
+        }
+    }
+
+
+    public void addPlayer(PlayerEntity player) {
+        players.add(player);
+        player.setGameSessionEntity(this);
     }
 }
 //    /**
