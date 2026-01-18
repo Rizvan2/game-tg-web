@@ -1,6 +1,7 @@
 package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.lifecycle;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.gametgweb.gameplay.game.duel.application.services.GameSessionService;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.JoinLeaveScheduler;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.utils.WebSocketContext;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.MessageDispatcherService;
@@ -22,6 +23,7 @@ public class PlayerLifecycleService {
 
     private final JoinLeaveScheduler scheduler;
     private final MessageDispatcherService dispatcherService;
+    private final GameSessionService gameSessionService;
 
     /**
      * Создаёт экземпляр сервиса жизненного цикла игрока.
@@ -29,9 +31,10 @@ public class PlayerLifecycleService {
      * @param scheduler          Планировщик для отложенной обработки входов/выходов.
      * @param dispatcherService  Сервис для широковещательной рассылки игровых сообщений.
      */
-    public PlayerLifecycleService(JoinLeaveScheduler scheduler, MessageDispatcherService dispatcherService) {
+    public PlayerLifecycleService(JoinLeaveScheduler scheduler, MessageDispatcherService dispatcherService, GameSessionService gameSessionService) {
         this.scheduler = scheduler;
         this.dispatcherService = dispatcherService;
+        this.gameSessionService = gameSessionService;
     }
 
     /**
@@ -59,8 +62,11 @@ public class PlayerLifecycleService {
      * @param ctx контекст WebSocket — включает gameCode и playerName
      */
     public void handleLeave(WebSocketContext ctx) {
-        scheduler.handleLeave(ctx, () ->
-                dispatcherService.broadcastLeave(ctx.gameCode(), ctx.playerName()));
+        scheduler.handleLeave(ctx, () -> {
+            gameSessionService.removePlayerFromGame(ctx.gameCode(), ctx.playerName());
+            dispatcherService.broadcastLeave(ctx.gameCode(), ctx.playerName());
+        });
+
         log.info("{} вышел из комнаты {}", ctx.playerName(), ctx.gameCode());
     }
 

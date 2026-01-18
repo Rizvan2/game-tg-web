@@ -162,6 +162,24 @@ public class GameSessionService {
     }
 
     /**
+     * Удаляет игрока из игровой сессии.
+     *
+     * @param gameCode код сессии
+     * @param username игрока
+     * @throws IllegalArgumentException если игрок или сессия не найдены
+     */
+    @Transactional
+    public void removePlayerFromGame(String gameCode, String username) {
+        GameSession game = repository.findByGameCode(gameCode)
+                .orElseThrow(() -> new IllegalArgumentException("Комната не найдена"));
+
+        game.removePlayerByName(username);
+        log.info("Игрок {} удалён из игры {}", username, gameCode);
+
+        repository.updateOrSaveGame(game);
+    }
+
+    /**
      * Находит существующую сессию по коду или создаёт новую.
      *
      * @param gameCode код сессии

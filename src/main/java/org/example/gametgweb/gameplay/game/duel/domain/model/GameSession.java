@@ -53,6 +53,25 @@ public class GameSession {
         this.state = GameState.IN_PROGRESS;
     }
 
+    /**
+     * Удаляет двунаправленно игрока из сессии по имени (поиск) и id (удаление).
+     *
+     * @param playerName имя игрока
+     * @throws IllegalArgumentException если игрок не найден
+     */
+    public void removePlayerByName(String playerName) {
+        Player player = players.stream()
+                .filter(p -> p.getUsername().equals(playerName))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Player " + playerName + " not found in session"));
+
+        // отвязываем двунаправленно
+        player.setGameSession(null);
+
+        // удаляем игрока по ID
+        players.removeIf(p -> p.getId().equals(player.getId()));
+    }
+
     public void finish() {
         this.state = GameState.FINISHED;
     }
@@ -63,5 +82,4 @@ public class GameSession {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Player " + name + " not found in session"));
     }
-
 }
