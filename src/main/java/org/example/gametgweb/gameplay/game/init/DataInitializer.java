@@ -1,6 +1,7 @@
 package org.example.gametgweb.gameplay.game.init;
 
 import jakarta.transaction.Transactional;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.BodyPartEfficiency;
 import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.PlayerUnitEntity;
 import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.UnitEntity;
 import org.example.gametgweb.characterSelection.infrastructure.persistence.repository.JpaPlayerUnitRepository;
@@ -43,10 +44,61 @@ public class DataInitializer {
             if (jpaPlayerUnitRepository.count() == 0) {
 
                 List<UnitEntity> templates = List.of(
-                        UnitEntity.builder().name("Turk Warrior").maxHealth(100L).health(100L).damage(10L).imagePath("/images/always-mustachioed.png").build(),
-                        UnitEntity.builder().name("Goblin").maxHealth(80L).health(80L).damage(8L).imagePath("/images/Goblin.png").build(),
-                        UnitEntity.builder().name("Elf").maxHealth(120L).health(120L).damage(12L).imagePath("/images/Elf.png").build(),
-                        UnitEntity.builder().name("Monk").maxHealth(100L).health(100L).damage(8L).imagePath("/images/Monk.png").build()
+                        UnitEntity.builder()
+                                .name("Turk Warrior")
+                                .maxHealth(100L)
+                                .health(100L)
+                                .damage(10L)
+                                .imagePath("/images/always-mustachioed.png")
+                                .bodyEfficiency(new BodyPartEfficiency(1,
+                                        1.3,
+                                        1.2,
+                                        1.2,
+                                        1.2,
+                                        1.2))
+                                .build(),
+
+                        UnitEntity.builder()
+                                .name("Goblin")
+                                .maxHealth(80L)
+                                .health(80L)
+                                .damage(8L)
+                                .imagePath("/images/Goblin.png")
+                                .bodyEfficiency(new BodyPartEfficiency(0.8,
+                                        1,
+                                        0.8,
+                                        0.8,
+                                        0.8,
+                                        0.8))
+                                .build(),
+
+                        UnitEntity.builder()
+                                .name("Elf")
+                                .maxHealth(120L)
+                                .health(120L)
+                                .damage(12L)
+                                .imagePath("/images/Elf.png")
+                                .bodyEfficiency(new BodyPartEfficiency(1.1,
+                                        1.2,
+                                        1.2,
+                                        1.2,
+                                        1.2,
+                                        1.2))
+                                .build(),
+
+                        UnitEntity.builder()
+                                .name("Monk")
+                                .maxHealth(100L)
+                                .health(100L)
+                                .damage(8L)
+                                .imagePath("/images/Monk.png")
+                                .bodyEfficiency(new BodyPartEfficiency(1.4,
+                                        1.3,
+                                        1.4,
+                                        1.4,
+                                        1.3,
+                                        1.3))
+                                .build()
                 );
                 jpaUnitRepository.saveAll(templates);
 
