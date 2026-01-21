@@ -1,4 +1,4 @@
-package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket;
+package org.example.gametgweb.gameplay.game.duel.application.services.duel;
 
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 

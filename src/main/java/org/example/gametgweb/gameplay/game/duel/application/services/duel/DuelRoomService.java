@@ -1,7 +1,6 @@
-package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket;
+package org.example.gametgweb.gameplay.game.duel.application.services.duel;
 
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.DuelRoomCoordinator;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.order.PlayerOrderService;
+import org.example.gametgweb.gameplay.game.duel.application.services.order.PlayerOrderService;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.utils.UnitStateBroadcaster;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.utils.WebSocketContext;
 import org.springframework.beans.factory.annotation.Autowired;

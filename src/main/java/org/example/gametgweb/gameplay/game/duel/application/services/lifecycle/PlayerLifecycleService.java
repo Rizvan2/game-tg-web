@@ -1,8 +1,8 @@
-package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.lifecycle;
+package org.example.gametgweb.gameplay.game.duel.application.services.lifecycle;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.gametgweb.gameplay.game.duel.application.services.GameSessionService;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.JoinLeaveScheduler;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.internal.scheduling.JoinLeaveScheduler;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.utils.WebSocketContext;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.MessageDispatcherService;
 import org.springframework.stereotype.Component;

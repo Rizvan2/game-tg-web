@@ -1,4 +1,4 @@
-package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry;
+package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.session;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

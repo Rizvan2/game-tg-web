@@ -1,9 +1,9 @@
-package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service;
+package org.example.gametgweb.gameplay.game.duel.application.events.notifier;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.BodyPartDestroyedNotificationDto;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.RoomSessionRegistry;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.session.RoomSessionRegistry;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 import org.springframework.stereotype.Service;
 

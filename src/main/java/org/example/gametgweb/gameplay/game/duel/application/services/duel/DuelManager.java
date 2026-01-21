@@ -1,4 +1,4 @@
-package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket;
+package org.example.gametgweb.gameplay.game.duel.application.services.duel;
 
 import org.example.gametgweb.gameplay.game.duel.api.dto.GameSessionDto;
 import org.example.gametgweb.gameplay.game.duel.application.services.GameSessionService;

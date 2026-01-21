@@ -1,4 +1,4 @@
-package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.order;
+package org.example.gametgweb.gameplay.game.duel.application.services.order;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

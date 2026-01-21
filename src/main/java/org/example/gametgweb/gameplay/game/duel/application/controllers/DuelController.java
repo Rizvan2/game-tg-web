@@ -3,7 +3,7 @@ package org.example.gametgweb.gameplay.game.duel.application.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gametgweb.gameplay.game.duel.api.dto.GameSessionDto;
 import org.example.gametgweb.gameplay.game.duel.domain.exception.GameAlreadyExistsException;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.DuelManager;
+import org.example.gametgweb.gameplay.game.duel.application.services.duel.DuelManager;
 import org.example.gametgweb.gameplay.game.duel.shared.PlayerDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

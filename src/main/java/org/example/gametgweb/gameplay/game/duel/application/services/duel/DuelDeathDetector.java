@@ -1,4 +1,4 @@
-package org.example.gametgweb.gameplay.game.duel.application.services;
+package org.example.gametgweb.gameplay.game.duel.application.services.duel;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;

@@ -1,16 +1,16 @@
-package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat;
+package org.example.gametgweb.gameplay.game.duel.application.services.combat;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
-import org.example.gametgweb.gameplay.game.duel.application.services.DuelDeathDetector;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.DuelTurn;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.DuelTurnManager;
+import org.example.gametgweb.gameplay.game.duel.application.services.duel.DuelDeathDetector;
+import org.example.gametgweb.gameplay.game.duel.application.services.duel.DuelTurn;
+import org.example.gametgweb.gameplay.game.duel.application.services.duel.DuelTurnManager;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.DuelRoundResponseDto;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.DuelRoundResult;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.RoomSessionRegistry;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.UnitRegistryService;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.session.RoomSessionRegistry;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.session.UnitRegistryService;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * <ul>
  *     <li>Добавление хода игрока через {@link DuelTurnManager};</li>
  *     <li>Определение готовности хода (когда оба игрока сделали выбор);</li>
- *     <li>Вызов {@link CombatService#duelRound(PlayerUnit, Body, PlayerUnit, Body)} для расчёта результатов боя;</li>
+ *     <li>Вызов {@link CombatService#duelRound(PlayerUnit, Body, PlayerUnit, Body, String)} для расчёта результатов боя;</li>
  *     <li>Очистку хода после завершения раунда;</li>
  *     <li>Возврат результата боя в виде JSON строки.</li>
  * </ul>

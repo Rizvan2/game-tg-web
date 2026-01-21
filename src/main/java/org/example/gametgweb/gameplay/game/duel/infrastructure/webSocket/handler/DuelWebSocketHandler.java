@@ -3,14 +3,14 @@ package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.handle
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.DuelRoomService;
+import org.example.gametgweb.gameplay.game.duel.application.services.duel.DuelRoomService;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.AttackMessageDTO;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.ChatMessageDTO;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.ErrorMessageDTO;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.InfoMessageDTO;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.registry.RoomSessionRegistry;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.session.RoomSessionRegistry;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.MessageDispatcherService;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.combat.DuelCombatService;
+import org.example.gametgweb.gameplay.game.duel.application.services.combat.DuelCombatService;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.utils.WebSocketContext;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 import org.springframework.beans.factory.annotation.Autowired;

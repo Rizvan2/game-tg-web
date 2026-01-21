@@ -3,7 +3,7 @@
 //import org.example.gametgweb.gameplay.game.duel.domain.model.GameSession;
 //import org.example.gametgweb.gameplay.game.duel.domain.repository.GameSessionRepositoryImpl;
 //import org.example.gametgweb.gameplay.game.duel.domain.repository.PlayerRepositoryImpl;
-//import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.DuelManager;
+//import org.example.gametgweb.gameplay.game.duel.application.services.duel.DuelManager;
 //import org.junit.jupiter.api.Test;
 //import org.junit.jupiter.api.extension.ExtendWith;
 //import org.mockito.InjectMocks;

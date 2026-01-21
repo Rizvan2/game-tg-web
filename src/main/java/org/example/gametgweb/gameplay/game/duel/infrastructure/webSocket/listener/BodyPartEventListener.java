@@ -2,7 +2,7 @@ package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.listen
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.example.gametgweb.gameplay.game.duel.application.events.BodyPartDestroyedEvent;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.BodyPartNotifier;
+import org.example.gametgweb.gameplay.game.duel.application.events.notifier.BodyPartNotifier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
