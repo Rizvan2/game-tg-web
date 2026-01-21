@@ -143,7 +143,7 @@ public class DuelCombatService {
             log.info(String.valueOf(u1.getId()));
             log.info(String.valueOf(u2.getId()));
 
-            DuelRoundResult result = combatService.duelRound(u1, turn.getBody1(), u2, turn.getBody2());
+            DuelRoundResult result = combatService.duelRound(u1, turn.getBody1(), u2, turn.getBody2(), gameCode);
 
 
             // Добавляем явные поля для фронта
