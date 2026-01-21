@@ -60,7 +60,16 @@ document.addEventListener('click', (e) => {
 let selectedBody = null;
 document.querySelectorAll('.hit-zone').forEach(zone => {
     zone.addEventListener('click', () => {
+        // Проверяем, не сломана ли эта часть
+        if (zone.classList.contains('destroyed')) {
+            log('❌ Эта часть тела уничтожена! Выберите другую.');
+            return;
+        }
+
+        // Убираем старое выделение
         document.querySelectorAll('.hit-zone').forEach(z => z.classList.remove('selected'));
+
+        // Выделяем текущую
         zone.classList.add('selected');
         selectedBody = zone.dataset.part;
         log(`🎯 Вы выбрали: ${selectedBody}`);

@@ -76,7 +76,12 @@
                 showDuelResult(msg.resultText);
                 return;
             }
-
+            // НОВЫЙ ОБРАБОТЧИК
+            if (msg.type === 'BODY_PART_DESTROYED') {
+                console.log("💀 BODY PART DESTROYED:", msg);
+                handleBodyPartDestroyed(msg);
+                return;
+            }
 
             if (msg.type === 'UNITS_STATE') {
                 if (!Array.isArray(msg.units)) return;
@@ -188,6 +193,57 @@
 
         title.textContent = text;
         modal.style.display = 'flex';
+    }
+
+    // Функция обработки уничтожения части тела
+    function handleBodyPartDestroyed(data) {
+        // data = {
+        //   type: "BODY_PART_DESTROYED",
+        //   player: "Вася",
+        //   bodyPart: "HEAD",
+        //   message: "Вася потерял голову!"
+        // }
+
+        log(`💀 ${data.message}`);
+        chatMsg(`💀 ${data.message}`);
+
+        // Визуально отключаем эту часть тела
+        disableBodyPart(data.bodyPart);
+
+        // Показываем уведомление
+        showNotification(data.message);
+    }
+
+// Отключает возможность выбора части тела
+    function disableBodyPart(bodyPart) {
+        const hitZone = document.querySelector(`.hit-zone[data-part="${bodyPart}"]`);
+        if (hitZone) {
+            hitZone.classList.add('destroyed');
+            hitZone.style.pointerEvents = 'none'; // нельзя кликнуть
+
+            // Добавляем иконку черепа
+            const skull = document.createElement('span');
+            skull.className = 'skull-icon';
+            skull.textContent = '💀';
+            hitZone.appendChild(skull);
+        }
+    }
+
+// Показывает временное уведомление
+    function showNotification(message) {
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 100);
+
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
     }
 
 

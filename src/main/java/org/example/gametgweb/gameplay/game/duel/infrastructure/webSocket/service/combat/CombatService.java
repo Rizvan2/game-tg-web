@@ -12,9 +12,9 @@ public class CombatService {
 
     private final CombatEngine engine;
 
-    public String attack(PlayerUnit attacker, PlayerUnit defender, Body body) {
-        return engine.performAttack(attacker, defender, body);
-    }
+//    public String attack(PlayerUnit attacker, PlayerUnit defender, Body body) {
+//        return engine.performAttack(attacker, defender, body);
+//    }
 
 
     /**
@@ -26,9 +26,9 @@ public class CombatService {
      * @param bodyD часть тела, выбранная вторым игроком для атаки
      * @return карта с описанием боя и текущим здоровьем
      */
-    public DuelRoundResult duelRound(PlayerUnit attacker, Body bodyA, PlayerUnit defender, Body bodyD) {
-        String msg1 = engine.performAttack(attacker, defender, bodyA);
-        String msg2 = engine.performAttack(defender, attacker, bodyD);
+    public DuelRoundResult duelRound(PlayerUnit attacker, Body bodyA, PlayerUnit defender, Body bodyD, String gameCode) {
+        String msg1 = engine.performAttack(attacker, defender, bodyA, gameCode);
+        String msg2 = engine.performAttack(defender, attacker, bodyD, gameCode);
 
         long attackerHpPercent = (attacker.getHealth() / attacker.getMaxHealth()) * 100;
         long defenderHpPercent = (defender.getHealth() / defender.getMaxHealth()) * 100;

@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 
 /**
  * Хранит индивидуальное состояние юнита игрока
@@ -13,7 +12,7 @@ import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 @Setter
 @Slf4j
 @Entity
-public class PlayerUnitEntity implements GameUnit {
+public class PlayerUnitEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -55,6 +54,10 @@ public class PlayerUnitEntity implements GameUnit {
     @Column(name = "image_path")
     private String imagePath;
 
+    // Текущее состояние частей тела этого юнита
+    @Embedded
+    private BodyPartEfficiency bodyEfficiency;
+
     public PlayerUnitEntity(UnitEntity template) {
         this.template = template;
 
@@ -64,6 +67,7 @@ public class PlayerUnitEntity implements GameUnit {
         this.damage = template.getDamage();
         this.name = template.getName();
         this.imagePath = template.getImagePath();
+        this.bodyEfficiency = template.getBodyEfficiency();
     }
 
     public PlayerUnitEntity(long id, UnitEntity template, String name, long maxHealth, long health, long damage, String imagePath) {
@@ -77,43 +81,5 @@ public class PlayerUnitEntity implements GameUnit {
     }
 
     public PlayerUnitEntity() {
-    }
-
-    /**
-     * Наносит урон юниту с учётом части тела, в которую пришёл удар.
-     * <p>
-     * Модификатор урона определяется значением {@link Body#getDamageMultiplier()}.
-     * Если итоговый урон превышает текущее здоровье — здоровье устанавливается в 0.
-     *
-     * @param bodyPart часть тела, в которую попал удар
-     * @param damage   базовое значение урона (до применения множителя)
-     */
-    @Override
-    public void takeDamage(Body bodyPart, long damage) {
-        if (bodyPart == null) {
-            throw new IllegalArgumentException("Часть тела не может быть null");
-        }
-
-        // Рассчитываем фактический урон с модификатором
-        long actualDamage = Math.round(damage * bodyPart.getDamageMultiplier());
-
-        // Применяем урон
-        this.health = Math.max(this.health - actualDamage, 0);
-
-        // Можно добавить лог/сообщение
-        log.info("%s получает %d урона в %s (x%.2f)%n",
-                name, actualDamage, bodyPart.name(), bodyPart.getDamageMultiplier());
-    }
-
-    /**
-     * Вылечить юнита.
-     * <p>
-     * Если лечение превышает максимальное здоровье, здоровье устанавливается в {@link #maxHealth}.
-     *
-     * @param amount количество восстанавливаемого здоровья
-     */
-    @Override
-    public void heal(long amount) {
-        this.health = Math.min(this.health + amount, this.maxHealth);
     }
 }

@@ -3,6 +3,7 @@ package org.example.gametgweb.characterSelection.domain.model;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.BodyPartEfficiency;
 import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.GameUnit;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 
@@ -26,13 +27,14 @@ public class PlayerUnit implements GameUnit {
      */
     private long health;
     private long maxHealth;
+    private long damage;
+    private BodyPartEfficiency bodyEfficiency;
 
     /**
      * Кастомные визуальные элементы
      */
     private String name;
     private String imagePath;
-    private long damage;
 
     public PlayerUnit(Unit template, String customName) {
         this.template = template;
@@ -43,6 +45,19 @@ public class PlayerUnit implements GameUnit {
         this.maxHealth = template.getMaxHealth();
         this.imagePath = template.getImagePath();
         this.damage = template.getDamage();
+        // ✅ ИСПРАВЬ ЭТО: создаём КОПИЮ, а не ссылку
+        if (template.getBodyEfficiency() != null) {
+            this.bodyEfficiency = new BodyPartEfficiency(template.getBodyEfficiency());
+        } else {
+            // Fallback на случай если в шаблоне нет
+            this.bodyEfficiency = new BodyPartEfficiency(
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0);
+        }
     }
 
     public PlayerUnit(long id, Unit template, String name, long maxHealth, long health, long damage, String imagePath) {
@@ -53,6 +68,12 @@ public class PlayerUnit implements GameUnit {
         this.name = name;
         this.imagePath = imagePath;
         this.damage = damage;
+        // ✅ ДОБАВЬ ИНИЦИАЛИЗАЦИЮ bodyEfficiency!
+        if (template != null && template.getBodyEfficiency() != null) {
+            this.bodyEfficiency = new BodyPartEfficiency(template.getBodyEfficiency());
+        } else {
+            this.bodyEfficiency = new BodyPartEfficiency(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
+        }
     }
 
     /**
@@ -73,16 +94,10 @@ public class PlayerUnit implements GameUnit {
      *
      * @param bodyPart часть тела, в которую попал удар
      * @param damage   базовое значение урона (до применения множителя)
+     * @return текущая эффективность атакованной части тела после урона (0.0 - 1.0+)
      */
     @Override
-    public void takeDamage(Body bodyPart, long damage) {
-        if (bodyPart == null) {
-            throw new IllegalArgumentException("Часть тела не может быть null");
-        }
-        if (damage < 0) {
-            throw new IllegalArgumentException("Урон не может быть отрицательным");
-        }
-
+    public double takeDamage(Body bodyPart, long damage) {
         // Рассчитываем фактический урон с модификатором
         long actualDamage = Math.round(damage * bodyPart.getDamageMultiplier());
 
@@ -91,6 +106,9 @@ public class PlayerUnit implements GameUnit {
 
         log.info("{} получает {} урона в {} (x{})",
                 name, actualDamage, bodyPart.name(), bodyPart.getDamageMultiplier());
+
+        // Возвращаем эффективность атакованной части тела
+        return bodyEfficiency.reduceEfficiency(bodyPart, actualDamage, maxHealth);
     }
 
     /**

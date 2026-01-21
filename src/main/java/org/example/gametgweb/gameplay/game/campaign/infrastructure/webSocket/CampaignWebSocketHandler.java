@@ -157,7 +157,8 @@ public class CampaignWebSocketHandler extends TextWebSocketHandler {
                 PlayerUnitMapper.toDomain(campaignEntity.getEnemyUnitEntity()) :
                 PlayerUnitMapper.toDomain(campaignEntity.getPlayerUnitEntity());
 
-        String message = combatService.attack(attacker, defender, body);
+        String message = "adasd";
+//        String message = combatService.attack(attacker, defender, body);
 
         registry.broadcast(playerName, mapper.writeValueAsString(Map.of(
                 "message", message,
