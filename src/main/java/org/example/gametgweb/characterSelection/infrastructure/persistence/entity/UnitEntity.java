@@ -3,7 +3,6 @@ package org.example.gametgweb.characterSelection.infrastructure.persistence.enti
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 
 /**
  * Сущность игрового юнита.
@@ -20,7 +19,7 @@ import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 @AllArgsConstructor
 @Builder
 @Slf4j
-public class UnitEntity implements GameUnit {
+public class UnitEntity {
 
     /** Уникальный идентификатор юнита. */
     @Id
@@ -47,41 +46,6 @@ public class UnitEntity implements GameUnit {
     @Column(name = "image_path")
     private String imagePath;
 
-    /**
-     * Наносит урон юниту с учётом части тела, в которую пришёл удар.
-     * <p>
-     * Модификатор урона определяется значением {@link Body#getDamageMultiplier()}.
-     * Если итоговый урон превышает текущее здоровье — здоровье устанавливается в 0.
-     *
-     * @param bodyPart часть тела, в которую попал удар
-     * @param damage   базовое значение урона (до применения множителя)
-     */
-    @Override
-    public void takeDamage(Body bodyPart, long damage) {
-        if (bodyPart == null) {
-            throw new IllegalArgumentException("Часть тела не может быть null");
-        }
-
-        // Рассчитываем фактический урон с модификатором
-        long actualDamage = Math.round(damage * bodyPart.getDamageMultiplier());
-
-        // Применяем урон
-        this.health = Math.max(this.health - actualDamage, 0);
-
-        // Можно добавить лог/сообщение
-        log.info("%s получает %d урона в %s (x%.2f)%n",
-                name, actualDamage, bodyPart.name(), bodyPart.getDamageMultiplier());
-    }
-
-    /**
-     * Вылечить юнита.
-     * <p>
-     * Если лечение превышает максимальное здоровье, здоровье устанавливается в {@link #maxHealth}.
-     *
-     * @param amount количество восстанавливаемого здоровья
-     */
-    @Override
-    public void heal(long amount) {
-        this.health = Math.min(this.health + amount, this.maxHealth);
-    }
+    @Embedded
+    private BodyPartEfficiency bodyEfficiency;
 }

@@ -2,6 +2,7 @@ package org.example.gametgweb.characterSelection.infrastructure.persistence.mapp
 
 import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
 import org.example.gametgweb.characterSelection.domain.model.Unit;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.BodyPartEfficiency;
 import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.PlayerUnitEntity;
 
 /**
@@ -46,6 +47,9 @@ public class PlayerUnitMapper {
         entity.setHealth(unit.getHealth());
         entity.setDamage(unit.getDamage());
         entity.setImagePath(unit.getImagePath());
+        entity.setBodyEfficiency(
+                new BodyPartEfficiency(unit.getBodyEfficiency())
+        );
 
         return entity;
     }

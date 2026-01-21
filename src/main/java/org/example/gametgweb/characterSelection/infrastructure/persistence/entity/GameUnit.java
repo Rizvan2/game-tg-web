@@ -44,7 +44,7 @@ public interface GameUnit {
      * @param bodyPart часть тела, по которой наносится урон
      * @param damage количество урона
      */
-    void takeDamage(Body bodyPart, long damage);
+    double takeDamage(Body bodyPart, long damage);
 
     /**
      * Восстановление здоровья юнита.
