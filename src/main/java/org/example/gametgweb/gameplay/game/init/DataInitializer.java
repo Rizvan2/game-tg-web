@@ -2,6 +2,7 @@ package org.example.gametgweb.gameplay.game.init;
 
 import jakarta.transaction.Transactional;
 import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.BodyPartEfficiency;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.DeflectionChargesEmbeddable;
 import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.PlayerUnitEntity;
 import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.UnitEntity;
 import org.example.gametgweb.characterSelection.infrastructure.persistence.repository.JpaPlayerUnitRepository;
@@ -56,6 +57,7 @@ public class DataInitializer {
                                         1.2,
                                         1.2,
                                         1.2))
+                                .deflectionCharges(new DeflectionChargesEmbeddable(2,2)) // ✅ добавлено
                                 .build(),
 
                         UnitEntity.builder()
@@ -70,6 +72,7 @@ public class DataInitializer {
                                         0.8,
                                         0.8,
                                         0.8))
+                                .deflectionCharges(new DeflectionChargesEmbeddable(1,1)) // ✅ добавлено
                                 .build(),
 
                         UnitEntity.builder()
@@ -84,6 +87,7 @@ public class DataInitializer {
                                         1.2,
                                         1.2,
                                         1.2))
+                                .deflectionCharges(new DeflectionChargesEmbeddable(1,1)) // ✅ добавлено
                                 .build(),
 
                         UnitEntity.builder()
@@ -98,13 +102,18 @@ public class DataInitializer {
                                         1.4,
                                         1.3,
                                         1.3))
+                                .deflectionCharges(new DeflectionChargesEmbeddable(1,1)) // ✅ добавлено
                                 .build()
                 );
                 jpaUnitRepository.saveAll(templates);
 
                 for (UnitEntity template : templates) {
-                    jpaPlayerUnitRepository.save(new PlayerUnitEntity(template));
+                    PlayerUnitEntity playerUnit = new PlayerUnitEntity(template);
+                    // ❗ вручную копируем дефлект
+                    playerUnit.setDeflectionCharges(template.getDeflectionCharges());
+                    jpaPlayerUnitRepository.save(playerUnit);
                 }
+
             }
         };
     }
