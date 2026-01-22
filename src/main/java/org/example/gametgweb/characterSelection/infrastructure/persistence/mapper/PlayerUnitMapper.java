@@ -2,7 +2,9 @@ package org.example.gametgweb.characterSelection.infrastructure.persistence.mapp
 
 import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
 import org.example.gametgweb.characterSelection.domain.model.Unit;
+import org.example.gametgweb.characterSelection.domain.model.valueObjects.DeflectionCharges;
 import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.BodyPartEfficiency;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.DeflectionChargesEmbeddable;
 import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.PlayerUnitEntity;
 
 /**
@@ -16,7 +18,14 @@ public class PlayerUnitMapper {
      * @return доменная модель {@link Unit}
      */
     public static PlayerUnit toDomain(PlayerUnitEntity entity) {
-        return new PlayerUnit(
+        BodyPartEfficiency bodyEfficiency;
+        if (entity.getTemplate() != null && entity.getTemplate().getBodyEfficiency() != null) {
+            bodyEfficiency = new BodyPartEfficiency(entity.getTemplate().getBodyEfficiency());
+        } else {
+            bodyEfficiency = new BodyPartEfficiency(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
+        }
+
+        PlayerUnit unit = new PlayerUnit(
                 entity.getId(),
                 UnitMapper.toDomain(entity.getTemplate()),
                 entity.getName(),
@@ -25,6 +34,12 @@ public class PlayerUnitMapper {
                 entity.getDamage(),
                 entity.getImagePath()
         );
+        unit.setBodyEfficiency(bodyEfficiency);
+        unit.setDeflectionCharges(new DeflectionCharges(
+                entity.getDeflectionCharges().getCurrent(),
+                entity.getDeflectionCharges().getMax())
+        );
+        return unit;
     }
 
     /**
@@ -48,8 +63,17 @@ public class PlayerUnitMapper {
         entity.setDamage(unit.getDamage());
         entity.setImagePath(unit.getImagePath());
         entity.setBodyEfficiency(
-                new BodyPartEfficiency(unit.getBodyEfficiency())
+                new BodyPartEfficiency(
+                        unit.getBodyEfficiency()
+                )
         );
+        entity.setDeflectionCharges(
+                        new DeflectionChargesEmbeddable(
+                        unit.getDeflectionCharges().current(),
+                        unit.getDeflectionCharges().max()
+                )
+        );
+
 
         return entity;
     }

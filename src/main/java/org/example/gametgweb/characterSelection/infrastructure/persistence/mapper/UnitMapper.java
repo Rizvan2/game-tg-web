@@ -2,6 +2,9 @@ package org.example.gametgweb.characterSelection.infrastructure.persistence.mapp
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.gametgweb.characterSelection.domain.model.Unit;
+import org.example.gametgweb.characterSelection.domain.model.valueObjects.DeflectionCharges;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.BodyPartEfficiency;
+import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.DeflectionChargesEmbeddable;
 import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.UnitEntity;
 
 @Slf4j
@@ -23,6 +26,10 @@ public class UnitMapper {
         } else {
             log.warn("⚠️ bodyEfficiency = NULL!");
         }
+
+        BodyPartEfficiency bodyEfficiency = new BodyPartEfficiency(entity.getBodyEfficiency());
+        DeflectionCharges deflectionCharges = entity.getDeflectionCharges().toDomain();
+
         return new Unit(
                 entity.getId(),
                 entity.getName(),
@@ -30,7 +37,8 @@ public class UnitMapper {
                 entity.getHealth(),
                 entity.getDamage(),
                 entity.getImagePath(),
-                entity.getBodyEfficiency()
+                bodyEfficiency,
+                deflectionCharges
         );
     }
 
@@ -41,6 +49,9 @@ public class UnitMapper {
      * @return JPA-сущность юнита
      */
     public static UnitEntity toEntity(Unit unit) {
+        BodyPartEfficiency bodyEfficiency = new BodyPartEfficiency(unit.getBodyEfficiency());
+        DeflectionChargesEmbeddable deflectionCharges = DeflectionChargesEmbeddable.fromDomain(unit.getDeflectionCharges());
+
         return new UnitEntity(
                 unit.getId(),
                 unit.getName(),
@@ -48,7 +59,8 @@ public class UnitMapper {
                 unit.getHealth(),
                 unit.getDamage(),
                 unit.getImagePath(),
-                unit.getBodyEfficiency()
+                bodyEfficiency,
+                deflectionCharges
         );
     }
 }
