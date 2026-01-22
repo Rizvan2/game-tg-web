@@ -48,4 +48,7 @@ public class UnitEntity {
 
     @Embedded
     private BodyPartEfficiency bodyEfficiency;
+
+    @Embedded
+    private DeflectionChargesEmbeddable deflectionCharges;
 }

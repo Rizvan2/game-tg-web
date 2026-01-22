@@ -3,6 +3,7 @@ package org.example.gametgweb.characterSelection.domain.model;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.example.gametgweb.characterSelection.domain.model.valueObjects.DeflectionCharges;
 import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.BodyPartEfficiency;
 
 /**
@@ -20,8 +21,9 @@ public class Unit {
     private final long damage;
     private final String imagePath;
     private BodyPartEfficiency bodyEfficiency;
+    private DeflectionCharges deflectionCharges;
 
-    public Unit(long id, String name, long maxHealth, long health, long damage, String imagePath, BodyPartEfficiency bodyEfficiency) {
+    public Unit(long id, String name, long maxHealth, long health, long damage, String imagePath, BodyPartEfficiency bodyEfficiency, DeflectionCharges deflectionCharges) {
         this.id = id;
         this.name = name;
         this.maxHealth = maxHealth;
@@ -29,5 +31,6 @@ public class Unit {
         this.damage = damage;
         this.imagePath = imagePath;
         this.bodyEfficiency = bodyEfficiency;
+        this.deflectionCharges = deflectionCharges;
     }
 }

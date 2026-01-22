@@ -3,6 +3,7 @@ package org.example.gametgweb.characterSelection.domain.model;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.example.gametgweb.characterSelection.domain.model.valueObjects.DeflectionCharges;
 import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.BodyPartEfficiency;
 import org.example.gametgweb.characterSelection.infrastructure.persistence.entity.GameUnit;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
@@ -29,6 +30,7 @@ public class PlayerUnit implements GameUnit {
     private long maxHealth;
     private long damage;
     private BodyPartEfficiency bodyEfficiency;
+    private DeflectionCharges deflectionCharges;
 
     /**
      * Кастомные визуальные элементы
@@ -68,12 +70,6 @@ public class PlayerUnit implements GameUnit {
         this.name = name;
         this.imagePath = imagePath;
         this.damage = damage;
-        // ✅ ДОБАВЬ ИНИЦИАЛИЗАЦИЮ bodyEfficiency!
-        if (template != null && template.getBodyEfficiency() != null) {
-            this.bodyEfficiency = new BodyPartEfficiency(template.getBodyEfficiency());
-        } else {
-            this.bodyEfficiency = new BodyPartEfficiency(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
-        }
     }
 
     /**

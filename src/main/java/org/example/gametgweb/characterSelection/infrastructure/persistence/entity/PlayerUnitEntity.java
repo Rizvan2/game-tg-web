@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 @Setter
 @Slf4j
 @Entity
-public class PlayerUnitEntity{
+public class PlayerUnitEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,6 +58,9 @@ public class PlayerUnitEntity{
     @Embedded
     private BodyPartEfficiency bodyEfficiency;
 
+    @Embedded
+    private DeflectionChargesEmbeddable deflectionCharges;
+
     public PlayerUnitEntity(UnitEntity template) {
         this.template = template;
 
@@ -68,6 +71,7 @@ public class PlayerUnitEntity{
         this.name = template.getName();
         this.imagePath = template.getImagePath();
         this.bodyEfficiency = template.getBodyEfficiency();
+        this.deflectionCharges = template.getDeflectionCharges();
     }
 
     public PlayerUnitEntity(long id, UnitEntity template, String name, long maxHealth, long health, long damage, String imagePath) {

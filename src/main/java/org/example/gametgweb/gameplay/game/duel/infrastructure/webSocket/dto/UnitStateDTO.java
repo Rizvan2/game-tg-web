@@ -6,5 +6,7 @@ public record UnitStateDTO(
         String unitName,
         long hp,
         long hpMax,
-        String imagePath
+        String imagePath,
+        // 🔰 Парирование
+        int deflectionCurrent
 ) {}
