@@ -89,7 +89,8 @@ public class UnitStateBroadcaster {
                     unit.getName(),
                     unit.getHealth(),
                     unit.getMaxHealth(),
-                    unit.getImagePath()
+                    unit.getImagePath(),
+                    unit.getDeflectionCharges().current()
             ));
         }
         return units;

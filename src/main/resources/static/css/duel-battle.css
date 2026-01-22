@@ -417,3 +417,61 @@ body {
     opacity: 1;
     transform: translateX(0);
 }
+.deflection-charges {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px; /* расстояние между HP и именем */
+    justify-content: center;
+}
+
+.charge {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+
+    background: linear-gradient(
+            145deg,
+            #1b2b22,
+            #0f1a15
+    );
+
+    border: 1px solid #2f6f4f;
+    box-shadow:
+            inset 0 0 3px rgba(0,0,0,0.6);
+
+    opacity: 0.5;
+}
+
+.charge.active {
+    background: linear-gradient(
+            145deg,
+            #3f7f5a,
+            #1f4d38
+    );
+
+    border-color: #7fbf9a;
+
+    box-shadow:
+            inset 0 0 2px rgba(255,255,255,0.15),
+            0 0 6px rgba(63, 127, 90, 0.4);
+
+    opacity: 1;
+}
+.charge.active:last-child {
+    background: linear-gradient(145deg, #6f8f7a, #3a5f4c);
+    box-shadow:
+            inset 0 0 3px rgba(255,255,255,0.2),
+            0 0 8px rgba(120, 160, 140, 0.6);
+}
+.charge.spent {
+    background: repeating-linear-gradient(
+            45deg,
+            #1b2b22,
+            #1b2b22 2px,
+            #0f1a15 2px,
+            #0f1a15 4px
+    );
+    opacity: 0.35;
+}
+
+

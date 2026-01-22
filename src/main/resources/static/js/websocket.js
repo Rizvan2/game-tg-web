@@ -7,6 +7,8 @@
 
     const wsProtocol = location.protocol === 'https:' ? 'wss' : 'ws';
     let ws = null;
+    const DEFLECTION_MAX_BY_SLOT = {};
+
     let wsConnected = false;
 
     try {
@@ -114,21 +116,54 @@
                     }
                 });
             }
+
             function setUnitToSlot(slot, unit) {
                 const img = document.getElementById(`player${slot}Img`);
                 const name = document.getElementById(`player${slot}Name`);
                 const health = document.getElementById(`player${slot}Health`);
+                const deflectionContainer = document.getElementById(`player${slot}Deflection`);
 
-                if (name.textContent === unit.player) {
-                    console.log(`ℹ️ Слот ${slot} уже содержит юнита ${unit.player}, обновляем HP и картинку`);
-                } else {
-                    console.log(`✅ Слот ${slot} обновлен: ${unit.player} (${unit.hp}/${unit.hpMax} HP)`);
+                // ⬇️ фиксируем максимум ОДИН РАЗ ДЛЯ СЛОТА
+                if (DEFLECTION_MAX_BY_SLOT[slot] === undefined) {
+                    DEFLECTION_MAX_BY_SLOT[slot] = unit.deflectionCurrent;
                 }
 
+                const max = DEFLECTION_MAX_BY_SLOT[slot];
+                const current = Math.max(unit.deflectionCurrent, 0);
+
+                if (name.textContent === unit.player) {
+                    console.log(`ℹ️ Слот ${slot}: обновление состояния (${current}/${max} deflection)`);
+                } else {
+                    console.log(`✅ Слот ${slot}: новый юнит ${unit.player}`);
+                }
+
+                // Базовые данные
                 img.src = unit.imagePath;
                 name.textContent = unit.player;
                 health.style.width = (unit.hp / unit.hpMax * 100) + '%';
+
+                // 🛡️ Рендер ячеек дефлекта
+                renderDeflectionCharges(deflectionContainer, current, max);
             }
+            function renderDeflectionCharges(container, current, max) {
+                if (!container) return;
+
+                // очищаем старые ячейки
+                container.innerHTML = '';
+
+                for (let i = 0; i < max; i++) {
+                    const charge = document.createElement('span');
+                    charge.classList.add('charge');
+
+                    if (i < current) {
+                        charge.classList.add('active');
+                    }
+
+                    container.appendChild(charge);
+                }
+            }
+
+
 
             function clearSlot(slot) {
                 const img = document.getElementById(`player${slot}Img`);
@@ -138,6 +173,10 @@
                 img.src = '/img/waiting.png';
                 name.textContent = slot === 1 ? 'Ожидание вашего юнита…' : 'Ожидание соперника…';
                 health.style.width = '0%';
+
+                // 🧹 ВАЖНО: сбрасываем максимум отражений для слота
+                delete DEFLECTION_MAX_BY_SLOT[slot];
+
                 console.log(`ℹ️ Слот ${slot} очищен`);
             }
 
