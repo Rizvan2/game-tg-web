@@ -3,6 +3,7 @@ package org.example.gametgweb.characterSelection.application.services;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gametgweb.characterSelection.api.dto.SelectUnitRequest;
 import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
+import org.example.gametgweb.characterSelection.domain.model.Unit;
 import org.example.gametgweb.characterSelection.domain.repository.PlayerUnitRepositoryImpl;
 import org.example.gametgweb.characterSelection.domain.repository.UnitRepositoryImpl;
 import org.example.gametgweb.gameplay.game.duel.application.services.PlayerUnitSelectionService;
@@ -44,11 +45,11 @@ public class CharacterSelectionService {
         log.info(request.customUnitName(), request.unitName());
         Player player = PlayerMapper.toDomain(playerDetails.playerEntity());
 
-        PlayerUnit unit = new PlayerUnit(
-                unitRepository.findByName(request.unitName())
-                        .orElseThrow(() -> new IllegalArgumentException("Юнит с таким именем не найден: " + request.unitName())),
-                request.customUnitName()
-        );
+        Unit templateUnit = unitRepository.findByName(request.unitName())
+                .orElseThrow(() -> new IllegalArgumentException("Юнит с таким именем не найден: " + request.unitName()));
+
+        PlayerUnit unit = new PlayerUnit(templateUnit, request.customUnitName()); // копируем все поля
+
 
         // Сохраняем и используем объект с присвоенным id
         PlayerUnit savedUnit = playerUnitRepository.save(unit);

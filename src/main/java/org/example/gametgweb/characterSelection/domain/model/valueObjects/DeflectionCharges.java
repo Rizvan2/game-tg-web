@@ -11,6 +11,10 @@ import org.example.gametgweb.characterSelection.domain.model.skills.UnitSkill;
  */
 public record DeflectionCharges(int current, int max) implements UnitSkill {
 
+
+    public static DeflectionCharges copyOf(DeflectionCharges other) {
+        return new DeflectionCharges(other.current, other.max);
+    }
     /**
      * Возвращает уникальное название способности.
      * Используется для идентификации навыка в боевой логике или UI.

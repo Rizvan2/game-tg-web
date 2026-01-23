@@ -47,20 +47,23 @@ public class PlayerUnit implements GameUnit {
         this.maxHealth = template.getMaxHealth();
         this.imagePath = template.getImagePath();
         this.damage = template.getDamage();
-        // ✅ ИСПРАВЬ ЭТО: создаём КОПИЮ, а не ссылку
+
+        // Копируем bodyEfficiency
         if (template.getBodyEfficiency() != null) {
             this.bodyEfficiency = new BodyPartEfficiency(template.getBodyEfficiency());
         } else {
-            // Fallback на случай если в шаблоне нет
             this.bodyEfficiency = new BodyPartEfficiency(
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0);
+                    1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
+        }
+
+        // ✅ Добавляем дефлекты
+        if (template.getDeflectionCharges() != null) {
+            this.deflectionCharges = DeflectionCharges.copyOf(template.getDeflectionCharges());
+        } else {
+            this.deflectionCharges = new DeflectionCharges(0, 0); // дефолт, если шаблон не содержит
         }
     }
+
 
     public PlayerUnit(long id, Unit template, String name, long maxHealth, long health, long damage, String imagePath) {
         this.id = id;
