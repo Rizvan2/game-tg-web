@@ -2,8 +2,8 @@
 (function() {
     const params = new URLSearchParams(window.location.search);
     const gameCode = params.get('gameCode') || params.get('id');
-    const playerName = params.get('player') || localStorage.getItem('playerName') || `Player${Math.floor(Math.random()*1000)}`;
-    localStorage.setItem('playerName', playerName);
+    let playerName = null;
+    let myUnitName = null; // переменная для хранения имени нашего юнита
 
     const wsProtocol = location.protocol === 'https:' ? 'wss' : 'ws';
     let ws = null;
@@ -19,11 +19,15 @@
         log("❌ Ошибка: WebSocket не может быть создан.");
     }
 
+    // ====== ИНИЦИАЛИЗАЦИЯ UI АТАКИ ======
+    AttackSender.initAttackUI();
+
     // ====== КНОПКА АТАКИ ======
     const attackBtn = document.getElementById('attackBtn');
 
-    // ====== СОБЫТИЯ WEBSOCKET (СТАРАЯ ЛОГИКА) ======
+    // ====== СОБЫТИЯ WEBSOCKET ======
     if (ws) {
+
         ws.onopen = () => {
             wsConnected = true;
             log(`✅ Подключено к комнате "${gameCode}" как ${playerName}`);
@@ -45,14 +49,21 @@
 
             const msg = JSON.parse(event.data);
 
+            if (msg.type === 'INIT') {
+                console.log("🚀 INIT получен:", msg);
+                playerName = msg.playerName
+                localStorage.setItem('playerName', playerName);
+                myUnitName = msg.playerUnitName;
+
+                console.log(`📌 Мой юнит зафиксирован: ${myUnitName}`);
+                return;
+            }
             if (msg.type === 'join') {
                 log(`👤 ${msg.message}`);
                 return;
             }
             if (msg.type === 'reconnect') {
-                log(`🔄 ${msg.message}`); // Сообщение о реконнекте
-                // Можно обновить UI, если нужно:
-                // Например, сбросить таймер, включить кнопки атаки
+                log(`🔄 ${msg.message}`);
                 attackBtn.disabled = false;
                 return;
             }
@@ -73,12 +84,11 @@
                 console.log("🏁 DUEL RESULT EVENT RECEIVED");
                 console.log("➡️ resultText:", msg.resultText);
                 console.log("➡️ targetPlayer:", msg.targetPlayer);
-                console.log("➡️ full payload:", msg); // весь объект для отладки
+                console.log("➡️ full payload:", msg);
 
                 showDuelResult(msg.resultText);
                 return;
             }
-            // НОВЫЙ ОБРАБОТЧИК
             if (msg.type === 'BODY_PART_DESTROYED') {
                 console.log("💀 BODY PART DESTROYED:", msg);
                 handleBodyPartDestroyed(msg);
@@ -88,12 +98,11 @@
             if (msg.type === 'UNITS_STATE') {
                 if (!Array.isArray(msg.units)) return;
 
-                const slots = [null, null]; // Слот 1 и Слот 2
+                const slots = [null, null];
 
                 msg.units.forEach(u => {
-                    // Сначала проверяем, не занят ли юнит уже слотом
                     if (slots[0] && slots[0].playerId === u.playerId) {
-                        slots[0] = u; // обновляем
+                        slots[0] = u;
                         return;
                     }
                     if (slots[1] && slots[1].playerId === u.playerId) {
@@ -101,12 +110,10 @@
                         return;
                     }
 
-                    // Если есть пустой слот, ставим туда
                     if (!slots[0]) slots[0] = u;
                     else if (!slots[1]) slots[1] = u;
                 });
 
-                // Обновляем UI
                 slots.forEach((unit, idx) => {
                     const slotNum = idx + 1;
                     if (unit) {
@@ -145,6 +152,7 @@
                 // 🛡️ Рендер ячеек дефлекта
                 renderDeflectionCharges(deflectionContainer, current, max);
             }
+
             function renderDeflectionCharges(container, current, max) {
                 if (!container) return;
 
@@ -163,8 +171,6 @@
                 }
             }
 
-
-
             function clearSlot(slot) {
                 const img = document.getElementById(`player${slot}Img`);
                 const name = document.getElementById(`player${slot}Name`);
@@ -174,27 +180,26 @@
                 name.textContent = slot === 1 ? 'Ожидание вашего юнита…' : 'Ожидание соперника…';
                 health.style.width = '0%';
 
-                // 🧹 ВАЖНО: сбрасываем максимум отражений для слота
                 delete DEFLECTION_MAX_BY_SLOT[slot];
 
                 console.log(`ℹ️ Слот ${slot} очищен`);
             }
 
-
-
-            // --- ЧАТ (как в старом скрипте) ---
+            // --- ЧАТ ---
             if (msg.type === 'chat') {
                 let inner = null;
                 try { inner = JSON.parse(msg.message); } catch {}
 
                 if (inner && inner.turnMessages) {
-                    // 👉 это не настоящий чат, а боевой лог раунда
                     chatMsg("💥 Результат раунда:");
                     inner.turnMessages.forEach(m => chatMsg(`→ ${m}`));
                     chatMsg(`❤️ HP Плеер 1: ${inner.attackerHp}, Плеер 2: ${inner.defenderHp}`);
 
                     attackBtn.disabled = false;
-                    resetSelectedBody();
+
+                    // Сброс через модуль
+                    AttackSender.resetSelectedBody();
+                    document.querySelectorAll('.hit-zone').forEach(z => z.classList.remove('selected'));
 
                 } else {
                     // 👉 обычное сообщение игрока
@@ -207,7 +212,6 @@
                     showBubble(sender, text);
                 }
             }
-
         };
     }
 
@@ -243,32 +247,28 @@
         //   message: "Вася потерял голову!"
         // }
 
+        console.log("🔥 BODY_PART_DESTROYED:", data);
+        console.log("🔥 мой юнит:", myUnitName);
+
         log(`💀 ${data.message}`);
         chatMsg(`💀 ${data.message}`);
-
-        // Визуально отключаем эту часть тела
-        disableBodyPart(data.bodyPart);
-
-        // Показываем уведомление
         showNotification(data.message);
-    }
 
-// Отключает возможность выбора части тела
-    function disableBodyPart(bodyPart) {
-        const hitZone = document.querySelector(`.hit-zone[data-part="${bodyPart}"]`);
-        if (hitZone) {
-            hitZone.classList.add('destroyed');
-            hitZone.style.pointerEvents = 'none'; // нельзя кликнуть
+        if (!myUnitName) {
+            console.warn("⚠️ INIT ещё не получен — пропускаем UI");
+            return;
+        }
 
-            // Добавляем иконку черепа
-            const skull = document.createElement('span');
-            skull.className = 'skull-icon';
-            skull.textContent = '💀';
-            hitZone.appendChild(skull);
+        // если пострадал НЕ мой юнит — отключаем часть тела
+        if (data.playerUnitName !== myUnitName) {
+            console.log(`💀 Отключаем часть тела у врага: ${data.bodyPart}`);
+            AttackSender.disableBodyPart(data.bodyPart);
+        } else {
+            console.log("💡 Это мой юнит — UI не трогаем");
         }
     }
 
-// Показывает временное уведомление
+
     function showNotification(message) {
         const notification = document.createElement('div');
         notification.className = 'notification';
@@ -284,7 +284,6 @@
             setTimeout(() => notification.remove(), 300);
         }, 3000);
     }
-
 
     document.getElementById('exitToMenuBtn').addEventListener('click', () => {
         window.location.href = '/';

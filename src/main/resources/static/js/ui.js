@@ -56,51 +56,7 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// ====== ЛОГИКА ВЫБОРА ЧАСТИ ТЕЛА ======
-let selectedBody = null;
-document.querySelectorAll('.hit-zone').forEach(zone => {
-    zone.addEventListener('click', () => {
-        // Проверяем, не сломана ли эта часть
-        if (zone.classList.contains('destroyed')) {
-            log('❌ Эта часть тела уничтожена! Выберите другую.');
-            return;
-        }
-
-        // Убираем старое выделение
-        document.querySelectorAll('.hit-zone').forEach(z => z.classList.remove('selected'));
-
-        // Выделяем текущую
-        zone.classList.add('selected');
-        selectedBody = zone.dataset.part;
-        log(`🎯 Вы выбрали: ${selectedBody}`);
-    });
-});
-
-function resetSelectedBody() {
-    selectedBody = null;
-    document.querySelectorAll('.hit-zone').forEach(z => z.classList.remove('selected'));
-}
-
-// ====== КНОПКА АТАКИ ======
-const attackBtn = document.getElementById('attackBtn');
-attackBtn.onclick = () => {
-    if (!selectedBody) {
-        log("❗ Сначала выберите часть тела!");
-        return;
-    }
-
-    const ok = window.sendAttack(selectedBody);
-    if (!ok) {
-        log("❌ Нельзя атаковать: соединение отсутствует.");
-        return;
-    }
-
-    attackBtn.disabled = true;
-    // 👉 сбрасываем выделение
-    resetSelectedBody();
-    log(`🕒 Отправлена атака по: ${selectedBody}. Ждём соперника...`);
-};
-
+// ====== ФУНКЦИЯ ДЛЯ BUBBLE (используется из websocket.js) ======
 function showBubble(playerName, text) {
     const p1Name = document.getElementById("player1Name").innerText.trim();
     const p2Name = document.getElementById("player2Name").innerText.trim();
@@ -137,8 +93,6 @@ function showBubble(playerName, text) {
     }, 1900);
 }
 
-
-
 // ====== ОТПРАВКА ЧАТА ======
 document.getElementById("sendChatBtn").onclick = () => {
     const input = document.getElementById("chatInput");
@@ -147,8 +101,11 @@ document.getElementById("sendChatBtn").onclick = () => {
 
     const ok = window.sendChat(text);
     if (!ok) chatMsg("❌ Невозможно отправить: нет соединения с сервером.");
+
     // 💬 Показываем bubble сразу локально
-    showBubble(window.playerName, text);
+    const playerName = localStorage.getItem('playerName') || 'Player';
+    showBubble(playerName, text);
+
     input.value = "";
 };
 

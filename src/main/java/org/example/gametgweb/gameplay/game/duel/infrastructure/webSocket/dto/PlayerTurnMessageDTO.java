@@ -6,9 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record AttackMessageDTO(String type, String body) {
+public record PlayerTurnMessageDTO(String type, String body) {
     @JsonCreator
-    public AttackMessageDTO(@JsonProperty("body") String body) {
+    public PlayerTurnMessageDTO(@JsonProperty("body") String body) {
         this("attack", body);
     }
 

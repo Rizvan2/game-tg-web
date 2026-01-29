@@ -47,7 +47,7 @@ public class BodyPartEventListener {
     public void onBodyPartDestroyed(BodyPartDestroyedEvent event) throws JsonProcessingException {
         bodyPartNotifier.sendBodyPartDestroyed(
                 event.getGameCode(),
-                event.getPlayerName(),
+                event.getPlayerUnitName(),
                 event.getBodyPart()
         );
     }

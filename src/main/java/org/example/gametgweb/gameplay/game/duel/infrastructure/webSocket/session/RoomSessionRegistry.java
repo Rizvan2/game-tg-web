@@ -121,6 +121,7 @@ public class RoomSessionRegistry {
             log.debug("Комната {} пуста — сообщение не отправлено", gameCode);
             return;
         }
+        log.debug("📤 Отправляем сообщение в комнату {} всем сессиям: {}", gameCode, message);
 
         sessions.removeIf(s -> !s.isOpen());
 

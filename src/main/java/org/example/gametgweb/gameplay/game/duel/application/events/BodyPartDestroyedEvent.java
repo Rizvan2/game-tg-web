@@ -23,9 +23,9 @@ public class BodyPartDestroyedEvent extends ApplicationEvent {
     private final String gameCode;
 
     /**
-     * Имя игрока, у которого была уничтожена часть тела.
+     * Имя юнита, у которого была уничтожена часть тела.
      */
-    private final String playerName;
+    private final String playerUnitName;
 
     /**
      * Часть тела, которая была уничтожена в результате игрового действия.
@@ -37,18 +37,18 @@ public class BodyPartDestroyedEvent extends ApplicationEvent {
      *
      * @param source объект-источник события (обычно сервис или агрегат)
      * @param gameCode уникальный идентификатор игры
-     * @param playerName имя игрока
+     * @param playerUnitName имя игрока
      * @param bodyPart уничтоженная часть тела
      */
     public BodyPartDestroyedEvent(
             Object source,
             String gameCode,
-            String playerName,
+            String playerUnitName,
             Body bodyPart
     ) {
         super(source);
         this.gameCode = gameCode;
-        this.playerName = playerName;
+        this.playerUnitName = playerUnitName;
         this.bodyPart = bodyPart;
     }
 }

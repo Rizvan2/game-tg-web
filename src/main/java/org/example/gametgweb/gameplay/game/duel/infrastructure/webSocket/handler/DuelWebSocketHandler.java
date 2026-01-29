@@ -3,14 +3,14 @@ package org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.handle
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.example.gametgweb.gameplay.game.duel.application.services.duel.DuelRoomService;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.AttackMessageDTO;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.ChatMessageDTO;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.ErrorMessageDTO;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.InfoMessageDTO;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.session.RoomSessionRegistry;
-import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.MessageDispatcherService;
+import org.example.gametgweb.characterSelection.domain.model.PlayerUnit;
 import org.example.gametgweb.gameplay.game.duel.application.services.combat.DuelCombatService;
+import org.example.gametgweb.gameplay.game.duel.application.services.duel.DuelRoomService;
+import org.example.gametgweb.gameplay.game.duel.domain.model.Player;
+import org.example.gametgweb.gameplay.game.duel.domain.repository.PlayerRepositoryImpl;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.dto.*;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.service.MessageDispatcherService;
+import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.session.RoomSessionRegistry;
 import org.example.gametgweb.gameplay.game.duel.infrastructure.webSocket.utils.WebSocketContext;
 import org.example.gametgweb.gameplay.game.duel.shared.domain.Body;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,13 +41,15 @@ public class DuelWebSocketHandler extends TextWebSocketHandler {
     private final DuelCombatService duelCombatService;
     private final MessageDispatcherService messageDispatcherService;
     private final ObjectMapper mapper;
+    private final PlayerRepositoryImpl playerRepository;
 
     @Autowired
-    public DuelWebSocketHandler(DuelRoomService duelRoomService, DuelCombatService duelCombatService, MessageDispatcherService messageDispatcherService, ObjectMapper mapper) {
+    public DuelWebSocketHandler(DuelRoomService duelRoomService, DuelCombatService duelCombatService, MessageDispatcherService messageDispatcherService, ObjectMapper mapper, PlayerRepositoryImpl playerRepository) {
         this.duelRoomService = duelRoomService;
         this.duelCombatService = duelCombatService;
         this.messageDispatcherService = messageDispatcherService;
         this.mapper = mapper;
+        this.playerRepository = playerRepository;
     }
 
     /**
@@ -62,12 +64,25 @@ public class DuelWebSocketHandler extends TextWebSocketHandler {
      */
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        var ctx = WebSocketContext.from(session);
+        WebSocketContext ctx = WebSocketContext.from(session);
         if (ctx == null) {
             closeBadSession(session);
             return;
         }
         duelRoomService.playerJoin(ctx, session);
+
+        Player player = playerRepository.findByUsername(ctx.playerName());
+        String playerUnitName = player.getActiveUnit().map(PlayerUnit::getName).orElse("DuelWebSocketHandler не нашел имя юнита");
+        // === INIT ===
+        InitMessageDTO init = new InitMessageDTO(
+                "INIT",
+                player.getUsername(),
+                playerUnitName
+        );
+
+        session.sendMessage(
+                new TextMessage(mapper.writeValueAsString(init))
+        );
     }
 
     /**
@@ -80,7 +95,7 @@ public class DuelWebSocketHandler extends TextWebSocketHandler {
      */
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        var ctx = WebSocketContext.from(session);
+        WebSocketContext ctx = WebSocketContext.from(session);
         if (ctx != null) {
             duelRoomService.playerLeave(ctx, session);
         }
@@ -88,7 +103,7 @@ public class DuelWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        var ctx = WebSocketContext.from(session);
+        WebSocketContext ctx = WebSocketContext.from(session);
         if (ctx == null) return;
 
         JsonNode payload = mapper.readTree(message.getPayload());
@@ -113,7 +128,7 @@ public class DuelWebSocketHandler extends TextWebSocketHandler {
         String player = ctx.playerName();
 
         try {
-            AttackMessageDTO attack = mapper.treeToValue(payload, AttackMessageDTO.class);
+            PlayerTurnMessageDTO attack = mapper.treeToValue(payload, PlayerTurnMessageDTO.class);
             Body body = attack.bodyEnum();
             if (body == null) return;
 

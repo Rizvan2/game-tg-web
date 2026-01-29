@@ -40,21 +40,21 @@ public class BodyPartNotifier {
      * Отправляет всем игрокам в комнате уведомление об уничтожении части тела.
      *
      * @param gameCode   код игровой сессии
-     * @param playerName имя игрока, потерявшего часть тела
+     * @param playerUnitName имя юнита, потерявшего часть тела
      * @param bodyPart   уничтоженная часть тела
      * @throws JsonProcessingException если возникла ошибка сериализации сообщения
      */
-    public void sendBodyPartDestroyed(String gameCode, String playerName, Body bodyPart)
+    public void sendBodyPartDestroyed(String gameCode, String playerUnitName, Body bodyPart)
             throws JsonProcessingException {
 
         String bodyPartName = getBodyPartName(bodyPart);
-        String message = String.format("%s потерял %s!", playerName, bodyPartName);
+        String message = String.format("%s потерял %s!", playerUnitName, bodyPartName);
 
         roomSessionRegistry.broadcast(
                 gameCode,
                 objectMapper
                         .writeValueAsString(BodyPartDestroyedNotificationDto.of(
-                                playerName,
+                                playerUnitName,
                                 bodyPart,
                                 message)
                         )
